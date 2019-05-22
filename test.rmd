@@ -1,0 +1,40 @@
+---
+title: 'Projects Repo'
+author: "Steve and Jonathan"
+date: " `r as.Date(Sys.time())` "
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(echo = FALSE
+	, warning = FALSE
+	, message = FALSE
+	, fig.width = 10
+	, fig.height = 10
+	, results = "asis")
+options(width = 12)
+library(ggplot2)
+#library(plotly)
+#library(gapminder)
+#library("papeR")
+library(DT)
+library(dplyr)
+library(pander)
+
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+```
+This page describes some of the projects we are currently working on:
+
+* APHRC Data
+
+* Breast Cancer Wisconsin (Diagnostic) Data Set
+
+```{r, echo = TRUE}
+plot(1:10)
+```
