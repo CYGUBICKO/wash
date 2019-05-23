@@ -1,3 +1,17 @@
+2019 May 23 (Thu)
+================
+
+## Status
+
+## Goals
+Make a strong, simple example where the technique clearly works
+* Compare the multivariate approach to a univariate approach
+* Ideally, we have a scenario where multivariate is either more powerful or more valid
+* Maybe make some checkplots
+
+Write up our understanding of the beta/variance issue
+* Refer to the beta/lines picture binary_random.R 
+
 2019 May 10 (Fri)
 ================
 
