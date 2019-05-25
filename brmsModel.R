@@ -36,16 +36,17 @@ get_prior(
 report <- 2 # Index within nsims to save for summary
 brmsmodel_list <- list() 
 brmscoef_list <- list()
-prior <- c(
+priors <- c(
 	prior(normal(0, 1), class = b, coef = intercept, resp = service1)
 	, prior(normal(0, 1), class = b, coef = intercept, resp = service2)
 	, prior(normal(0, 1), class = b, coef = intercept, resp = service3)
 	, prior(normal(0, 1), class = b, coef = wealthindex, resp = service1)
 	, prior(normal(0, 1), class = b, coef = wealthindex, resp = service2)
 	, prior(normal(0, 1), class = b, coef = wealthindex, resp = service3)
-	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = hhid_anon, resp = service1)
-	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = hhid_anon, resp = service2)
-	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = hhid_anon, resp = service3)
+	, prior(normal(0, 0.5), class = sd, coef = Intercept, group = hhid_anon, resp = service1)
+	, prior(normal(0, 0.5), class = sd, coef = Intercept, group = hhid_anon, resp = service2)
+	, prior(normal(0, 0.5), class = sd, coef = Intercept, group = hhid_anon, resp = service3)
+	, set_prior("lkj(1)", class = "cor")
 )
 
 for (s in 1:nsims){
@@ -57,11 +58,11 @@ for (s in 1:nsims){
 			, data = df
 			, cores = 8
 			, family = list(bernoulli(link = "logit"), bernoulli(link = "logit"), bernoulli(link = "logit")) 
-			, iter = 2e4
-			, chains = 4
-			, control = list(adapt_delta = 0.95)
+#			, iter = 2e4
+			, chains = 2
+#			, control = list(adapt_delta = 0.95)
 			, seed = 7777
-			, prior = prior
+			, prior = priors
 	)
 	if (s <= report){
 		brmsmodel_list[[s]] <- model # Model to store

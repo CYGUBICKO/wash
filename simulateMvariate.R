@@ -24,7 +24,7 @@ theme_set(theme_bw() +
 
 # Simulate multivariate response.
 
-nsims <- 50 # Number of simulations to run
+nsims <- 1 # Number of simulations to run
 sample_prop <- 0.05 # Prop of sample per hh
 year <- 2013
 
@@ -40,9 +40,9 @@ service3_int <- 0.4
 service3_wealth <- 0.6
 
 # Correlation matrix
-cor_s1s2 <- 0.01
-cor_s1s3 <- 0.03
-cor_s2s3 <- 0.01
+cor_s1s2 <- 0.20
+cor_s1s3 <- 0.20
+cor_s2s3 <- 0.20
 corMat <- matrix(
 	c(1, cor_s1s2, cor_s1s3
 		, cor_s1s2, 1, cor_s2s3
@@ -51,9 +51,9 @@ corMat <- matrix(
 )
 
 # Sd
-service1_sd <- 0.2
-service2_sd <- 0.3
-service3_sd <- 0.4
+service1_sd <- 0.5
+service2_sd <- 0.5
+service3_sd <- 0.5
 sdVec <- c(service1_sd, service2_sd, service3_sd)
 varMat <- sdVec %*% t(sdVec)
 varMat
@@ -82,8 +82,9 @@ people <- nrow(temp_df)
 betas <- mvrnorm(n = people
 	, mu = rep(c(service1_wealth, service2_wealth, service3_wealth), each = 1)
 	, Sigma = covMat
+	, empirical = TRUE
 )
-
+print(var(betas))
 # Predictions (XB)
 sim_df <- (temp_df
 	%>% group_by(hhid_anon)

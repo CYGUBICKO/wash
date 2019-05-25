@@ -4,6 +4,7 @@
 #### ---- By: Steve and Jonathan ----
 #### ---- Date: 2019 May 13 (Mon) ----
 
+library(data.table)
 library(dplyr)
 library(tidyr)
 library(tibble)
@@ -23,11 +24,23 @@ load("brmsModel.rda")
 brmsmodel <- brmsmodel_list[[1]]
 
 # Coefficient plots
-print(stanplot(brmsmodel, type = "areas") 
+print(stanplot(brmsmodel) 
 	+ geom_point(data = betas_df, aes(x = betas, y = coef), colour = "red")
 	+ scale_y_discrete(breaks = betas_df$coef
 		, labels = gsub("b_|_intercept|hhid_anon__", "", betas_df$coef)
 	)
+)
+
+# Zoom in
+print(stanplot(brmsmodel, type = "dens") 
+	+ geom_vline(data = betas_df 
+		%>% setnames(c("coef", "betas"), c("Parameter", "Value"))
+		, aes(xintercept = Value)
+		, linetype = "dashed"
+		, colour = "red"
+	)
+   + facet_wrap(~Parameter, scales = "free", ncol = 3)
+	+ theme(strip.text.x = element_text(size = 6))
 )
 
 # Trace plots
