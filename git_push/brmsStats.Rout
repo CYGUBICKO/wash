@@ -1,0 +1,79 @@
+
+R version 3.5.1 (2018-07-02) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #### ---- Project: APHRC Wash Data ----
+> #### ---- Task: Simulation ----
+> #### ---- MCMCMglmr summary ----
+> #### ---- By: Steve and Jonathan ----
+> #### ---- Date: 2019 Apr 03 (Wed) ----
+> 
+> library(brms)
+> 
+> load("brmsModel.rda")
+> 
+> # Incoming objects:
+> # * brms model objects
+> 
+> nsims <- length(brmsmodel_list)
+> 
+> for (s in 1:nsims){
++ 	print(summary(brmsmodel_list[[s]]))
++ }
+ Family: MV(bernoulli, bernoulli, bernoulli) 
+  Links: mu = logit
+         mu = logit
+         mu = logit 
+Formula: service1 ~ 0 + intercept + wealthindex + (0 + 1 | p | hhid_anon) 
+         service2 ~ 0 + intercept + wealthindex + (0 + 1 | p | hhid_anon) 
+         service3 ~ 0 + intercept + wealthindex + (0 + 1 | p | hhid_anon) 
+   Data: df (Number of observations: 1801) 
+Samples: 4 chains, each with iter = 20000; warmup = 1000; thin = 1;
+         total post-warmup samples = 76000
+
+Group-Level Effects: 
+~hhid_anon (Number of levels: 1801) 
+                                           Estimate Est.Error l-95% CI u-95% CI
+sd(service1_Intercept)                         0.78      0.64     0.03     2.37
+sd(service2_Intercept)                         0.61      0.54     0.02     2.04
+sd(service3_Intercept)                         0.78      0.63     0.03     2.30
+cor(service1_Intercept,service2_Intercept)     0.00      0.19    -0.38     0.38
+cor(service1_Intercept,service3_Intercept)     0.06      0.18    -0.32     0.41
+cor(service2_Intercept,service3_Intercept)    -0.01      0.19    -0.38     0.36
+                                           Eff.Sample Rhat
+sd(service1_Intercept)                            775 1.00
+sd(service2_Intercept)                            906 1.00
+sd(service3_Intercept)                            854 1.01
+cor(service1_Intercept,service2_Intercept)      20008 1.00
+cor(service1_Intercept,service3_Intercept)      11634 1.00
+cor(service2_Intercept,service3_Intercept)      11455 1.00
+
+Population-Level Effects: 
+                     Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+service1_intercept       0.25      0.07     0.13     0.43       1877 1.00
+service1_wealthindex     0.30      0.08     0.17     0.50       1615 1.00
+service2_intercept       0.38      0.08     0.25     0.58       1767 1.00
+service2_wealthindex     0.86      0.14     0.68     1.26       1138 1.00
+service3_intercept       0.51      0.11     0.36     0.80       1230 1.00
+service3_wealthindex     0.52      0.11     0.37     0.81       1251 1.00
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).
+> 
+> 

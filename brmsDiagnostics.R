@@ -47,7 +47,7 @@ print(stanplot(brmsmodel, type = "dens")
 plot(brmsmodel)
 
 # Marginal effect of predictors
-plot(marginal_effects(brmsmodel, "wealthindex", resp = "service1"), points = TRUE, rug = FALSE)
-plot(marginal_effects(brmsmodel, "wealthindex", resp = "service2"), points = TRUE, rug = FALSE)
-plot(marginal_effects(brmsmodel, "wealthindex", resp = "service3"), points = TRUE, rug = FALSE)
+#plot(marginal_effects(brmsmodel, "wealthindex", resp = "service1"), points = TRUE, rug = FALSE)
+#plot(marginal_effects(brmsmodel, "wealthindex", resp = "service2"), points = TRUE, rug = FALSE)
+#plot(marginal_effects(brmsmodel, "wealthindex", resp = "service3"), points = TRUE, rug = FALSE)
 

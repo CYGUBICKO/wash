@@ -122,6 +122,16 @@ integration.out: integration.sage
 	sage $< |tee > $@
 
 
+## Back to basics: Bivariate, Multivariate normal response
+
+# Simulations
+simulatemvn.Rout: simulatemvn.R
+
+# Models
+bivariateModel.Rout: bivariateModel.R
+
+
+
 ## Bottomline test with multivariate normal response
 
 mvnSim.Rout: mvnSim.R

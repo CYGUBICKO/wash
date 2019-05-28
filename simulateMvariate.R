@@ -25,7 +25,7 @@ theme_set(theme_bw() +
 # Simulate multivariate response.
 
 nsims <- 1 # Number of simulations to run
-sample_prop <- 0.05 # Prop of sample per hh
+sample_prop <- 0.08 # Prop of sample per hh
 year <- 2013
 
 # Predictor variable to simulate
@@ -33,16 +33,16 @@ predictors <- "wealthindex"
 
 # Beta values
 service1_int <- 0.2
-service1_wealth <- 0.4 
+service1_wealth <- 0.3 
 service2_int <- 0.3
-service2_wealth <- 0.5
+service2_wealth <- 0.8
 service3_int <- 0.4
-service3_wealth <- 0.6
+service3_wealth <- 0.5
 
 # Correlation matrix
 cor_s1s2 <- 0.20
-cor_s1s3 <- 0.20
-cor_s2s3 <- 0.20
+cor_s1s3 <- 0.30
+cor_s2s3 <- 0.50
 corMat <- matrix(
 	c(1, cor_s1s2, cor_s1s3
 		, cor_s1s2, 1, cor_s2s3
@@ -51,9 +51,9 @@ corMat <- matrix(
 )
 
 # Sd
-service1_sd <- 0.5
+service1_sd <- 0.6
 service2_sd <- 0.5
-service3_sd <- 0.5
+service3_sd <- 0.7
 sdVec <- c(service1_sd, service2_sd, service3_sd)
 varMat <- sdVec %*% t(sdVec)
 varMat
