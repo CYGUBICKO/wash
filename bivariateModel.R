@@ -25,16 +25,16 @@ set.seed(7777)
 
 nsims <- length(sim_dflist)
 
-get_prior(y1n ~ x
+get_prior(y1 ~ 0 + intercept + x
 	, data = sim_dflist[[1]]
 	, family = gaussian
 )
 
 report <- 1 # Index within nsims to save for summary
 
-priors <- c(prior(normal(0, 10), class = b)
-	, prior(normal(0, 10), class = b, coef = x)
-	, prior(normal(0, 10), class = Intercept)
+priors <- c(prior(normal(0, 1), class = b)
+	, prior(normal(0, 1), class = b, coef = x)
+	, prior(normal(0, 1), class = b, coef = intercept)
 	, prior(cauchy(0, 1), class = sigma)
 )
 
@@ -45,11 +45,11 @@ for (s in 1:nsims){
    df <- (sim_dflist[[s]]
       %>% data.frame()
    )
-	model <- brm(y1n ~ x
+	model <- brm(y1 ~ 0 + intercept + x
 			, data = df
 			, family = gaussian 
 			, seed = 7777
-			, prior = priors
+			, cores = 8
 	)
 	if (s <= report){
 		y1model_list[[s]] <- model # Model to store
@@ -65,11 +65,11 @@ for (s in 1:nsims){
    df <- (sim_dflist[[s]]
       %>% data.frame()
    )
-	model <- brm(y2n ~ x
+	model <- brm(y2 ~ 0 + intercept + x
 			, data = df
 			, family = gaussian 
 			, seed = 7777
-			, prior = priors
+			, cores = 8
 	)
 	if (s <= report){
 		y2model_list[[s]] <- model # Model to store
@@ -85,11 +85,11 @@ for (s in 1:nsims){
    df <- (sim_dflist[[s]]
       %>% data.frame()
    )
-	model <- brm(y3n ~ x
+	model <- brm(y3 ~ 0 + intercept + x
 			, data = df
 			, family = gaussian 
 			, seed = 7777
-			, prior = priors
+			, cores = 8
 	)
 	if (s <= report){
 		y3model_list[[s]] <- model # Model to store

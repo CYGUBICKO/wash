@@ -1,0 +1,115 @@
+#### ---- Project: APHRC Wash Data ----
+#### ---- Task: Simulation ----
+#### ---- Outputs from bivariate: Continous outcome ----
+#### ---- By: Steve and Jonathan ----
+#### ---- Date: 2019 May 29 (Wed) ----
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+library(brms)
+
+theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines")))
+
+load("bivariateModel.rda")
+
+# Clean betas_df
+# Align Beta df with the estimates
+betas_df <- (betas_df
+   %>% mutate(coef_clean = coef
+		, coef_clean = ifelse(grepl("0$", coef_clean), "b_intercept"
+         , ifelse(grepl("x:y[1-9]", coef_clean), "b_x"
+            , ifelse(grepl("_sd", coef_clean), "sigma" 
+            , coef_clean
+				)
+         )
+      )
+   )
+)
+
+# Extract model for each reasponse
+y1model <- bivmodel_list[[1]][[1]]
+y2model <- bivmodel_list[[2]][[1]]
+y3model <- bivmodel_list[[3]][[1]]
+
+# y1
+## Coefficient plots
+print(stanplot(y1model) 
+	+ geom_point(data = betas_df
+		%>% filter(grepl("^x:y1|y1_sd", coef))	
+		, aes(x = betas, y = coef_clean)
+		, colour = "red"
+	)
+	+ ggtitle("True vs fitted parameter estimates for y1")
+	+ theme(plot.title = element_text(hjust = 0.5))
+)
+
+## Zoom in
+print(stanplot(y1model, type = "dens") 
+	+ geom_vline(data = betas_df 
+		%>% filter(grepl("^x:y1|y1_sd", coef))	
+		%>% setnames(c("coef_clean", "betas"), c("Parameter", "Value"))
+		, aes(xintercept = Value)
+		, linetype = "dashed"
+		, colour = "red"
+	)
+   + facet_wrap(~Parameter, scales = "free", ncol = 3)
+	+ theme(strip.text.x = element_text(size = 6))
+)
+
+## Trace plots
+plot(y1model)
+
+# y2
+## Coefficient plots
+print(stanplot(y2model) 
+	+ geom_point(data = betas_df
+		%>% filter(grepl("^x:y2|y2_sd", coef))	
+		, aes(x = Value, y = Parameter)
+		, colour = "red"
+	)
+	+ ggtitle("True vs fitted parameter estimates for y2")
+	+ theme(plot.title = element_text(hjust = 0.5))
+)
+## Zoom in
+print(stanplot(y2model, type = "dens") 
+	+ geom_vline(data = betas_df 
+		%>% filter(grepl("^x:y2|y2_sd", coef))	
+		, aes(xintercept = Value)
+		, linetype = "dashed"
+		, colour = "red"
+	)
+   + facet_wrap(~Parameter, scales = "free", ncol = 3)
+	+ theme(strip.text.x = element_text(size = 6))
+)
+
+## Trace plots
+plot(y2model)
+
+# y3
+## Coefficient plots
+print(stanplot(y3model) 
+	+ geom_point(data = betas_df
+		%>% filter(grepl("^x:y3|y3_sd", coef))	
+		, aes(x = Value, y = Parameter)
+		, colour = "red"
+	)
+	+ ggtitle("True vs fitted parameter estimates for y3")
+	+ theme(plot.title = element_text(hjust = 0.5))
+)
+## Zoom in
+print(stanplot(y3model, type = "dens") 
+	+ geom_vline(data = betas_df 
+		%>% filter(grepl("^x:y3|y3_sd", coef))	
+		, aes(xintercept = Value)
+		, linetype = "dashed"
+		, colour = "red"
+	)
+   + facet_wrap(~Parameter, scales = "free", ncol = 3)
+	+ theme(strip.text.x = element_text(size = 6))
+)
+
+## Trace plots
+plot(y3model)

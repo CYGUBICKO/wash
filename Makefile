@@ -130,7 +130,14 @@ simulatemvn.Rout: simulatemvn.R
 # Models
 bivariateModel.Rout: bivariateModel.R
 
+# Plot the coeffs
+bivariateDiagnostics.Rout: bivariateDiagnostics.R
 
+# Joint model
+mvnjointModel.Rout: mvnjointModel.R
+mvnjointDiagnostics.Rout: mvnjointDiagnostics.R
+
+binjointModel.Rout: binjointModel.R
 
 ## Bottomline test with multivariate normal response
 

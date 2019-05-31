@@ -4,7 +4,7 @@
 #### ---- By: Steve and Jonathan ----
 #### ---- Date: 2019 May 28 (Tue) ----
 
-library(MASS)
+library(mvtnorm)
 library(data.table)
 library(dplyr)
 options(dplyr.width = Inf)
@@ -19,15 +19,15 @@ set.seed(7777)
 theme_set(theme_bw() +
             theme(panel.spacing=grid::unit(0,"lines")))
 
-nsims <- 1
+nsims <- 3
 people <- 1000 # Number of simulations to run
 
 # Predictor
 x <- rnorm(people)
 
 # Beta values
-y1_beta0 <- 0.2
-y1_beta1 <- 0.3 
+y1_beta0 <- 0.3
+y1_beta1 <- 0.4 
 y2_beta0 <- 0.3
 y2_beta1 <- 0.8
 y3_beta0 <- 0.4
@@ -59,24 +59,30 @@ covMat
 # Sumulate Betas from mvnorm
 sim_dflist <- list()
 for (i in 1:nsims){
-	betas <- mvrnorm(n = people
-		, mu = rep(c(y1_beta1, y2_beta1, y3_beta1), each = 1)
-		, Sigma = covMat
-		, empirical = TRUE
-	)
-	# Predictions (XB)
-	sim_df <- (tibble(x = x
-			, y1n = y1_beta0 + betas[,1]*x
-			, y2n = y2_beta0 + betas[,2]*x
-			, y3n = y3_beta0 + betas[,3]*x
+	XB <- (data.frame(x = x
+			, pred1 = y1_beta0 + y1_beta1 * x
+			, pred2 = y2_beta0 + y2_beta1 * x
+			, pred3 = y3_beta0 + y3_beta1 * x
 		)
-		%>% data.frame()
+		%>% select(-x)
+		%>% as.matrix()
 	)
+	sim_df <- (t(apply(XB, 1, function(x){
+         	rmvnorm(1, mean = x, sigma = covMat)
+      	})
+   	)
+   	%>% data.frame()
+   	%>% setnames(names(.), c("y1", "y2", "y3"))
+   	%>% mutate(id = 1:people
+      	, x = x
+   	)
+	)
+
 	dat <- (sim_df
 		%>% mutate(
-			y1b = rbinom(people, 1, plogis(y1n))
-			, y2b = rbinom(people, 1, plogis(y2n))
-			, y3b = rbinom(people, 1, plogis(y3n))
+			y1bin = rbinom(people, 1, plogis(y1))
+			, y2bin = rbinom(people, 1, plogis(y2))
+			, y3bin = rbinom(people, 1, plogis(y3))
 		)
 	)
 	sim_dflist[[i]] <- dat
