@@ -1,0 +1,43 @@
+---
+title: 'Beta/Variance Report'
+author: "Steve and Jonathan"
+date: " `r as.Date(Sys.time())` "
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+
+
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(echo = FALSE
+	, warning = FALSE
+	, message = FALSE
+	, fig.width = 10
+	, fig.height = 10
+	, results = "asis")
+options(width = 12)
+
+library(ggplot2)
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+```
+
+The intercept variance is taken to be zero ($\beta_0 = 0$) hence in all simulations, the regressions will give the same predictions at $x = 0$. The variance in the slope ($\beta_1 = 1$) is taken to be $1$ and $\beta_z \in \{1,2,3,4,5\}$. On the logit-scale, as the variance of $\beta_z$ increases, the predicted probabilities increase with a positive or negative values. Similar trend is observed in the probability-scale plot. However, as the $\beta_z$ increase, the relations between the predictions and $x$ becomes more linear. 
+
+## Logit-scale plot
+
+```{r, echo = FALSE}
+load("binary_random.rda")
+print(pplot_logit)
+```
+
+## Probability-scale plot
+
+```{r, echo = FALSE}
+print(pplot_prob)
+```

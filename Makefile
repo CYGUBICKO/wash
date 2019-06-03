@@ -116,6 +116,7 @@ wash_presentation.pdf: wash_presentation.tex
 
 ## Theory 
 binary_random.Rout: binary_random.R 
+beta_variance_report.html: beta_variance_report.rmd
 
 ## Integrating f(theta)*l(theta)
 integration.out: integration.sage
@@ -128,7 +129,12 @@ integration.out: integration.sage
 simulatemvn.Rout: simulatemvn.R
 
 # Models
+
+## Multivariate normal
 bivariateModel.Rout: bivariateModel.R
+
+## Multivariate binomial
+bivariateBinary.Rout: bivariateBinary.R
 
 # Plot the coeffs
 bivariateDiagnostics.Rout: bivariateDiagnostics.R

@@ -19,7 +19,7 @@ set.seed(7777)
 theme_set(theme_bw() +
             theme(panel.spacing=grid::unit(0,"lines")))
 
-nsims <- 3
+nsims <- 1
 people <- 1000 # Number of simulations to run
 
 # Predictor
