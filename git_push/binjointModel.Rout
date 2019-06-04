@@ -1,0 +1,171 @@
+
+R version 3.5.1 (2018-07-02) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #### ---- Project: APHRC Wash Data ----
+> #### ---- Task: Simulation ----
+> #### ---- Fit joint model: Binanry response ----
+> #### ---- By: Steve and Jonathan ----
+> #### ---- Date: 2019 May 28 (Tue) ----
+> 
+> library(dplyr)
+> library(tidyr)
+> library(tibble)
+> library(ggplot2)
+> library(brms)
+> 
+> options(dplyr.width = Inf)
+> 
+> theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines")))
+> 
+> load("simulatemvn.rda")
+> set.seed(7777)
+> 
+> # Objects in
+> # * sim_dflist
+> # * betas_df
+> # * betas
+> # * x
+> 
+> nsims <- length(sim_dflist)
+> 
+> get_prior(
++ 	mvbind(y1bin, y2bin, y3bin) ~ 0 + intercept + x + (0 + 1|p|id)
++ 		, data = sim_dflist[[1]]
++ 		, family = bernoulli 
++ )
+                 prior class      coef group  resp dpar nlpar bound
+1                          b                                       
+2               lkj(1)   cor                                       
+3                        cor              id                       
+4                          b                 y1bin                 
+5                          b intercept       y1bin                 
+6                          b         x       y1bin                 
+7  student_t(3, 0, 10)    sd                 y1bin                 
+8                         sd              id y1bin                 
+9                         sd Intercept    id y1bin                 
+10                         b                 y2bin                 
+11                         b intercept       y2bin                 
+12                         b         x       y2bin                 
+13 student_t(3, 0, 10)    sd                 y2bin                 
+14                        sd              id y2bin                 
+15                        sd Intercept    id y2bin                 
+16                         b                 y3bin                 
+17                         b intercept       y3bin                 
+18                         b         x       y3bin                 
+19 student_t(3, 0, 10)    sd                 y3bin                 
+20                        sd              id y3bin                 
+21                        sd Intercept    id y3bin                 
+> 
+> report <- 1 # Index within nsims to save for summary
+> 
+> priors <- c(
++ 	prior(normal(0, 1), class = b, resp = y1bin)
++ 	, prior(normal(0, 1), class = b, resp = y2bin)
++ 	, prior(normal(0, 1), class = b, resp = y3bin)
++ 	, prior(normal(0, 1), class = b, coef = intercept, resp = y1bin)
++ 	, prior(normal(0, 1), class = b, coef = intercept, resp = y2bin)
++ 	, prior(normal(0, 1), class = b, coef = intercept, resp = y3bin)
++ 	, prior(normal(0, 1), class = b, coef = x, resp = y1bin)
++ 	, prior(normal(0, 1), class = b, coef = x, resp = y2bin)
++ 	, prior(normal(0, 1), class = b, coef = x, resp = y3bin)
++ 	, prior(normal(0, 1), class = sd, resp = y1bin)
++ 	, prior(normal(0, 1), class = sd, resp = y2bin)
++ 	, prior(normal(0, 1), class = sd, resp = y3bin)
++ 	, prior(normal(0, 1), class = sd, group = id, resp = y1bin)
++ 	, prior(normal(0, 1), class = sd, group = id, resp = y2bin)
++ 	, prior(normal(0, 1), class = sd, group = id, resp = y3bin)
++ 	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y1bin)
++ 	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y2bin)
++ 	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y3bin)
++ )
+> brmsmodel_list <- list() 
+> brmscoef_list <- list()
+> for (s in 1:nsims){
++    df <- (sim_dflist[[s]]
++       %>% data.frame()
++    )
++ 	model <- brm(
++ 		mvbind(y1bin, y2bin, y3bin) ~ 0 + intercept + x + (1|p|id) 
++ 			, data = df
++ 			, family = bernoulli 
++ 			, cores = 4
++ 			, seed = 7777
++ 			, prior = priors
++ 			, warmup = 1000
++ 			, iter = 2e4
++ 			, refresh = 0
++ 			, open_progress = FALSE
++ 	)
++ 	if (s <= report){
++ 		brmsmodel_list[[s]] <- model # Model to store
++ 	}
++ 	brmscoef_list[[s]] <- fixef(model)[, "Estimate"]
++ }
+> 
+> brmscoef_df <- Reduce(rbind, brmscoef_list) %>% as_tibble()
+> summary(brmsmodel_list[[1]])
+ Family: MV(bernoulli, bernoulli, bernoulli) 
+  Links: mu = logit
+         mu = logit
+         mu = logit 
+Formula: y1bin ~ 0 + intercept + x + (1 | p | id) 
+         y2bin ~ 0 + intercept + x + (1 | p | id) 
+         y3bin ~ 0 + intercept + x + (1 | p | id) 
+   Data: df (Number of observations: 2000) 
+Samples: 4 chains, each with iter = 20000; warmup = 1000; thin = 1;
+         total post-warmup samples = 76000
+
+Group-Level Effects: 
+~id (Number of levels: 2000) 
+                                     Estimate Est.Error l-95% CI u-95% CI
+sd(y1bin_Intercept)                      0.74      0.61     0.19     2.52
+sd(y2bin_Intercept)                      0.37      0.26     0.12     1.09
+sd(y3bin_Intercept)                      0.72      0.57     0.18     2.26
+cor(y1bin_Intercept,y2bin_Intercept)    -0.22      0.39    -0.88     0.64
+cor(y1bin_Intercept,y3bin_Intercept)     0.60      0.25     0.06     0.96
+cor(y2bin_Intercept,y3bin_Intercept)    -0.16      0.38    -0.86     0.64
+                                     Eff.Sample Rhat
+sd(y1bin_Intercept)                         384 1.01
+sd(y2bin_Intercept)                        1174 1.00
+sd(y3bin_Intercept)                         533 1.01
+cor(y1bin_Intercept,y2bin_Intercept)       2581 1.00
+cor(y1bin_Intercept,y3bin_Intercept)       3998 1.00
+cor(y2bin_Intercept,y3bin_Intercept)       5427 1.00
+
+Population-Level Effects: 
+                Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+y1bin_intercept     0.33      0.09     0.21     0.55        559 1.01
+y1bin_x             0.48      0.12     0.35     0.80        455 1.01
+y2bin_intercept     0.30      0.05     0.20     0.41       5631 1.00
+y2bin_x             0.82      0.08     0.70     1.00       1999 1.00
+y3bin_intercept     0.35      0.09     0.23     0.56        940 1.01
+y3bin_x             0.51      0.11     0.37     0.79        707 1.01
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).
+> 
+> save(file = "binjointModel.rda"
++ 	, brmsmodel_list
++ 	, brmscoef_df
++ 	, betas_df
++ 	, betas
++ )
+> 
+> 

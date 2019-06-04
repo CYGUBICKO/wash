@@ -32,9 +32,9 @@ get_prior(y1bin ~ 0 + intercept + x + (1|id)
 
 report <- 1 # Index within nsims to save for summary
 
-priors <- c(#prior(normal(0, 10), class = b)
-	prior(normal(0, 5), class = b, coef = x)
-	, prior(normal(0, 5), class = b, coef = intercept)
+priors <- c(prior(normal(0, 1), class = b)
+	, prior(normal(0, 1), class = b, coef = x)
+	, prior(normal(0, 1), class = b, coef = intercept)
 	, prior(inv_gamma(3, 1), class = sd)
 )
 
@@ -48,8 +48,10 @@ for (s in 1:nsims){
 	model <- brm(y1bin ~ 0 + intercept + x + (1|id)
 			, data = df
 			, family = bernoulli 
-			, seed = 7777
 			, cores = 4
+			, warmup = 500
+			, iter = 1e4
+			, seed = 7777
 			, prior = priors
 			, refresh = 0
 			, open_progress = FALSE
@@ -71,8 +73,10 @@ for (s in 1:nsims){
 	model <- brm(y2bin ~ 0 + intercept + x + (1|id)
 			, data = df
 			, family = bernoulli 
-			, seed = 7777
 			, cores = 4
+			, warmup = 500
+			, iter = 1e4
+			, seed = 7777
 			, prior = priors
 			, refresh = 0
 			, open_progress = FALSE
@@ -94,8 +98,10 @@ for (s in 1:nsims){
 	model <- brm(y3bin ~ 0 + intercept + x + (1|id)
 			, data = df
 			, family = bernoulli 
-			, seed = 7777
 			, cores = 4
+			, warmup = 1000
+			, iter = 2e4
+			, seed = 7777
 			, prior = priors
 			, refresh = 0
 			, open_progress = FALSE
