@@ -119,9 +119,9 @@ binary_random.Rout: binary_random.R
 beta_variance_report.html: beta_variance_report.rmd
 
 ## Integrating f(theta)*l(theta)
+## Does not integrate!!
 integration.out: integration.sage
 	sage $< |tee > $@
-
 
 ## Back to basics: Bivariate, Multivariate normal response
 
