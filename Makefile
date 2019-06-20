@@ -144,6 +144,7 @@ mvnjointModel.Rout: mvnjointModel.R
 mvnjointDiagnostics.Rout: mvnjointDiagnostics.R
 
 binjointModel.Rout: binjointModel.R
+binjointDiagnostics.Rout: binjointDiagnostics.R
 
 ## Bottomline test with multivariate normal response
 

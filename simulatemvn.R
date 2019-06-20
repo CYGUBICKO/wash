@@ -20,7 +20,7 @@ theme_set(theme_bw() +
             theme(panel.spacing=grid::unit(0,"lines")))
 
 nsims <- 1
-people <- 2000 # Number of simulations to run
+people <- 1000 # Number of simulations to run
 
 # Predictor
 x <- rnorm(people)
@@ -45,9 +45,9 @@ corMat <- matrix(
 )
 
 # Sd
-y1_sd <- 0.6
-y2_sd <- 0.5
-y3_sd <- 0.7
+y1_sd <- 5
+y2_sd <- 3
+y3_sd <- 7
 sdVec <- c(y1_sd, y2_sd, y3_sd)
 varMat <- sdVec %*% t(sdVec)
 varMat

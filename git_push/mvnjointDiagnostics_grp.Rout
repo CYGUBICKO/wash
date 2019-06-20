@@ -1,0 +1,169 @@
+
+R version 3.5.1 (2018-07-02) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #### ---- Project: APHRC Wash Data ----
+> #### ---- Task: Simulation ----
+> #### ---- Continous outcome simulation plots ----
+> #### ---- By: Steve and Jonathan ----
+> #### ---- Date: 2019 May 30 (Thu) ----
+> 
+> library(data.table)
+> library(dplyr)
+> library(tidyr)
+> library(tibble)
+> library(ggplot2)
+> library(brms)
+> 
+> theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines")))
+> 
+> load("mvnjointModel.rda")
+> 
+> # Incoming objects:
+> # * brmsmodel_list - glmer fits per simulation
+> # * brmscoef_df - fixed effect coef per simulation
+> # * betas_df & betas - initial beta values for simulations
+> # * predictors  
+> 
+> # Clean betas_df
+> # Align Beta df with the estimates
+> betas_df <- (betas_df
++    %>% mutate(coef_clean = coef
++ 		, coef_clean = ifelse(grepl("0$", coef_clean), paste0("b_y", substr(n, 1, 1), "_intercept")
++          , ifelse(grepl("x:y[1-9]", coef_clean), paste0("b_y", substr(n, 1, 1), "_x")
++             , ifelse(grepl("_sd", coef_clean), paste0("sigma_y", n)
++             	, ifelse(grepl("^cor_", coef_clean), paste0("rescor__y", substr(n, 1, 1), "__y", substr(n, 2, 2))
++ 						, coef_clean
++ 					)
++ 				)
++          )
++       )
++    )
++ )
+> brmsmodel <- brmsmodel_list[[1]]
+> 
+> summary(brmsmodel)
+ Family: MV(gaussian, gaussian, gaussian) 
+  Links: mu = identity; sigma = identity
+         mu = identity; sigma = identity
+         mu = identity; sigma = identity 
+Formula: y1 ~ 0 + intercept + x + (0 + 1 | p | id) 
+         y2 ~ 0 + intercept + x + (0 + 1 | p | id) 
+         y3 ~ 0 + intercept + x + (0 + 1 | p | id) 
+   Data: df (Number of observations: 2000) 
+Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+         total post-warmup samples = 4000
+
+Group-Level Effects: 
+~id (Number of levels: 2000) 
+                               Estimate Est.Error l-95% CI u-95% CI Eff.Sample
+sd(y1_Intercept)                   0.27      0.14     0.01     0.50         17
+sd(y2_Intercept)                   0.25      0.13     0.02     0.43          7
+sd(y3_Intercept)                   0.35      0.17     0.01     0.59          4
+cor(y1_Intercept,y2_Intercept)    -0.08      0.53    -0.88     0.83         16
+cor(y1_Intercept,y3_Intercept)     0.05      0.43    -0.76     0.82         11
+cor(y2_Intercept,y3_Intercept)     0.43      0.42    -0.69     0.94         10
+                               Rhat
+sd(y1_Intercept)               1.30
+sd(y2_Intercept)               1.44
+sd(y3_Intercept)               1.61
+cor(y1_Intercept,y2_Intercept) 1.39
+cor(y1_Intercept,y3_Intercept) 1.24
+cor(y2_Intercept,y3_Intercept) 1.20
+
+Population-Level Effects: 
+             Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+y1_intercept     0.30      0.01     0.28     0.33       2452 1.00
+y1_x             0.41      0.01     0.39     0.44        735 1.00
+y2_intercept     0.29      0.01     0.27     0.31        815 1.01
+y2_x             0.81      0.01     0.79     0.83       1770 1.00
+y3_intercept     0.40      0.02     0.37     0.43       1664 1.00
+y3_x             0.50      0.02     0.47     0.53       1261 1.00
+
+Family Specific Parameters: 
+         Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sigma_y1     0.51      0.08     0.34     0.61         12 1.35
+sigma_y2     0.41      0.08     0.26     0.51         10 1.43
+sigma_y3     0.58      0.10     0.39     0.72          4 1.81
+
+Residual Correlations: 
+              Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+rescor(y1,y2)     0.29      0.22    -0.14     0.74         13 1.53
+rescor(y1,y3)     0.42      0.18     0.05     0.85          5 1.51
+rescor(y2,y3)     0.49      0.15     0.12     0.76         10 1.24
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).
+> 
+> print(betas_df)
+       coef betas  n     coef_clean
+1  cor_y1y2   0.2 12 rescor__y1__y2
+2  cor_y1y3   0.3 13 rescor__y1__y3
+3  cor_y2y3   0.5 23 rescor__y2__y3
+4     x:y10   0.3 10 b_y1_intercept
+5     x:y11   0.4 11         b_y1_x
+6     y1_sd   0.6  1       sigma_y1
+7     x:y20   0.3 20 b_y2_intercept
+8     x:y21   0.8 21         b_y2_x
+9     y2_sd   0.5  2       sigma_y2
+10    x:y30   0.4 30 b_y3_intercept
+11    x:y31   0.5 31         b_y3_x
+12    y3_sd   0.7  3       sigma_y3
+> 
+> print(vcov(brmsmodel))
+              y1_intercept         y1_x  y2_intercept          y2_x
+y1_intercept  1.722970e-04 1.165559e-06  2.938544e-05 -2.167790e-06
+y1_x          1.165559e-06 1.678645e-04  2.257830e-06  2.064187e-05
+y2_intercept  2.938544e-05 2.257830e-06  1.321908e-04 -6.380170e-06
+y2_x         -2.167790e-06 2.064187e-05 -6.380170e-06  1.127185e-04
+y3_intercept  6.342649e-05 2.039063e-06  9.633890e-05 -6.709112e-06
+y3_x         -9.976594e-07 4.397961e-05 -1.079204e-05  8.303234e-05
+              y3_intercept          y3_x
+y1_intercept  6.342649e-05 -9.976594e-07
+y1_x          2.039063e-06  4.397961e-05
+y2_intercept  9.633890e-05 -1.079204e-05
+y2_x         -6.709112e-06  8.303234e-05
+y3_intercept  2.637104e-04 -1.710488e-05
+y3_x         -1.710488e-05  2.309289e-04
+> 
+> # Coefficient plots
+> print(stanplot(brmsmodel) 
++ 	+ geom_point(data = betas_df, aes(x = betas, y = coef_clean), colour = "red")
++ )
+> 
+> # Zoom in
+> print(stanplot(brmsmodel, type = "dens") 
++ 	+ geom_vline(data = betas_df 
++ 		%>% setnames(c("coef_clean", "betas"), c("Parameter", "Value"))
++ 		, aes(xintercept = Value)
++ 		, linetype = "dashed"
++ 		, colour = "red"
++ 	)
++    + facet_wrap(~Parameter, scales = "free", ncol = 3)
++ 	+ theme(strip.text.x = element_text(size = 6))
++ )
+> 
+> # Trace plots
+> plot(brmsmodel)
+> 
+> # Marginal effect of predictors
+> plot(marginal_effects(brmsmodel, "x", resp = "y1"), points = TRUE, rug = FALSE)
+> plot(marginal_effects(brmsmodel, "x", resp = "y2"), points = TRUE, rug = FALSE)
+> plot(marginal_effects(brmsmodel, "x", resp = "y3"), points = TRUE, rug = FALSE)
+> 

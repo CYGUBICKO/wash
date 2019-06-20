@@ -39,7 +39,7 @@ for (s in 1:nsims){
       %>% data.frame()
    )
 	model <- brm(
-		mvbind(y1, y2, y3) ~ 0 + intercept + x 
+		mvbind(y1, y2, y3) ~ 0 + intercept + x + (0 + 1|p|id) 
 			, data = df
 			, family = gaussian 
 			, cores = 8
