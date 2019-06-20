@@ -14,10 +14,9 @@ options(dplyr.width = Inf)
 
 theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines")))
 
-load("simulatemvn.rda")
 set.seed(7777)
 
-# Objects in
+load("simulatemvn.rda")
 # * sim_dflist
 # * betas_df
 # * betas
@@ -25,13 +24,8 @@ set.seed(7777)
 
 nsims <- length(sim_dflist)
 
-get_prior(y1 ~ 0 + intercept + x
-	, data = sim_dflist[[1]]
-	, family = gaussian
-)
-
 report <- 1 # Index within nsims to save for summary
-
+## priors are not used (did we use defaults?)
 priors <- c(prior(normal(0, 1), class = b)
 	, prior(normal(0, 1), class = b, coef = x)
 	, prior(normal(0, 1), class = b, coef = intercept)
@@ -40,6 +34,7 @@ priors <- c(prior(normal(0, 1), class = b)
 
 y1model_list <- list()
 y1coef_list <- list()
+
 # y1
 for (s in 1:nsims){
    df <- (sim_dflist[[s]]
