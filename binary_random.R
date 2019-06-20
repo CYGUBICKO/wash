@@ -65,7 +65,6 @@ pplot_prob <- (data.frame(ran, plst)
 		+ labs(x = "x"
 			, y = paste0("Predicted probabilities")
 		)
-	
 )
 
 print(pplot_logit)
