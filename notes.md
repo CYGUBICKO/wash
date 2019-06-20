@@ -1,3 +1,18 @@
+2019 Jun 20 (Thu)
+=================
+
+There is a fair amount of confusion about the current plots
+
+* bivariateDiagnostics.Rout.pdf just does univariate (!) normal stuff. Seems to work fine
+* mvnjointDiagnostics.Rout.pdf does multivariate normal and also works fine
+* mvnjointDiagnostics_grp.Rout.pdf does not work yet; possibly because it assumes groups but groups have no replication
+* binjointDiagnostics.Rout.pdf FAILS to see correlations when we look at binary variables based on the mvnjoint normal variables. This is the current problem point
+
+To do
+* Go back to working mvn and add grouping variables _with_ multiple observations per group
+* Try other approaches for fitting binary data
+* Maybe: try other approaches for _making_ binary data. This is not really satisfactory, because we feel that the current binary data should be fittable.
+
 2019 May 23 (Thu)
 ================
 

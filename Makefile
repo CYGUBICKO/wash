@@ -120,6 +120,8 @@ beta_variance_report.html: beta_variance_report.rmd
 
 ## Integrating f(theta)*l(theta)
 ## Does not integrate!!
+Ignore += *.sage.py
+Ignore += integration.out
 integration.out: integration.sage
 	sage $< |tee > $@
 
