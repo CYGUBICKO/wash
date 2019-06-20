@@ -45,9 +45,9 @@ corMat <- matrix(
 )
 
 # Sd
-y1_sd <- 5
-y2_sd <- 3
-y3_sd <- 7
+y1_sd <- 0.5
+y2_sd <- 0.3
+y3_sd <- 0.7
 sdVec <- c(y1_sd, y2_sd, y3_sd)
 varMat <- sdVec %*% t(sdVec)
 varMat
