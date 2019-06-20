@@ -52,7 +52,7 @@ priors <- c(
 	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y1bin)
 	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y2bin)
 	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y3bin)
-	, set_prior("lkj(8)", class = "cor")
+	, set_prior("lkj(4)", class = "cor")
 )
 brmsmodel_list <- list() 
 brmscoef_list <- list()
