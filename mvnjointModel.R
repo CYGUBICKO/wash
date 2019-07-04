@@ -14,7 +14,8 @@ options(dplyr.width = Inf)
 
 theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines")))
 
-load("simulatemvn.rda")
+#load("simulatemvn.rda")
+load("simulateHierarchicalmvn.rda")
 set.seed(7777)
 
 # Objects in
@@ -26,7 +27,7 @@ set.seed(7777)
 nsims <- length(sim_dflist)
 
 get_prior(
-	mvbind(y1, y2, y3) ~ 0 + intercept + x + (0 + 1|p|id)
+	mvbind(y1, y2, y3) ~ 0 + intercept + x + (1|p|id)
 		, data = sim_dflist[[1]]
 		, family = gaussian 
 )
@@ -39,7 +40,7 @@ for (s in 1:nsims){
       %>% data.frame()
    )
 	model <- brm(
-		mvbind(y1, y2, y3) ~ 0 + intercept + x + (0 + 1|p|id) 
+		mvbind(y1, y2, y3) ~ 0 + intercept + x #+ (1|p|id) 
 			, data = df
 			, family = gaussian 
 			, cores = 8

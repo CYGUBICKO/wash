@@ -14,7 +14,7 @@ options(dplyr.width = Inf)
 
 theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines")))
 
-load("simulatemvn.rda")
+load("simulateHierarchicalmvn.rda")
 set.seed(7777)
 
 # Objects in

@@ -148,8 +148,16 @@ mvnjointDiagnostics.Rout: mvnjointDiagnostics.R
 binjointModel.Rout: binjointModel.R
 binjointDiagnostics.Rout: binjointDiagnostics.R
 
-## Bottomline test with multivariate normal response
+## Simulate Hierarchical Multivariate data
+simulateHierarchicalmvn.Rout: simulateHierarchicalmvn.R
 
+## Fit stan model using rstanarm
+rstanarmModel.Rout: rstanarmModel.R
+
+# Binary response
+rstanarmModelbin.Rout: rstanarmModelbin.R
+
+## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
 
 ######################################################################

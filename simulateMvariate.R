@@ -130,7 +130,7 @@ betas_df <- (data.frame(betas)
 		)
 	)
 )
-
+plot(1:10)
 print(betas_df)
 
 save(file = "simulateMvariate.rda"
