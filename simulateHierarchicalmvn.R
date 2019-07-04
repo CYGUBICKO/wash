@@ -11,13 +11,8 @@ options(dplyr.width = Inf)
 
 library(tidyr)
 library(tibble)
-library(ggplot2)
-
 
 set.seed(7777)
-
-theme_set(theme_bw() +
-            theme(panel.spacing=grid::unit(0,"lines")))
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
