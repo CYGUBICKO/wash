@@ -21,8 +21,8 @@ theme_set(theme_bw() +
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-people <- 100	# Number of cases (primary units) per simulation
-J <- 30			# Number of observations per HH
+people <- 150	# Number of cases (primary units) per HH
+J <- 30			# Number of HH
 
 # Generate dataset template
 temp_df <- data.frame(id = sort(rep(c(1:people),J))
