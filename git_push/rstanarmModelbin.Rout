@@ -59,10 +59,10 @@ Type 'q()' to quit R.
 + 		)
 + 		, data = sim_dflist[[1]]
 + 		, refresh = 0
-+ 		, prior_intercept = normal(0, 10)
-+ 		, prior = normal(0, 10)
-+ 		, prior_aux = cauchy(0, 2)
-+ 		, prior_covariance = lkj(1)
++ 		, prior_intercept = normal(0, 1)
++ 		, prior = normal(0, 1)
++ 		, prior_aux = normal(0, 1)
++ 		, prior_covariance = lkj(4)
 + 		, family = list(binomial, binomial, binomial)
 + 		, chains = parallel::detectCores()
 + 		, cores = parallel::detectCores()
@@ -98,8 +98,8 @@ Please note the warmup may be much slower than later iterations!
 # A tibble: 2 x 3
      y1    y2    y3
   <dbl> <dbl> <dbl>
-1 0.266 0.312 0.336
-2 0.486 0.975 0.434
+1 0.280 0.303 0.340
+2 0.344 0.755 0.387
 > 
 > summary(rstanmodel_list[[1]])
 
@@ -115,73 +115,73 @@ Model Info:
  algorithm:    sampling
  priors:       see help('prior_summary')
  sample:       8000 (posterior sample size)
- num obs:      1000 (y1), 1000 (y2), 1000 (y3)
+ num obs:      3000 (y1), 3000 (y2), 3000 (y3)
  groups:       id (100)
- runtime:      2.5 mins
+ runtime:      3.8 mins
 
 Estimates:
                                           mean      sd        2.5%      25%    
-y1|(Intercept)                              0.267     0.069     0.134     0.220
-y1|x                                        0.487     0.067     0.359     0.439
-y1|mean_PPD                                 0.572     0.022     0.530     0.558
-y2|(Intercept)                              0.312     0.079     0.159     0.259
-y2|x                                        0.978     0.084     0.817     0.920
-y2|mean_PPD                                 0.580     0.020     0.540     0.567
-y3|(Intercept)                              0.337     0.068     0.203     0.291
-y3|x                                        0.434     0.069     0.297     0.387
-y3|mean_PPD                                 0.588     0.021     0.546     0.574
-Sigma[id:y1|(Intercept),y1|(Intercept)]     0.021     0.028     0.000     0.002
-Sigma[id:y2|(Intercept),y1|(Intercept)]    -0.005     0.021    -0.059    -0.012
-Sigma[id:y3|(Intercept),y1|(Intercept)]     0.001     0.012    -0.023    -0.003
-Sigma[id:y2|(Intercept),y2|(Intercept)]     0.099     0.086     0.000     0.030
-Sigma[id:y3|(Intercept),y2|(Intercept)]     0.001     0.024    -0.049    -0.008
-Sigma[id:y3|(Intercept),y3|(Intercept)]     0.030     0.038     0.000     0.004
-log-posterior                           -2357.713    14.868 -2386.657 -2367.742
+y1|(Intercept)                              0.281     0.067     0.152     0.236
+y1|x                                        0.344     0.039     0.266     0.318
+y1|mean_PPD                                 0.566     0.012     0.542     0.558
+y2|(Intercept)                              0.303     0.047     0.212     0.272
+y2|x                                        0.754     0.045     0.667     0.724
+y2|mean_PPD                                 0.570     0.012     0.546     0.562
+y3|(Intercept)                              0.340     0.080     0.183     0.287
+y3|x                                        0.387     0.041     0.307     0.360
+y3|mean_PPD                                 0.576     0.012     0.553     0.568
+Sigma[id:y1|(Intercept),y1|(Intercept)]     0.283     0.065     0.171     0.237
+Sigma[id:y2|(Intercept),y1|(Intercept)]     0.045     0.028    -0.004     0.026
+Sigma[id:y3|(Intercept),y1|(Intercept)]     0.125     0.050     0.032     0.091
+Sigma[id:y2|(Intercept),y2|(Intercept)]     0.067     0.032     0.015     0.044
+Sigma[id:y3|(Intercept),y2|(Intercept)]     0.064     0.034     0.003     0.041
+Sigma[id:y3|(Intercept),y3|(Intercept)]     0.465     0.096     0.305     0.398
+log-posterior                           -6087.959    17.878 -6124.857 -6099.653
                                           50%       75%       97.5%  
-y1|(Intercept)                              0.266     0.311     0.403
-y1|x                                        0.486     0.534     0.618
-y1|mean_PPD                                 0.572     0.587     0.615
-y2|(Intercept)                              0.312     0.366     0.469
-y2|x                                        0.975     1.033     1.147
-y2|mean_PPD                                 0.580     0.594     0.619
-y3|(Intercept)                              0.336     0.383     0.471
-y3|x                                        0.434     0.479     0.573
-y3|mean_PPD                                 0.588     0.603     0.630
-Sigma[id:y1|(Intercept),y1|(Intercept)]     0.010     0.029     0.101
-Sigma[id:y2|(Intercept),y1|(Intercept)]    -0.001     0.003     0.032
-Sigma[id:y3|(Intercept),y1|(Intercept)]     0.000     0.004     0.029
-Sigma[id:y2|(Intercept),y2|(Intercept)]     0.080     0.145     0.307
-Sigma[id:y3|(Intercept),y2|(Intercept)]     0.000     0.010     0.054
-Sigma[id:y3|(Intercept),y3|(Intercept)]     0.016     0.044     0.135
-log-posterior                           -2357.647 -2347.771 -2328.132
+y1|(Intercept)                              0.280     0.325     0.416
+y1|x                                        0.344     0.371     0.422
+y1|mean_PPD                                 0.566     0.574     0.590
+y2|(Intercept)                              0.303     0.334     0.396
+y2|x                                        0.755     0.784     0.841
+y2|mean_PPD                                 0.570     0.578     0.593
+y3|(Intercept)                              0.340     0.395     0.496
+y3|x                                        0.387     0.415     0.469
+y3|mean_PPD                                 0.576     0.584     0.599
+Sigma[id:y1|(Intercept),y1|(Intercept)]     0.277     0.321     0.430
+Sigma[id:y2|(Intercept),y1|(Intercept)]     0.044     0.063     0.103
+Sigma[id:y3|(Intercept),y1|(Intercept)]     0.123     0.157     0.230
+Sigma[id:y2|(Intercept),y2|(Intercept)]     0.063     0.085     0.140
+Sigma[id:y3|(Intercept),y2|(Intercept)]     0.062     0.085     0.135
+Sigma[id:y3|(Intercept),y3|(Intercept)]     0.456     0.523     0.680
+log-posterior                           -6087.662 -6075.521 -6054.938
 
 Diagnostics:
                                         mcse  Rhat  n_eff
-y1|(Intercept)                          0.000 1.000 19242
-y1|x                                    0.000 0.999 20317
-y1|mean_PPD                             0.000 1.000 12037
-y2|(Intercept)                          0.001 1.000 14661
-y2|x                                    0.001 0.999 15476
-y2|mean_PPD                             0.000 1.000 10959
-y3|(Intercept)                          0.000 0.999 19411
-y3|x                                    0.001 0.999 18047
-y3|mean_PPD                             0.000 1.000 11145
-Sigma[id:y1|(Intercept),y1|(Intercept)] 0.000 1.001  4855
-Sigma[id:y2|(Intercept),y1|(Intercept)] 0.000 1.002  3215
-Sigma[id:y3|(Intercept),y1|(Intercept)] 0.000 1.001  5478
-Sigma[id:y2|(Intercept),y2|(Intercept)] 0.002 1.002  2517
-Sigma[id:y3|(Intercept),y2|(Intercept)] 0.000 1.000  6724
-Sigma[id:y3|(Intercept),y3|(Intercept)] 0.001 1.002  3795
-log-posterior                           0.338 1.002  1932
+y1|(Intercept)                          0.001 1.002  2718
+y1|x                                    0.000 1.000 10203
+y1|mean_PPD                             0.000 1.000 10404
+y2|(Intercept)                          0.001 1.001  5803
+y2|x                                    0.000 0.999 11066
+y2|mean_PPD                             0.000 1.000  9690
+y3|(Intercept)                          0.001 1.001  3127
+y3|x                                    0.000 1.000 10011
+y3|mean_PPD                             0.000 1.000  8287
+Sigma[id:y1|(Intercept),y1|(Intercept)] 0.001 1.001  3172
+Sigma[id:y2|(Intercept),y1|(Intercept)] 0.000 1.000  4810
+Sigma[id:y3|(Intercept),y1|(Intercept)] 0.001 1.002  2239
+Sigma[id:y2|(Intercept),y2|(Intercept)] 0.001 1.001  3405
+Sigma[id:y3|(Intercept),y2|(Intercept)] 0.001 1.004  1345
+Sigma[id:y3|(Intercept),y3|(Intercept)] 0.002 1.001  3196
+log-posterior                           0.420 1.001  1813
 
 For each parameter, mcse is Monte Carlo standard error, n_eff is a crude measure of effective sample size, and Rhat is the potential scale reduction factor on split chains (at convergence Rhat=1).
 > 
 > 
 > VarCorr(rstanmodel_list[[1]])
- Groups Name           Std.Dev. Corr         
- id     y1|(Intercept) 0.14428               
-        y2|(Intercept) 0.31420  -0.115       
-        y3|(Intercept) 0.17460   0.036  0.020
+ Groups Name           Std.Dev. Corr       
+ id     y1|(Intercept) 0.53161             
+        y2|(Intercept) 0.25839  0.331      
+        y3|(Intercept) 0.68184  0.345 0.361
 > 
 > save(file = "rstanarmModelbin.rda"
 + 	, rstanmodel_list

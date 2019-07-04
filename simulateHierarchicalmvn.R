@@ -22,7 +22,7 @@ theme_set(theme_bw() +
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
 people <- 100	# Number of cases (primary units) per simulation
-J <- 10			# Number of observations per HH
+J <- 30			# Number of observations per HH
 
 # Generate dataset template
 temp_df <- data.frame(id = sort(rep(c(1:people),J))
@@ -73,13 +73,21 @@ for (i in 1:nsims){
    	%>% data.frame()
    	%>% setnames(names(.), c("b1", "b2", "b3"))
 	)
+	betas0 <- (MASS::mvrnorm(people
+			, mu = rep(c(y1_beta0, y2_beta0, y3_beta0), each = 1)
+			, Sigma = covMat
+			, empirical = TRUE
+		)
+   	%>% data.frame()
+	)
+	betas0 <- betas0[temp_df$id, ]
 
 	dat <- (betas[temp_df$id, ]
 		%>% mutate(id = pull(temp_df, id)
 			, x = pull(temp_df, x)
-			, y1 = y1_beta0 + b1*x
-			, y2 = y2_beta0 + b2*x
-			, y3 = y3_beta0 + b3*x
+			, y1 = betas0[,1] + b1*x
+			, y2 = betas0[,2] + b2*x
+			, y3 = betas0[,3] + b3*x
 			, y1bin = rbinom(people*J, 1, plogis(y1))
 			, y2bin = rbinom(people*J, 1, plogis(y2))
 			, y3bin = rbinom(people*J, 1, plogis(y3))

@@ -49,10 +49,10 @@ priors <- c(
 	, prior(normal(0, 1), class = sd, group = id, resp = y1bin)
 	, prior(normal(0, 1), class = sd, group = id, resp = y2bin)
 	, prior(normal(0, 1), class = sd, group = id, resp = y3bin)
-	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y1bin)
-	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y2bin)
-	, prior(inv_gamma(3, 1), class = sd, coef = Intercept, group = id, resp = y3bin)
-	, set_prior("lkj(4)", class = "cor")
+	, prior(normal(0, 1), class = sd, coef = Intercept, group = id, resp = y1bin)
+	, prior(normal(0, 1), class = sd, coef = Intercept, group = id, resp = y2bin)
+	, prior(normal(0, 1), class = sd, coef = Intercept, group = id, resp = y3bin)
+	, set_prior("lkj(2)", class = "cor")
 )
 brmsmodel_list <- list() 
 brmscoef_list <- list()
@@ -67,8 +67,8 @@ for (s in 1:nsims){
 			, cores = 8
 			, seed = 7777
 			, prior = priors
-			, warmup = 1000
-			, iter = 2e4
+#			, warmup = 1000
+#			, iter = 2e4
 			, refresh = 0
 			, open_progress = FALSE
 	)
