@@ -40,6 +40,7 @@ for (s in 1:nsims){
 		)
 		, data = sim_dflist[[1]]
 		, family = list(gaussian, gaussian, gaussian)
+		, refresh = 0
 		, chains = parallel::detectCores()
 		, cores = parallel::detectCores()
 		, seed = 7777
