@@ -1,3 +1,21 @@
+
+2019 Jul 04 (Thu)
+=================
+
+Steve wants to do hierarchical simulations, so we need to decide what simulations to do:
+* is it realistic to aggregate within a household by year?
+* is it realistic not to?
+
+Do we have different services for different people in the household? How many people per household have different incomes? Is it easy to figure out an aggregate measure of househould income or household wealth? How do we adjust that for the number of people per household?
+
+We can:
+* Look at the data
+* Make a clear simulation plan (in plain English)
+* Do a simulation
+* Adapt current rstanarm (and test to see if we can see the hierarchy)
+
+Steve can email JD at the end of each step
+
 2019 Jun 20 (Thu)
 =================
 
