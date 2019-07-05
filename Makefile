@@ -32,7 +32,7 @@ $(ms)/Makefile:
 ######################################################################
 
 ## Loading data and defining some important functions
-## ln -fs ~/Dropbox/aphrc/wash/data 
+## ln -fs ~/Dropbox/aphrc/wash/data  ##
 
 Ignore += data docs temp_files 
 

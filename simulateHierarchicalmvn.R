@@ -11,23 +11,18 @@ options(dplyr.width = Inf)
 
 library(tidyr)
 library(tibble)
-library(ggplot2)
-
 
 set.seed(7777)
 
-theme_set(theme_bw() +
-            theme(panel.spacing=grid::unit(0,"lines")))
-
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-people <- 150	# Number of cases (primary units) per HH
-J <- 30			# Number of HH
+nHH <- 150	# Number of cases (primary units) per HH
+hhsize <- 30			# Number of HH
 
 # Generate dataset template
-temp_df <- data.frame(id = sort(rep(c(1:people),J))
-	, J = rep(c(1:J),people)
-	, x = rnorm(n = J*people)
+temp_df <- data.frame(hhid = sort(rep(c(1:nHH),hhsize))
+	, HH = rep(c(1:hhsize),nHH)
+	, x = rnorm(n = hhsize*nHH)
 )
 print(temp_df)
 
@@ -65,38 +60,47 @@ covMat
 # Generate dataset
 sim_dflist <- list()
 for (i in 1:nsims){
-	betas <- (MASS::mvrnorm(people
-			, mu = rep(c(y1_beta1, y2_beta1, y3_beta1), each = 1)
+	betas <- (MASS::mvrnorm(nHH
+			, mu = c(y1_beta1, y2_beta1, y3_beta1)
 			, Sigma = covMat
 			, empirical = TRUE
 		)
    	%>% data.frame()
    	%>% setnames(names(.), c("b1", "b2", "b3"))
 	)
-	betas0 <- (MASS::mvrnorm(people
+	betas0 <- (MASS::mvrnorm(nHH
 			, mu = rep(c(y1_beta0, y2_beta0, y3_beta0), each = 1)
 			, Sigma = covMat
 			, empirical = TRUE
 		)
    	%>% data.frame()
 	)
-	betas0 <- betas0[temp_df$id, ]
+	betas0 <- betas0[temp_df$hhid, ]
 
-	dat <- (betas[temp_df$id, ]
-		%>% mutate(id = pull(temp_df, id)
+	dat <- (betas[temp_df$hhid, ]
+		%>% mutate(hhid = pull(temp_df, hhid)
 			, x = pull(temp_df, x)
+<<<<<<< HEAD
 			, y1 = betas0[,1] + y1_beta1*x + rnorm(people*J)
 			, y2 = betas0[,2] + y2_beta1*x + rnorm(people*J)
 			, y3 = betas0[,3] + y3_beta1*x + rnorm(people*J)
 			, y1bin = rbinom(people*J, 1, plogis(y1))
 			, y2bin = rbinom(people*J, 1, plogis(y2))
 			, y3bin = rbinom(people*J, 1, plogis(y3))
+=======
+			, y1 = betas0[,1] + b1*x
+			, y2 = betas0[,2] + b2*x
+			, y3 = betas0[,3] + b3*x
+			, y1bin = rbinom(nHH*hhsize, 1, plogis(y1))
+			, y2bin = rbinom(nHH*hhsize, 1, plogis(y2))
+			, y3bin = rbinom(nHH*hhsize, 1, plogis(y3))
+>>>>>>> 95a2b24c691e55351ada3cef4cf832d35c108934
 		)
 	)
 	sim_dflist[[i]] <- dat
 }
 
-print(head(sim_dflist[[1]]))
+print((sim_dflist[[1]]))
 
 # Extract beta values assigned in the simulation
 betas <- sapply(grep("y[1-9]|cor_y", ls(), value = TRUE), get)
