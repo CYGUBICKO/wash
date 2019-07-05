@@ -7,6 +7,7 @@ library(dplyr)
 
 load("globalFunctions.rda")
 load("complete.rda")
+options(dplyr.width = Inf)
 
 # This script select only variables which will be useful in the subsequent analysis
 
@@ -49,6 +50,8 @@ working_df <- (working_df
 )
 
 summary(working_df)
+
+print(head(working_df))
 
 df_outpath <- paste0("data/", "wash_analysis_df.rds")
 saveRDS(working_df, df_outpath)

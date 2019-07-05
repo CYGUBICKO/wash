@@ -85,9 +85,9 @@ for (i in 1:nsims){
 	dat <- (betas[temp_df$id, ]
 		%>% mutate(id = pull(temp_df, id)
 			, x = pull(temp_df, x)
-			, y1 = betas0[,1] + b1*x
-			, y2 = betas0[,2] + b2*x
-			, y3 = betas0[,3] + b3*x
+			, y1 = betas0[,1] + y1_beta1*x + rnorm(people*J)
+			, y2 = betas0[,2] + y2_beta1*x + rnorm(people*J)
+			, y3 = betas0[,3] + y3_beta1*x + rnorm(people*J)
 			, y1bin = rbinom(people*J, 1, plogis(y1))
 			, y2bin = rbinom(people*J, 1, plogis(y2))
 			, y3bin = rbinom(people*J, 1, plogis(y3))

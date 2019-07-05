@@ -40,10 +40,10 @@ for (s in 1:nsims){
 		)
 		, data = sim_dflist[[1]]
 		, refresh = 0
-		, prior_intercept = normal(0, 1)
-		, prior = normal(0, 1)
-		, prior_aux = normal(0, 1)
-		, prior_covariance = lkj(4)
+#		, prior_intercept = normal(0, 1)
+#		, prior = normal(0, 1)
+#		, prior_aux = normal(0, 1)
+#		, prior_covariance = lkj(4)
 		, family = list(binomial, binomial, binomial)
 		, chains = parallel::detectCores()
 		, cores = parallel::detectCores()
