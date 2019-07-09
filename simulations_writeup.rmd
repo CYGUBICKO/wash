@@ -1,0 +1,38 @@
+---
+title: 'Simulated data documentation'
+author: "Steve and Jonathan"
+date: " `r as.Date(Sys.time())` "
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+
+
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(echo = FALSE
+	, warning = FALSE
+	, message = FALSE
+	, fig.width = 10
+	, fig.height = 10
+	, results = "asis")
+options(width = 12)
+
+library(ggplot2)
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+```
+
+In this simulation, we assume that there are year effects on the intercepts only and consider balanced data for now.
+
+This is a random-intercept or varying-intercepts model simulation
+We also have random slopes or varying coefficients
+With mixed models we can also estimate the variations among the observed levels
+
+Random assumption on the intercepts
+
+$\alpha_j \sim N(\mu, \sigma^2)$
