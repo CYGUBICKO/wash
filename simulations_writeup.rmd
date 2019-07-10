@@ -22,17 +22,90 @@ knitr::opts_chunk$set(echo = FALSE
 	, results = "asis")
 options(width = 12)
 
+library(DT)
 library(ggplot2)
+library(tidyr)
+library(dplyr)
+
 theme_set(theme_bw() +
 	theme(panel.spacing=grid::unit(0,"lines")))
+
+load("additional_summaries.RData")
 ```
 
-In this simulation, we assume that there are year effects on the intercepts only and consider balanced data for now.
+# Data exploration
 
-This is a random-intercept or varying-intercepts model simulation
-We also have random slopes or varying coefficients
-With mixed models we can also estimate the variations among the observed levels
+## Water sources
 
-Random assumption on the intercepts
+The table below summarises the distribution of household access to water by interview year. The `0` and `1` columns indicate unimproved and improved water services, respecitvely, while n$\_$hh$\_$int indicates the total number of interviews per household.
 
-$\alpha_j \sim N(\mu, \sigma^2)$
+* Each household was surveyed only once per year. 
+* Some household had either unimproved or improved water services for different years. 
+
+In most slum dwelllings, the services are at times not available throught the year. Hence grouping by the year would be more realistic. Similar trends are observed in other services.
+
+The dataset does not contain individual ID hence it is not easy to figure out whether HH members with different services are the same or different. *Might reach out to Damazo if we can get the individual IDs or dataset with the IDs*
+
+```{r}
+watersource_tab <- (watersource_tab$count_df
+	%>% arrange(hhid_anon)
+	%>% group_by(.dots = c("hhid_anon"))
+	%>% mutate(n_hh_int = n())
+	%>% datatable(caption = "Water source", rownames = FALSE)
+)
+watersource_tab
+```
+
+## Income per HH
+
+The table below summarises HH income. A total of `r sum(wealthindex_hh_tab$n>1, na.rm = TRUE)` respondents had equal incomes in at least two interview instances.
+
+```{r}
+wealthindex_hh_tab <- (wealthindex_hh_tab
+	%>% arrange(hhid_anon)
+	%>% group_by(.dots = c("hhid_anon"))
+	%>% select(-prop)
+	%>% mutate(wealthindex = round(wealthindex, 3))
+	%>% mutate(n_hh_int = n())
+	%>% arrange(desc(n))
+	%>% datatable(caption = "Income", rownames = FALSE)
+)
+wealthindex_hh_tab
+```
+
+## HH income per interview year
+
+However, if we aggregate HH incomes by year, all the members in the households had different incomes (`equal_income = ` `r sum(wealthindex_tab$n>1, na.rm = TRUE)`).
+
+* We can calculate average income per household as an aggregate measure of household income.
+* We can adjust HH average income by dividing by the HH size
+```{r}
+wealthindex_tab <- (wealthindex_tab
+	%>% arrange(hhid_anon)
+	%>% group_by(.dots = c("hhid_anon"))
+	%>% select(-prop)
+	%>% mutate(wealthindex = round(wealthindex, 3))
+	%>% mutate(n_hh_int = n())
+	%>% arrange(desc(n))
+	%>% datatable(caption = "Income", rownames = FALSE)
+)
+wealthindex_tab
+```
+
+# Simulation plan and assumptions
+
+* Use year as the grouping variable
+* Each household has its own year effect on the intercepts and slopes (random-intercept and random-slope)
+* Use average income per household, adjusted by the HH size (total number of people in the HH) as the predictor (any opinion or suggestion on this?).
+
+Consider the model
+\[y_{ijk} = \beta0_{jk} + \beta1_{jk}x_i + \epsilon_{ik}\]
+
+* $y_{ijk}$ is the simulated value of the ith observation in the jth year of the kth service; $i$ goes from 1 to the number of observations; $j = 1,2, \cdots, 15$ indexes the number of years and we consider equal number of observations per year; and $k = 1, 2, 3$ indexes the number of services. We therefore simulate three services $y_1, y_2$ and $y_3$.
+* $\beta0_{jk}$ is the random-intercept effect of the jth year of the kth service on the response. We assume $\beta0_{jk} \sim MVN(\mu0_k, \Sigma_{tk})$; $t = 1, 2, 3$.
+* $\beta1_{jk}$ is the random-slope effect of the jth year of the kth service on the response. We assume $\beta1_{jk} \sim MVN(\mu1_k, \Sigma_{tk})$.
+* $\epsilon_{ik}$ is the observation-level residual error term of the kth service. We assume $\epsilon_{ik} \sim N(0, 1).$
+* $x_j$ is the ith predictor value.
+
+We convert $y_{ijk}$ to binary scale by drawing samples from a binomial distribution, with probability, $p_k = plogis(y_{ijk})$.
+

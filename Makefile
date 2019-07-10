@@ -157,6 +157,11 @@ rstanarmModel.Rout: rstanarmModel.R
 # Binary response
 rstanarmModelbin.Rout: rstanarmModelbin.R
 
+## Simulations writeup
+additional_summaries.Rout: additional_summaries.R
+#simulations_writeup.html: simulations_writeup.rmd
+simulations_writeup.html.pages: simulations_writeup.rmd
+
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
 
