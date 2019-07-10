@@ -1,3 +1,18 @@
+2019 Jul 10 (Wed)
+=================
+
+Results of data analysis
+* Services are reported one per household per year
+* Wealth is always reported the same once we group by household and year
+	* but it may be reported by more than one interviewee
+* We don't really think that income is reported, it's wealth
+* We are thinking that our "observation" level will be households (not individuals), with one observation per year per household
+
+Simulation plan
+* Need to add correlations between ε within a household
+
+Analysis plan
+* Steve to suggest
 
 2019 Jul 04 (Thu)
 =================

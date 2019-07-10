@@ -1,6 +1,6 @@
 ### Hooks for the editor to set the default target
-
-## https:cygubicko.github.io/projects
+## https://cygubicko.github.io/wash/
+## https://cygubicko.github.io/wash/simulations_writeup.html
 
 current: target
 -include target.mk
