@@ -16,13 +16,16 @@ set.seed(7777)
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-nHH <- 150		# Number of cases (primary units) per HH
-hhsize <- 30			# Number of HH
+nHH <- 500		# Number of HH (primary units) per year
+
+nyrs <- 20	# Number of years to simulate
+yrs <- 2000 + c(1:nyrs) # Years to simulate
+N <- nyrs * nHH
 
 # Generate dataset template
-temp_df <- data.frame(hhid = sort(rep(c(1:nHH),hhsize))
-	, HH = rep(c(1:hhsize),nHH)
-	, x = rnorm(n = hhsize*nHH)
+temp_df <- data.frame(hhid = rep(c(1:nHH), each = nyrs)
+	, years = rep(yrs, nHH)
+	, wealthindex = rnorm(n = N)
 )
 print(temp_df)
 
@@ -60,32 +63,33 @@ covMat
 # Generate dataset
 sim_dflist <- list()
 for (i in 1:nsims){
-	betas <- (MASS::mvrnorm(nHH
-			, mu = c(y1_beta1, y2_beta1, y3_beta1)
+	
+	# Simulate B0 for each year and then merge to HH data. Different HH has same B0 for same year
+	betas0 <- (MASS::mvrnorm(nyrs
+			, mu = c(y1_beta0, y2_beta0, y3_beta0)
 			, Sigma = covMat
 			, empirical = TRUE
 		)
    	%>% data.frame()
-   	%>% setnames(names(.), c("b1", "b2", "b3"))
+		%>% mutate(years = yrs)
+		%>% right_join(temp_df)
+		%>% select(c("X1", "X2", "X3"))
 	)
-	betas0 <- (MASS::mvrnorm(nHH
-			, mu = rep(c(y1_beta0, y2_beta0, y3_beta0), each = 1)
-			, Sigma = covMat
-			, empirical = TRUE
-		)
-   	%>% data.frame()
+	
+	# Simulate HH-level random effects (residual error)
+	hhRE <- MASS::mvrnorm(N
+		, mu = c(0, 0, 0)
+		, Sigma = covMat
+		, empirical = TRUE
 	)
-	betas0 <- betas0[temp_df$hhid, ]
-
-	dat <- (betas[temp_df$hhid, ]
-		%>% mutate(hhid = pull(temp_df, hhid)
-			, x = pull(temp_df, x)
-			, y1 = betas0[,1] + b1*x
-			, y2 = betas0[,2] + b2*x
-			, y3 = betas0[,3] + b3*x
-			, y1bin = rbinom(nHH*hhsize, 1, plogis(y1))
-			, y2bin = rbinom(nHH*hhsize, 1, plogis(y2))
-			, y3bin = rbinom(nHH*hhsize, 1, plogis(y3))
+	
+	dat <- (temp_df
+		%>% mutate(y1 = betas0[,1] + y1_beta1*wealthindex + hhRE[,1]
+			, y2 = betas0[,2] + y2_beta1*wealthindex + hhRE[,2]
+			, y3 = betas0[,3] + y3_beta1*wealthindex + hhRE[,3]
+			, y1bin = rbinom(N, 1, plogis(y1))
+			, y2bin = rbinom(N, 1, plogis(y2))
+			, y3bin = rbinom(N, 1, plogis(y3))
 		)
 	)
 	sim_dflist[[i]] <- dat
@@ -102,7 +106,7 @@ betas_df <- (data.frame(betas)
 		, coef = ifelse(grepl("_0$", coef)
 			, paste0("y", n)
 				, ifelse(grepl("_beta", coef) 
-					, paste0("x:y", n)
+					, paste0("wealthindex:y", n)
 				, coef
 			)
 		)

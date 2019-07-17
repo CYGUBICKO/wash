@@ -1,0 +1,80 @@
+---
+title: 'Analysis of simulated data documentation'
+author: "Steve and Jonathan"
+date: " `r as.Date(Sys.time())` "
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+
+
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(echo = FALSE
+	, warning = FALSE
+	, message = FALSE
+	, fig.width = 10
+	, fig.height = 10
+	, results = "asis")
+options(width = 12)
+
+library(DT)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(rstanarm)
+
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+
+load("simulateHierarchicalmvn.rda")
+load("rstanarmModelbin.rda")
+```
+
+# Data
+
+The data is simulated as per the writeup [here](https://cygubicko.github.io/wash/simulations_writeup.html), except that $\beta_k$, $k = 1,2,3$ are fixed. 
+
+* It has `r length(unique(sim_dflist[[1]]$hhid))` households per year repeatedly collected for `r length(unique(sim_dflist[[1]]$years))` years.
+
+
+```{r}
+sims_df <- (sim_dflist[[1]]
+	%>% filter(hhid %in% sample(hhid, 5))
+	%>% mutate_at(c("y1", "y2", "y3", "wealthindex"), function(y){round(y, 3)})
+	%>% datatable(caption = "Simulated dataset", rownames = FALSE)
+)
+sims_df
+```
+
+# Analysis
+
+We use Bayesian multivariate generalized linear models with correlated group-specific terms via Stan to model the binary outcomes
+
+* Random intercept model: Assume an intercept that is different for each year
+* Jointly simulated $\epsilon_{ik}$ with $\mu_k = \mathbf{0}$ and covariance $\mathbf{\Sigma}$
+
+In other words, the fitted model was specified as:
+
+\[y_{ijk} = \beta0_{jk} + \beta1_kx_i + \epsilon_{ik}\]
+
+		model <- stan_mvmer(
+			formula = list(
+				y1bin ~ wealthindex + (1 | years)
+				, y2bin ~ wealthindex + (1 | years)
+				, y3bin ~ wealthindex + (1 | years)
+			)
+			, data = sim_dflist[[1]]
+			, family = list(binomial, binomial, binomial)
+		)
+
+# Results
+
+## Fixed effects
+
+
+

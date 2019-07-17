@@ -34,9 +34,9 @@ for (s in 1:nsims){
    )
 	model <- stan_mvmer(
 		formula = list(
-			y1bin ~ x + (1 | id)
-			, y2bin ~ x + (1 | id)
-			, y3bin ~ x + (1 | id)
+			y1bin ~ wealthindex + (1 | years)
+			, y2bin ~ wealthindex + (1 | years)
+			, y3bin ~ wealthindex + (1 | years)
 		)
 		, data = sim_dflist[[1]]
 		, refresh = 0

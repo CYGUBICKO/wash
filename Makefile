@@ -156,6 +156,7 @@ rstanarmModel.Rout: rstanarmModel.R
 
 # Binary response
 rstanarmModelbin.Rout: rstanarmModelbin.R
+rstanarmModelbinDiagnostics.Rout: rstanarmModelbinDiagnostics.R
 
 ## Simulations writeup
 additional_summaries.Rout: additional_summaries.R
@@ -163,6 +164,9 @@ simulations_writeup.html: simulations_writeup.rmd
 
 ## https://cygubicko.github.io/wash/simulations_writeup.html
 ## simulations_writeup.html.pages: simulations_writeup.rmd
+
+## Simulations analyis
+simulations_analysis_writeup.html: simulations_analysis_writeup.rmd
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R

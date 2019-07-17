@@ -21,7 +21,7 @@ set.seed(7777)
 # * sim_dflist
 # * betas_df
 # * betas
-# * x
+# * wealthindex
 
 nsims <- length(sim_dflist)
 
@@ -34,9 +34,9 @@ for (s in 1:nsims){
    )
 	model <- stan_mvmer(
 		formula = list(
-			y1 ~ x + (1 | id)
-			, y2 ~ x + (1 | id)
-			, y3 ~ x + (1 | id)
+			y1 ~ wealthindex + (1 | years)
+			, y2 ~ wealthindex + (1 | years)
+			, y3 ~ wealthindex + (1 | years)
 		)
 		, data = sim_dflist[[1]]
 		, family = list(gaussian, gaussian, gaussian)
