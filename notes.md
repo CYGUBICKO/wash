@@ -1,3 +1,25 @@
+
+2019 Jul 18 (Thu)
+=================
+
+Figure out how to add more correlations to the simulation:
+* Things should be correlated within households and across time
+* Each household could have a mean wealth and a temporal autocorrelation
+* Each household service intercept could also have a similar structure
+* If we know that the household has a service this year, then even if we control for wealth and other variables, it should be more likely to have the same service next year
+
+Figure out how to incorporate a household-level RE.
+* This should be possible if we have more than one year per household, even if we also have a temporal random effect (10×100 > 10+100)
+* It may just work in rstanarm, but I'm not sure
+
+Figure out how to interpret and validate rstanarm (or other model) outputs
+
+Experiment with changing simulation parameters and see how the changes are reflected in model fits
+
+Are the correlations also good, or just the sd?
+
+I am going to hang up, because I don't hear you ☹
+
 2019 Jul 10 (Wed)
 =================
 
