@@ -23,10 +23,13 @@ knitr::opts_chunk$set(echo = FALSE
 options(width = 12)
 
 library(DT)
+library(data.table)
 library(ggplot2)
+library(tibble)
 library(tidyr)
 library(dplyr)
 library(rstanarm)
+library(broom)
 
 theme_set(theme_bw() +
 	theme(panel.spacing=grid::unit(0,"lines")))
@@ -76,5 +79,63 @@ In other words, the fitted model was specified as:
 
 ## Fixed effects
 
+```{r}
+# Tidy true betas and sigma
+betas_df <- (betas_df
+   %>% mutate(coef_clean = coef
+		, coef_clean = ifelse(grepl("0$", coef_clean), paste0("y", substr(n, 1, 1), "|(Intercept)")
+         , ifelse(grepl("x:y[1-9]", coef_clean), paste0("y", substr(n, 1, 1), "|wealthindex")
+            , ifelse(grepl("_sd", coef_clean), paste0("sd_id__y", n, "bin_Intercept")
+            	, ifelse(grepl("^cor_", coef_clean), paste0("cor_id__y", substr(n, 1, 1), "bin_Intercept__y", substr(n, 2, 2), "bin_Intercept")
+						, coef_clean
+					)
+				)
+         )
+      )
+   )
+)
+rstanmodel <- rstanmodel_list[[1]]
+```
+
+```{r}
+fixed_effects <- (summary(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
+	%>% round(., digits = 4)
+	%>% datatable()
+)
+fixed_effects
+```
+
+```{r}
+#print(plot(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
+#	+ geom_point(data = betas_df %>% filter(grepl("^y[1-3]\\|\\(Intercept\\)|wealthindex", coef_clean))
+#		, aes(x = betas, y = coef_clean), colour = "red"
+#	)
+#)
+print(plot(rstanmodel, "dens", regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex") 
+	+ geom_vline(data = betas_df %>% filter(grepl("^y[1-3]\\|\\(Intercept\\)|wealthindex", coef_clean))
+		%>% setnames(c("coef_clean", "betas"), c("Parameter", "Value"))
+		, aes(xintercept = Value)
+		, linetype = "dashed"
+		, colour = "red"
+	)
+   + facet_wrap(~Parameter, scales = "free", ncol = 3)
+	+ theme(strip.text.x = element_text(size = 6))
+)
+```
+
+## Year-specific estimates
+
+```{r}
+#plot(rstanmodel, "mcmc_areas", pars = "varying")
+plot(rstanmodel, pars = "varying")
+```
+
+## Covariance and Sigma
+
+```{r}
+#plot(rstanmodel, "mcmc_areas", pars = "varying")
+summaryTwoLevelModelVar<- tidy(rstanmodel, intervals=TRUE, prob=.95, parameters = "hierarchical")
+datatable(print(summaryTwoLevelModelVar, digits = 2))
+```
 
 
