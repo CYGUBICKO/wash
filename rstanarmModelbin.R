@@ -34,19 +34,21 @@ for (s in 1:nsims){
    )
 	model <- stan_mvmer(
 		formula = list(
-			y1bin ~ wealthindex + (1 | years)
-			, y2bin ~ wealthindex + (1 | years)
-			, y3bin ~ wealthindex + (1 | years)
+			y1bin ~ wealthindex + (1 | years) + (1 | hhid)
+			, y2bin ~ wealthindex + (1 | years) + (1 | hhid)
+			, y3bin ~ wealthindex + (1 | years) + (1 | hhid)
 		)
 		, data = sim_dflist[[1]]
 		, refresh = 0
-		, prior_intercept = normal(0, 5)
-		, prior = normal(0, 5)
-#		, prior_aux = normal(0, 1)
-		, prior_covariance = lkj(4)
+		, prior_intercept = normal(0, 5, autoscale = FALSE)
+		, prior = normal(0, 5, autoscale = FALSE)
+		, prior_aux = cauchy(0, 2, autoscale = FALSE)
+		, prior_covariance = lkj(2, autoscale = FALSE)
+		, adapt_delta = 0.999
 		, family = list(binomial, binomial, binomial)
-		, chains = parallel::detectCores()
+		, chains = 4
 		, cores = parallel::detectCores()
+		, init = 0
 		, seed = 7777
 		, iter = 2000
 	)

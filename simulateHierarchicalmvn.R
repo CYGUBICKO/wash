@@ -16,18 +16,22 @@ set.seed(7777)
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-nHH <- 1000		# Number of HH (primary units) per year
+nHH <- 500		# Number of HH (primary units) per year
 
 nyrs <- 20	# Number of years to simulate
 yrs <- 2000 + c(1:nyrs) # Years to simulate
 N <- nyrs * nHH
 
 # Generate dataset template
-temp_df <- data.frame(hhid = rep(c(1:nHH), each = nyrs)
-	, years = rep(yrs, nHH)
-	, wealthindex = rnorm(n = N)
+temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
+		, years = rep(yrs, nHH)
+		, wealthindex = rnorm(n = N)
+	)
+	%>% group_by(hhid)
+	%>% mutate(wealthindex = mean(wealthindex)) # Average hh wealth index
+	%>% ungroup()
 )
-print(temp_df)
+print(as.data.frame(temp_df))
 
 # Beta values
 y1_beta0 <- 0.3
@@ -77,11 +81,12 @@ for (i in 1:nsims){
 	)
 	
 	# Simulate HH-level random effects (residual error)
-	hhRE <- MASS::mvrnorm(N
+	hhRE <- MASS::mvrnorm(nHH
 		, mu = c(0, 0, 0)
 		, Sigma = covMat
 		, empirical = TRUE
 	)
+	hhRE <- hhRE[temp_df$hhid, ]
 	
 	dat <- (temp_df
 		%>% mutate(y1 = betas0[,1] + y1_beta1*wealthindex + hhRE[,1]
