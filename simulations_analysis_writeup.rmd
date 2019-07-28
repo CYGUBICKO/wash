@@ -29,6 +29,7 @@ library(tibble)
 library(tidyr)
 library(dplyr)
 library(rstanarm)
+library(bayesplot)
 library(broom)
 
 theme_set(theme_bw() +
@@ -42,6 +43,7 @@ load("rstanarmModelbin.rda")
 
 The data is simulated as per the writeup [here](https://cygubicko.github.io/wash/simulations_writeup.html), except that $\beta_k$, $k = 1,2,3$ are fixed. 
 
+* Jointly simulated $\epsilon_{ik}$ with $\mu_k = \mathbf{0}$ and covariance $\mathbf{\Sigma}$
 * It has `r length(unique(sim_dflist[[1]]$hhid))` households per year repeatedly collected for `r length(unique(sim_dflist[[1]]$years))` years.
 
 
@@ -59,7 +61,6 @@ sims_df
 We use Bayesian multivariate generalized linear models with correlated group-specific terms via Stan to model the binary outcomes
 
 * Random intercept model: Assume an intercept that is different for each year
-* Jointly simulated $\epsilon_{ik}$ with $\mu_k = \mathbf{0}$ and covariance $\mathbf{\Sigma}$
 
 In other words, the fitted model was specified as:
 
@@ -67,9 +68,9 @@ In other words, the fitted model was specified as:
 
 		model <- stan_mvmer(
 			formula = list(
-				y1bin ~ wealthindex + (1 | years)
-				, y2bin ~ wealthindex + (1 | years)
-				, y3bin ~ wealthindex + (1 | years)
+				y1bin ~ wealthindex + (1 | years) + (1 | hhid)
+				, y2bin ~ wealthindex + (1 | years) + (1 | hhid)
+				, y3bin ~ wealthindex + (1 | years) + (1 | hhid)
 			)
 			, data = sim_dflist[[1]]
 			, family = list(binomial, binomial, binomial)
@@ -98,6 +99,32 @@ rstanmodel <- rstanmodel_list[[1]]
 ```
 
 ```{r}
+nhh <- 10 # Number of hh to vizualize
+posterior_df <- as.matrix(rstanmodel)
+posterior_estimates <- (t(apply(posterior_df, 2, quantile, probs = c(0.1, 0.5, 0.9)))
+	%>% data.frame()
+	%>% rownames_to_column("terms")
+	%>% mutate(Variable = ifelse(grepl("y1|", terms), "y1"
+   	, ifelse(grepl("y2|", terms), "y2", "y3")
+   	)
+	)
+)
+```
+
+```{r}
+# Year-Specific estimates
+year_specific_plot <- (ggplot(posterior_estimates
+		%>% filter(grepl("^b\\[y[1-3]\\|\\(Intercept\\) years:", terms))
+		, aes(terms, X50., ymin = X10., ymax = X90.)
+	)
+	+ geom_pointrange()
+	+ coord_flip()
+   + facet_wrap(Variable~., scales = "free")
+)
+year_specific_plot
+```
+
+```{r}
 fixed_effects <- (summary(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
 	%>% round(., digits = 4)
 	%>% datatable()
@@ -105,12 +132,16 @@ fixed_effects <- (summary(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|we
 fixed_effects
 ```
 
+
+## Marginal Posterior Parameter Estimates Plots
+
+Plots point estimates for each parameter along with credibility intervals. In this case we are plotting the $50\%$ uncertainty interval (thick horizontal lines) and the $90\%$ uncertainty interval (thin horizontal lines). In terms of interpretation, the $50\%$ uncertainty interval identifies where $50\%$ of the marginal distribution lies for each parameter. 
+
+<!--The  plotfun="areas" argument plots the posterior distribution of each parameter with the uncertainty intervals shaded as areas below the cuve.
+-->
+
 ```{r}
-fixed_effects <- (summary(rstanmodel)
-	%>% round(., digits = 4)
-	%>% datatable()
-)
-fixed_effects
+plot(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
 ```
 
 ```{r}

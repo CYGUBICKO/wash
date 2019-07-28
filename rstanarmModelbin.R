@@ -30,6 +30,7 @@ rstanmodel_list <- list()
 rstancoef_list <- list()
 for (s in 1:nsims){
    df <- (sim_dflist[[s]]
+		%>% mutate(wealthindex = scale(wealthindex))
       %>% data.frame()
    )
 	model <- stan_mvmer(
@@ -40,17 +41,17 @@ for (s in 1:nsims){
 		)
 		, data = sim_dflist[[1]]
 		, refresh = 0
-		, prior_intercept = normal(0, 5, autoscale = FALSE)
-		, prior = normal(0, 5, autoscale = FALSE)
-		, prior_aux = cauchy(0, 2, autoscale = FALSE)
-		, prior_covariance = lkj(2, autoscale = FALSE)
+		, prior_intercept = normal(0, 1, autoscale = FALSE)
+		, prior = normal(0, 1, autoscale = FALSE)
+		, prior_aux = cauchy(0, 5, autoscale = FALSE)
+		, prior_covariance = lkj(1, autoscale = FALSE)
 		, adapt_delta = 0.999
 		, family = list(binomial, binomial, binomial)
 		, chains = 4
 		, cores = parallel::detectCores()
 		, init = 0
 		, seed = 7777
-		, iter = 2000
+		, iter = 4000
 	)
 	if (s <= report){
 		rstanmodel_list[[s]] <- model # Model to store
