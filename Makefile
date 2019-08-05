@@ -167,6 +167,7 @@ simulations_writeup.html: simulations_writeup.rmd
 
 ## Simulations analyis
 simulations_analysis_writeup.html: simulations_analysis_writeup.rmd
+simulations_plots_temp.Rout: simulations_plots_temp.R
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
