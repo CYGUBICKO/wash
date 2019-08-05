@@ -26,6 +26,7 @@ options(width = 12)
 library(DT)
 library(data.table)
 library(ggplot2)
+library(cowplot)
 library(tibble)
 library(tidyr)
 library(dplyr)
@@ -99,31 +100,6 @@ betas_df <- (betas_df
 rstanmodel <- rstanmodel_list[[1]]
 ```
 
-```{r}
-nhh <- 10 # Number of hh to vizualize
-posterior_df <- as.matrix(rstanmodel)
-posterior_estimates <- (t(apply(posterior_df, 2, quantile, probs = c(0.1, 0.5, 0.9)))
-	%>% data.frame()
-	%>% rownames_to_column("terms")
-	%>% mutate(Variable = ifelse(grepl("y1|", terms), "y1"
-   	, ifelse(grepl("y2|", terms), "y2", "y3")
-   	)
-	)
-)
-```
-
-```{r}
-# Year-Specific estimates
-year_specific_plot <- (ggplot(posterior_estimates
-		%>% filter(grepl("^b\\[y[1-3]\\|\\(Intercept\\) years:", terms))
-		, aes(terms, X50., ymin = X10., ymax = X90.)
-	)
-	+ geom_pointrange()
-	+ coord_flip()
-   + facet_wrap(Variable~., scales = "free")
-)
-year_specific_plot
-```
 
 ```{r}
 fixed_effects <- (summary(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
@@ -141,8 +117,87 @@ Plots point estimates for each parameter along with credibility intervals. In th
 <!--The  plotfun="areas" argument plots the posterior distribution of each parameter with the uncertainty intervals shaded as areas below the cuve.
 -->
 
+## Intercept and slope
+
 ```{r}
-plot(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
+#plot(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
+plot_df <- plot(rstanmodel)[["data"]]
+
+# Population level estimate plot
+
+population_est_plot <- (plot_df
+	%>% filter(grepl("^y[1-3]", parameter))
+	%>% ggplot(aes(x = reorder(parameter, m), y = m))
+		+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
+		+ geom_pointrange(aes(ymin = l
+			, ymax = h
+		)
+			, size = 2/5, color = "deepskyblue4"
+		)
+		+ geom_segment(aes(y = ll
+			, yend = hh
+			, x = parameter
+			, xend = parameter
+		) 
+			, size = 0.8, color = "lightblue"
+		)
+		+ geom_pointrange(aes(ymin = l
+			, ymax = h
+		)
+			, size = 1, color = "deepskyblue4"
+		)
+		+ geom_point(color = "lightblue", size = 3.5)
+		+ coord_flip()
+		+ labs(x = NULL, y = NULL)
+		+ theme_bw()
+)
+population_est_plot
+
+```
+
+## Year and hhid variance
+
+```{r}
+# Sigma
+sigma_est_plot <- (plot_df
+	%>% filter(grepl("^Sigma", parameter))
+	%>% mutate(ny = ifelse(lengths(regmatches(parameter, gregexpr("y1", parameter))) == 2
+			, 2 
+			, ifelse(lengths(regmatches(parameter, gregexpr("y2", parameter))) == 2
+				, 2
+				, ifelse(lengths(regmatches(parameter, gregexpr("y3", parameter))) == 2
+					, 2
+					, lengths(regmatches(parameter, gregexpr("y1|y2|y2", parameter)))
+				) 
+			)
+		)
+	)
+	%>% filter(ny == 2)
+	%>% ggplot(aes(x = reorder(parameter, m), y = m))
+		+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
+		+ geom_pointrange(aes(ymin = l
+			, ymax = h
+		)
+			, size = 2/5, color = "deepskyblue4"
+		)
+		+ geom_segment(aes(y = ll
+			, yend = hh
+			, x = parameter
+			, xend = parameter
+		) 
+			, size = 0.8, color = "lightblue"
+		)
+		+ geom_pointrange(aes(ymin = l
+			, ymax = h
+		)
+			, size = 1, color = "deepskyblue4"
+		)
+		+ geom_point(color = "lightblue", size = 3.5)
+		+ coord_flip()
+		+ labs(x = NULL, y = NULL)
+		+ theme_bw()
+)
+sigma_est_plot
 ```
 
 ```{r}
@@ -167,13 +222,54 @@ print(plot(rstanmodel, "dens", regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthind
 
 ```{r}
 #plot(rstanmodel, "mcmc_areas", pars = "varying")
-plot(rstanmodel, regex_pars = "^b\\[y[1-3]\\|\\(Intercept\\) years:")
+# plot(rstanmodel, regex_pars = "^b\\[y[1-3]\\|\\(Intercept\\) years:")
+
+# Group level estimates - Year
+patterns <- c("^b\\[y1", "^b\\[y2", "^b\\[y3")
+
+year_est_plots <- list()
+for (i in 1:length(patterns)){
+	year_est_plot <- (plot_df
+		%>% filter(grepl(patterns[i], parameter) & grepl("years", parameter))
+		%>% ggplot(aes(x = reorder(parameter, m), y = m))
+			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
+			+ geom_pointrange(aes(ymin = l
+				, ymax = h
+			)
+				, size = 2/5, color = "deepskyblue4"
+			)
+			+ geom_segment(aes(y = ll
+				, yend = hh
+				, x = parameter
+				, xend = parameter
+			) 
+				, size = 0.8, color = "lightblue"
+			)
+			+ geom_pointrange(aes(ymin = l
+				, ymax = h
+			)
+				, size = 1, color = "deepskyblue4"
+			)
+			+ geom_point(color = "lightblue", size = 3.5)
+			+ coord_flip()
+			+ labs(x = NULL, y = NULL)
+			+ theme_bw()
+	)
+	year_est_plots[[i]] <- year_est_plot
+}
+
+plot_grid(year_est_plots[[1]]
+	, year_est_plots[[2]]
+	, year_est_plots[[3]]
+	, nrow = 3
+	, scale = c(1, 1, 1)
+)
 ```
 
 ## HH-specific estimates
 
 ```{r}
-plot(rstanmodel, regex_pars = "^b\\[y[1-3]\\|\\(Intercept\\) hhid:")
+# plot(rstanmodel, regex_pars = "^b\\[y[1-3]\\|\\(Intercept\\) hhid:")
 ```
 
 ## Covariance and Sigma
