@@ -69,6 +69,11 @@ simulatePoisson.Rout: simulatePoisson.R
 ## Just trying to include Cov in the simulations
 simulateMvariate.Rout: simulateMvariate.R
 
+## Fit rstanarm model to simulateMvariate.R data
+rstanarmModelbinwash.Rout: rstanarmModelbinwash.R
+simulations_analysis_writeup_wash.html: simulations_analysis_writeup_wash.rmd
+
+rstanarmModelbin.Rout: rstanarmModelbin.R
 # Fit simple GLM to recapture beta 
 simpleGlm.Rout: simpleGlm.R
 

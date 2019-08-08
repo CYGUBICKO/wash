@@ -37,8 +37,8 @@ library(broom)
 theme_set(theme_bw() +
 	theme(panel.spacing=grid::unit(0,"lines")))
 
-load("simulateHierarchicalmvn.rda")
-load("rstanarmModelbin.rda")
+load("simulateMvariate.rda")
+load("rstanarmModelbinwash.rda")
 ```
 
 # Data

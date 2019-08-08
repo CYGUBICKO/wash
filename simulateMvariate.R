@@ -4,57 +4,100 @@
 #### ---- By: Steve and Jonathan ----
 #### ---- Date: 2019 Mar 05 (Tue) ----
 
-library(MASS)
+library(mvtnorm)
 library(data.table)
 library(dplyr)
 options(dplyr.width = Inf)
-
+library(purrr)
 library(tidyr)
 library(tibble)
-library(ggplot2)
-
 
 load("globalFunctions.rda")
 load("analysisdata.rda")
 
 set.seed(7777)
 
-theme_set(theme_bw() +
-            theme(panel.spacing=grid::unit(0,"lines")))
-
 # Simulate multivariate response.
 
-nsims <- 1 # Number of simulations to run
-sample_prop <- 0.08 # Prop of sample per hh
-year <- 2013
+nsims <- 1	# Number of simulations to run
+
+minHH <- 4	# Minimum number of interviews per HH before sampling. This is <=14
+nHH <- 1000	# Number of HH (primary units) per year
+
+nyears <- 14	# Number of years. This is <=14
 
 # Predictor variable to simulate
 predictors <- "wealthindex"
 
+# Temporary data to sample from
+temp_df <- (working_df
+	%>% mutate_at(predictors, scale)
+	%>% filter(!is.nan(wealthindex))
+	%>% group_by(hhid_anon)
+	%>% filter(n()>=minHH)
+	%>% select(hhid_anon, intvwyear, predictors)
+	%>% setnames(c("intvwyear", "hhid_anon"), c("years", "hhid"))
+	%>% droplevels()
+	%>% data.frame()
+)
+
+# Sample HHIDs from the data
+hhids_sampled <- (temp_df
+	%>% pull(hhid)
+	%>% unique()
+	%>% sample(nHH)
+)
+
+# Filter the sampled HHIDs from the temp dataset
+temp_df <- (temp_df
+	%>% filter(hhid %in% hhids_sampled)
+	%>% group_by(hhid)
+	%>% data.frame()
+)
+
+# Sample years from the data
+years_sampled <- (temp_df
+	%>% pull(years)
+	%>% unique()
+	%>% sample(nyears)
+)
+years_sampled
+# Filter the sampled HHIDs from the temp dataset
+temp_df <- (temp_df
+	%>% filter(years %in% years_sampled)
+	%>% group_by(hhid, years)
+	%>% droplevels()
+	%>% data.frame()
+	%>% mutate(hhid = as.numeric(hhid))
+)
+temp_df
+
+N <- nrow(temp_df)
+
 # Beta values
-service1_int <- 0.2
-service1_wealth <- 0.3 
-service2_int <- 0.3
-service2_wealth <- 0.8
-service3_int <- 0.4
-service3_wealth <- 0.5
+y1_beta0 <- 0.3
+y1_beta1 <- 0.4 
+y2_beta0 <- 0.3
+y2_beta1 <- 0.8
+y3_beta0 <- 0.4
+y3_beta1 <- 0.5
 
 # Correlation matrix
-cor_s1s2 <- 0.20
-cor_s1s3 <- 0.30
-cor_s2s3 <- 0.50
+cor_y1y2 <- 0.20
+cor_y1y3 <- 0.30
+cor_y2y3 <- 0.50
 corMat <- matrix(
-	c(1, cor_s1s2, cor_s1s3
-		, cor_s1s2, 1, cor_s2s3
-		, cor_s1s3, cor_s2s3, 1
+	c(1, cor_y1y2, cor_y1y3
+		, cor_y1y2, 1, cor_y2y3
+		, cor_y1y3, cor_y2y3, 1
 	), 3, 3
 )
 
 # Sd
-service1_sd <- 0.6
-service2_sd <- 0.5
-service3_sd <- 0.7
-sdVec <- c(service1_sd, service2_sd, service3_sd)
+y1_sd <- 0.5
+y2_sd <- 0.3
+y3_sd <- 0.7
+sdVec <- c(y1_sd, y2_sd, y3_sd)
 varMat <- sdVec %*% t(sdVec)
 varMat
 corMat
@@ -62,82 +105,64 @@ corMat
 covMat <- varMat * corMat
 covMat
 
-# Confounder service
-serviceU_1 <- 0
-serviceU_2 <- 0
-serviceU_3 <- 0
-
-# Subset data to sumulate
-temp_df <- (working_df
-	%>% group_by(intvwyear, hhid_anon)
-	%>% filter(intvwyear %in% year & runif(n())<=sample_prop & !is.nan(wealthindex))
-	%>% ungroup()
-	%>% select(hhid_anon, predictors)
-	%>% mutate_at(predictors, scale)
-	%>% droplevels()
-)
-people <- nrow(temp_df)
-
-# Sumulate Betas from mvnorm
-betas <- mvrnorm(n = people
-	, mu = rep(c(service1_wealth, service2_wealth, service3_wealth), each = 1)
-	, Sigma = covMat
-	, empirical = TRUE
-)
-print(var(betas))
-# Predictions (XB)
-sim_df <- (temp_df
-	%>% group_by(hhid_anon)
-	%>% mutate(U1 = serviceU_1*rnorm(n = 1)
-		, U2 = serviceU_2*rnorm(n = 1)
-		, U3 = serviceU_3*rnorm(n = 1)
-	)
-	%>% ungroup()
-	%>% mutate(pred1 = service1_int + betas[,1]*wealthindex + U1
-		, pred2 = service2_int + betas[,2]*wealthindex + U2
-		, pred3 = service3_int + betas[,3]*wealthindex + U3
-	)
-	%>% data.frame()
-)
-
+# Generate dataset
 sim_dflist <- list()
 for (i in 1:nsims){
-	dat <- (sim_df
-		%>% mutate(
-			service1 = rbinom(people, 1, plogis(pred1))
-			, service2 = rbinom(people, 1, plogis(pred2))
-			, service3 = rbinom(people, 1, plogis(pred3))
+	
+	# Simulate B0 for each year and then merge to HH data. Different HH has same B0 for same year
+	betas0 <- (MASS::mvrnorm(nyears
+			, mu = c(y1_beta0, y2_beta0, y3_beta0)
+			, Sigma = covMat
+			, empirical = TRUE
+		)
+   	%>% data.frame()
+		%>% mutate(years = years_sampled)
+		%>% right_join(temp_df)
+		%>% select(c("X1", "X2", "X3"))
+	)
+	
+	# Simulate HH-level random effects (residual error)
+	hhRE <- MASS::mvrnorm(nHH
+		, mu = c(0, 0, 0)
+		, Sigma = covMat
+		, empirical = TRUE
+	)
+	hhRE <- hhRE[temp_df$hhid, ]
+	
+	dat <- (temp_df
+		%>% mutate(y1 = betas0[,1] + y1_beta1*wealthindex + hhRE[,1]
+			, y2 = betas0[,2] + y2_beta1*wealthindex + hhRE[,2]
+			, y3 = betas0[,3] + y3_beta1*wealthindex + hhRE[,3]
+			, y1bin = rbinom(N, 1, plogis(y1))
+			, y2bin = rbinom(N, 1, plogis(y2))
+			, y3bin = rbinom(N, 1, plogis(y3))
 		)
 	)
 	sim_dflist[[i]] <- dat
 }
 
-print(people)
-print(head(sim_dflist[[1]]))
+print((sim_dflist[[1]]))
 
 # Extract beta values assigned in the simulation
-betas <- sapply(grep("service[1-9]|cor_s", ls(), value = TRUE), get)
+betas <- sapply(grep("y[1-9]|cor_y", ls(), value = TRUE), get)
 #betas <- betas[!names(betas) %in% grep("_sd", names(betas), value = TRUE)]
 betas_df <- (data.frame(betas) 
 	%>% rownames_to_column("coef")
 	%>% mutate(n = extract_numeric(coef)
-		, coef = ifelse(grepl("_int$", coef)
-			, paste0("serviceservice", n)
-				, ifelse(grepl("_wealth", coef) 
-					, paste0("wealthindex:serviceservice", n)
+		, coef = ifelse(grepl("_0$", coef)
+			, paste0("y", n)
+				, ifelse(grepl("_beta", coef) 
+					, paste0("wealthindex:y", n)
 				, coef
 			)
 		)
 	)
 )
-plot(1:10)
+
 print(betas_df)
 
 save(file = "simulateMvariate.rda"
-	, sim_df
 	, sim_dflist
 	, betas_df
-	, predictors
 	, betas
 )
-
