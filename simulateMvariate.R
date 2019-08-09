@@ -21,8 +21,8 @@ set.seed(7777)
 
 nsims <- 1	# Number of simulations to run
 
-minHH <- 5	# Minimum number of interviews per HH before sampling. This is <=14
-nHH <- 1200	# Number of HH (primary units) per year
+minHH <- 3	# Minimum number of interviews per HH before sampling. This is <=14
+nHH <- 1500	# Number of HH (primary units) per year
 
 nyears <- 14	# Number of years. This is <=14
 
