@@ -1,4 +1,16 @@
 
+2019 Aug 29 (Thu)
+=================
+
+Make sure axis labels are readable (particularly if there is a pattern there)
+
+For S3.5–3.6, compare random effects with secret (but knowable) simulation values. Since the link may be complicated, start with scatter plots:
+* simulation value on the x axis and model inference on the y axis
+
+Make a plot for 3.7 as well.
+
+Add a few more words, in general, for these things. Especially if you are submitting a report. Your goal is that a busy, old, confused person can quickly figure out what your main points are before the meeting ☺
+
 2019 Jul 18 (Thu)
 =================
 
