@@ -171,6 +171,7 @@ simulations_writeup.html: simulations_writeup.rmd
 ## simulations_writeup.html.pages: simulations_writeup.rmd
 
 ## Simulations analyis
+extract_summaries.Rout: extract_summaries.R
 simulations_analysis_writeup.html: simulations_analysis_writeup.rmd
 simulations_plots_temp.Rout: simulations_plots_temp.R
 

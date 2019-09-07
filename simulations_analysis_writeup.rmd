@@ -37,7 +37,8 @@ library(broom)
 theme_set(theme_bw() +
 	theme(panel.spacing=grid::unit(0,"lines")))
 
-load("simulateHierarchicalmvn.rda")
+#load("simulateHierarchicalmvn.rda")
+load("extract_summaries.rda")
 load("rstanarmModelbin.rda")
 ```
 
@@ -46,15 +47,10 @@ load("rstanarmModelbin.rda")
 The data is simulated as per the writeup [here](https://cygubicko.github.io/wash/simulations_writeup.html), except that $\beta_k$, $k = 1,2,3$ are fixed. 
 
 * Jointly simulated $\epsilon_{ik}$ with $\mu_k = \mathbf{0}$ and covariance $\mathbf{\Sigma}$
-* It has `r length(unique(sim_dflist[[1]]$hhid))` households per year repeatedly collected for `r length(unique(sim_dflist[[1]]$years))` years.
+* It has `r nhouseholds` households per year repeatedly collected for `r nyears` years.
 
 
 ```{r}
-sims_df <- (sim_dflist[[1]]
-	%>% filter(hhid %in% sample(hhid, 5))
-	%>% mutate_at(c("y1", "y2", "y3", "wealthindex"), function(y){round(y, 3)})
-	%>% datatable(caption = "Simulated dataset", rownames = FALSE)
-)
 sims_df
 ```
 
