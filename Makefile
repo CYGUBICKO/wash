@@ -171,9 +171,16 @@ simulations_writeup.html: simulations_writeup.rmd
 ## simulations_writeup.html.pages: simulations_writeup.rmd
 
 ## Simulations analyis
+summary_plot_data.Rout: summary_plot_data.R 
 extract_summaries.Rout: extract_summaries.R
 simulations_analysis_writeup.html: simulations_analysis_writeup.rmd
 simulations_plots_temp.Rout: simulations_plots_temp.R
+
+## Run and push
+run_push:
+	make simulations_analysis_writeup.html
+	make sync
+	cd ~/grive && grive
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
