@@ -7,9 +7,8 @@ current: target
 
 ##################################################################
 
-## Defs
-
-# stuff
+## Kind of deprecated now ☺
+ms = makestuff
 
 Sources += Makefile notes.md
 
@@ -196,10 +195,9 @@ makestuff/Makefile:
 	ls $@
 
 -include makestuff/os.mk
--include makestuff/git.mk
 -include makestuff/visual.mk
 -include makestuff/projdir.mk
--include $(ms)/texdeps.mk
--include $(ms)/pandoc.mk
--include $(ms)/stepR.mk
--include $(ms)/git.mk
+-include makestuff/texdeps.mk
+-include makestuff/pandoc.mk
+-include makestuff/stepR.mk
+-include makestuff/git.mk
