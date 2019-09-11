@@ -25,9 +25,6 @@ Ignore += data docs temp_files
 
 Sources += $(wildcard *.R *.rmd *.tex *.sage)
 
-## Test the saving
-example.Rout: example.R
-
 # Define all important R-functions in one file
 globalFunctions.Rout: globalFunctions.R
 
