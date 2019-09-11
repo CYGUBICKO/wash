@@ -25,6 +25,9 @@ Ignore += data docs temp_files
 
 Sources += $(wildcard *.R *.rmd *.tex *.sage)
 
+## Test the saving
+example.Rout: example.R
+
 # Define all important R-functions in one file
 globalFunctions.Rout: globalFunctions.R
 
@@ -174,9 +177,11 @@ mvnSim.Rout: mvnSim.R
 
 ######################################################################
 
+## Why does Steve need so many? Should some be in stepR?
 Ignore += *.rda
 Ignore += *.Rhistory
 Ignore += *.pdf *.html *.csv *.vrb *.png *.Rexit
+
 sub += hh autopsy data docs temp_files 
 Ignore += $(sub)
 
@@ -199,5 +204,6 @@ makestuff/Makefile:
 -include makestuff/projdir.mk
 -include makestuff/texdeps.mk
 -include makestuff/pandoc.mk
+## makestuff/stepR.md
 -include makestuff/stepR.mk
 -include makestuff/git.mk
