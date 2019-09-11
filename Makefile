@@ -13,21 +13,9 @@ current: target
 
 Sources += Makefile notes.md
 
-msrepo = https://github.com/dushoff
-ms = makestuff
--include $(ms)/os.mk
-
 ## Used by Steve to link data to right place
 Ignore += local.mk
 -include local.mk
-
-# -include $(ms)/perl.def
-
-Ignore += $(ms)
-## Sources += $(ms)
-Makefile: $(ms)/Makefile
-$(ms)/Makefile:
-	git clone $(msrepo)/$(ms)
 
 ######################################################################
 
@@ -200,8 +188,18 @@ clean:
 
 ### Makestuff
 
+Ignore += makestuff
+msrepo = https://github.com/dushoff
+Makefile: makestuff/Makefile
+makestuff/Makefile:
+	git clone $(msrepo)/makestuff
+	ls $@
+
+-include makestuff/os.mk
+-include makestuff/git.mk
+-include makestuff/visual.mk
+-include makestuff/projdir.mk
 -include $(ms)/texdeps.mk
 -include $(ms)/pandoc.mk
--include $(ms)/git.mk
--include $(ms)/visual.mk
 -include $(ms)/stepR.mk
+-include $(ms)/git.mk
