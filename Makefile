@@ -165,7 +165,7 @@ simulations_plots_temp.Rout: simulations_plots_temp.R
 
 ## Run and push
 run_push:
-	make simulations_analysis_writeup.html.go
+	make simulations_analysis_writeup.html.pages
 	make sync
 	cd ~/grive && grive
 
