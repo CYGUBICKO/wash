@@ -8,7 +8,11 @@ library(data.table)
 library(tibble)
 library(tidyr)
 library(dplyr)
+
 library(ggplot2)
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+
 library(rstanarm)
 library(bayesplot)
 library(broom)
@@ -251,6 +255,7 @@ year_est_plots <- list()
 for (i in 1:length(patterns)){
 	year_est_plot <- (plot_df
 		%>% filter(grepl(patterns[i], parameter) & grepl("years", parameter))
+		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
 		%>% ggplot(aes(x = reorder(parameter, m), y = m))
 			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
 			+ geom_pointrange(aes(ymin = l
@@ -300,6 +305,7 @@ hhid_est_plots <- list()
 for (i in 1:length(patterns)){
 	hhid_est_plot <- (plot_df
 		%>% filter(grepl(patterns[i], parameter) & grepl("hhid", parameter))
+		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
 		%>% sample_n(nhhid)
 		%>% ggplot(aes(x = reorder(parameter, m), y = m))
 			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
@@ -340,9 +346,9 @@ hhid_est_plots[[3]]
 #datatable(print(summaryTwoLevelModelVar, digits = 2))
 
 true_cor_df <- (betas_df
-	%>% filter(grepl("cor_|_sd", coef))
+	%>% filter(grepl("cor_", coef))
 	%>% mutate(Parameter = gsub("years", "hhid", Parameter))
-	%>% rbind(., filter(betas_df, grepl("cor_|_sd", coef)))
+	%>% rbind(., filter(betas_df, grepl("cor_", coef)))
 	%>% select(c("Parameter", "Value"))
 	%>% setnames(names(.), c("term", "true_value"))
 )
@@ -350,6 +356,7 @@ cor_tabs <- (tidy(rstanmodel, parameters = "hierarchical")
 	%>% right_join(true_cor_df)
 	%>% select(c("term", "group", "true_value", "estimate"))
 	%>% mutate(diff = round(abs(estimate - true_value), 2))
+	%>% mutate(term = gsub("\\|\\(Intercept)", "", term))
 	%>% datatable(options = list(pageLength = 20), rownames = FALSE)
 	%>% formatRound(columns=c("estimate"), digits = 4)
 	%>% formatStyle("diff"
