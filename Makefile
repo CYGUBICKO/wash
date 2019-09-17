@@ -166,8 +166,9 @@ simulations_plots_temp.Rout: simulations_plots_temp.R
 ## Run and push
 run_push:
 	make simulations_analysis_writeup.html.pages
+	cd pages && git push
 	make sync
-	cd ~/grive && grive
+#	cd ~/grive && grive
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
