@@ -16,7 +16,7 @@ set.seed(7777)
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-nHH <- 10000		# Number of HH (primary units) per year
+nHH <- 1000		# Number of HH (primary units) per year
 
 nyrs <- 30	# Number of years to simulate
 yrs <- 2000 + c(1:nyrs) # Years to simulate
@@ -28,7 +28,7 @@ temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
 		, wealthindex = rnorm(n = N)
 	)
 	%>% group_by(hhid)
-	%>% mutate(wealthindex = mean(wealthindex)) # Average hh wealth index
+#	%>% mutate(wealthindex = mean(wealthindex)) # Average hh wealth index
 	%>% ungroup()
 )
 print(as.data.frame(temp_df))
@@ -120,9 +120,22 @@ betas_df <- (data.frame(betas)
 
 print(betas_df)
 
+# Create a dataframe of covariance matrix
+covmat_df <- (
+	data.frame(coef = c("y1y1", "y2y2", "y3y3", "y2y1", "y3y1", "y3y2")
+		, values = c(diag(covMat), covMat[lower.tri(covMat)])
+	)
+	%>% mutate(n = extract_numeric(coef)
+		, coef_clean = paste0("Sigma[years:y", substr(n, 1, 1), ",y", substr(n, 2, 2), "]")
+	) 
+)
+
 save(file = "simulateHierarchicalmvn.rda"
 	, sim_dflist
 	, betas_df
+	, covmat_df
 	, betas
+	, corMat
+	, covMat
 )
 

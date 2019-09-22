@@ -30,7 +30,7 @@ library(dplyr)
 theme_set(theme_bw() +
 	theme(panel.spacing=grid::unit(0,"lines")))
 
-load("additional_summaries.RData")
+load("additional_summaries.rda")
 ```
 
 # Data exploration
@@ -47,6 +47,7 @@ In most slum dwelllings, the services are at times not available throught the ye
 The dataset does not contain individual ID hence it is not easy to figure out whether HH members with different services are the same or different. *Might reach out to Damazo if we can get the individual IDs or dataset with the IDs*
 
 ```{r}
+
 watersource_tab <- (watersource_tab$count_df
 	%>% arrange(hhid_anon)
 	%>% group_by(.dots = c("hhid_anon"))

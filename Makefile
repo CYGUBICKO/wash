@@ -155,7 +155,7 @@ additional_summaries.Rout: additional_summaries.R
 simulations_writeup.html: simulations_writeup.rmd
 
 ## https://cygubicko.github.io/wash/simulations_writeup.html
-## simulations_writeup.html.pages: simulations_writeup.rmd
+simulations_writeup.html.pages: simulations_writeup.rmd
 
 ## Simulations analyis
 summary_plot_data.Rout: summary_plot_data.R 
