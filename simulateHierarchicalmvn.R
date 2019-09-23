@@ -16,7 +16,7 @@ set.seed(7777)
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-nHH <- 1000		# Number of HH (primary units) per year
+nHH <- 3000		# Number of HH (primary units) per year
 
 nyrs <- 30	# Number of years to simulate
 yrs <- 2000 + c(1:nyrs) # Years to simulate

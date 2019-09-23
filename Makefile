@@ -165,11 +165,12 @@ simulations_plots_temp.Rout: simulations_plots_temp.R
 
 ## Data lunch presentation
 ## https://cygubicko.github.io/wash/datalunch_wash_presentation.pdf
-datalunch_wash_presentation.pdf.pages: datalunch_wash_presentation.rmd
+datalunch_wash_presentation.pdf: datalunch_wash_presentation.rmd
 
 ## Run and push
 run_push:
 	make simulations_analysis_writeup.html.pages
+	make datalunch_wash_presentation.pdf.pages
 	cd pages && git push
 	make sync
 #	cd ~/grive && grive
