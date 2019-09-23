@@ -10,7 +10,7 @@ current: target
 ## Kind of deprecated now ☺
 ms = makestuff
 
-Sources += Makefile notes.md
+Sources += Makefile notes.md rmd.mk
 
 ## Used by Steve to link data to right place
 Ignore += local.mk
@@ -163,6 +163,9 @@ extract_summaries.Rout: extract_summaries.R
 simulations_analysis_writeup.html: simulations_analysis_writeup.rmd
 simulations_plots_temp.Rout: simulations_plots_temp.R
 
+## Data lunch presentation
+datalunch_wash_presentation.pdf.pages: datalunch_wash_presentation.rmd
+
 ## Run and push
 run_push:
 	make simulations_analysis_writeup.html.pages
@@ -197,6 +200,7 @@ makestuff/Makefile:
 	git clone $(msrepo)/makestuff
 	ls $@
 
+include rmd.mk
 -include makestuff/os.mk
 -include makestuff/visual.mk
 -include makestuff/projdir.mk
