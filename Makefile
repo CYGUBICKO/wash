@@ -164,6 +164,7 @@ simulations_analysis_writeup.html: simulations_analysis_writeup.rmd
 simulations_plots_temp.Rout: simulations_plots_temp.R
 
 ## Data lunch presentation
+## https://cygubicko.github.io/wash/datalunch_wash_presentation.pdf
 datalunch_wash_presentation.pdf.pages: datalunch_wash_presentation.rmd
 
 ## Run and push
