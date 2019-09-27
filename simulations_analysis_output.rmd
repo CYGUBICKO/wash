@@ -4,7 +4,7 @@ author: "Steve and Jonathan"
 date: " `r as.Date(Sys.time())` "
 output:
   slidy_presentation:
-    font_adjustment: +5
+    font_adjustment: +3
 ---
 
 
