@@ -21,6 +21,7 @@ library(broom)
 load("simulateHierarchicalmvn.rda")
 load("summary_plot_data.rda")
 
+
 ##### ---- Extract some key summaries ----
 nhouseholds <- length(unique(sim_dflist[[1]]$hhid))
 nyears <- length(unique(sim_dflist[[1]]$years))
@@ -56,6 +57,51 @@ fixed_effects <- (summary(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|we
 fixed_effects
 
 ## Intercept and slope
+
+
+
+#----------------------------------------------------------------------
+## This stupid but doing it to avoid waiting for 3 days. Will return this in case I have to run simulateHierarchicalmvn.Rout
+
+# Simulation parameters
+nsims <- 1		# Number of simulations to run
+nHH <- 3000		# Number of HH (primary units) per year
+
+nyrs <- 30	# Number of years to simulate
+yrs <- 2000 + c(1:nyrs) # Years to simulate
+N <- nyrs * nHH
+
+set.seed(7777)
+# Generate dataset template
+temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
+		, years = rep(yrs, nHH)
+		, wealthindex = rnorm(n = N)
+	)
+	%>% group_by(hhid)
+#	%>% mutate(wealthindex = mean(wealthindex)) # Average hh wealth index
+	%>% ungroup()
+)
+
+# Beta values
+y1_beta0 <- 0.3
+y2_beta0 <- 0.3
+y3_beta0 <- 0.4
+
+betas0_df <- (MASS::mvrnorm(nyrs
+		, mu = c(y1_beta0, y2_beta0, y3_beta0)
+		, Sigma = covMat
+		, empirical = TRUE
+	)
+	%>% data.frame()
+	%>% mutate(years = yrs)
+	%>% right_join(temp_df)
+	%>% select(c("years", "X1", "X2", "X3"))
+	%>% distinct()
+	%>% setnames(c("X1", "X2", "X3"), c("y1", "y2", "y3"))
+	%>% mutate_at("years", as.factor)
+)
+
+#----------------------------------------------------------------------
 
 #plot(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
 
@@ -220,7 +266,7 @@ for (i in 1:length(patterns)){
 		%>% filter(grepl(patterns[i], parameter) & grepl("years", parameter))
 #		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
 		%>% mutate(parameter = gsub("b\\[y[1-3]\\|\\(Intercept\\) years:|\\]", "", parameter))
-		%>% ggplot(aes(x = reorder(parameter, m), y = m))
+		%>% ggplot(aes(x = as.factor(reorder(parameter, m)), y = m))
 			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
 			+ geom_pointrange(aes(ymin = l
 				, ymax = h
@@ -240,6 +286,9 @@ for (i in 1:length(patterns)){
 				, size = 1, color = "deepskyblue4"
 			)
 			+ geom_point(color = "lightblue", size = 3.5)
+			+ geom_point(data = betas0_df
+				, aes_string(x = "years", y = gsub(".*\\[", "", patterns[i])), colour = "red"
+			)
 			+ coord_flip()
 			+ labs(x = "Years", y = "b (Intercept)")
 			+ ggtitle(paste0("Service", " ", gsub(".*\\[", "", patterns[i])))
