@@ -3,8 +3,7 @@ title: 'Analysis of simulated data documentation'
 author: "Steve and Jonathan"
 date: " `r as.Date(Sys.time())` "
 output:
-  slidy_presentation:
-    font_adjustment: +3
+  slidy_presentation
 ---
 
 
