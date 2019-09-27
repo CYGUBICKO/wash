@@ -71,7 +71,8 @@ load("additional_summaries.rda")
 
 ## Assumptions
 
-* Random effects of year (not correlated across time)
+<!-- * Random effects of year (not correlated across time) -->
+
 * Each household has its own year effect on the intercepts (random-intercept)
 	* These are correlated
 * There is a single measured covariate (corresponding to wealth)
@@ -80,27 +81,25 @@ load("additional_summaries.rda")
 
 # Model
 
-\[y_{hts} = \beta_{0ts} + \beta_{xts}x_{ht} + \epsilon_{hs}\]
+\[y_{hts} = \beta_{0ts} + \beta_{xs}x_{ht} + \epsilon_{hs}\]
 
-> - $y_{hts}$ is the simulated value of the ith household in the jth year of the kth service
->    - $j$ goes from 1 to the number of households 
+> - $y_{hts}$ is the simulated value of household `h` in year `t` of service `s`
+>    - $h$ goes from 1 to the number of households 
 >    - $t = 1,2, \cdots, 30$ years
 >    - $s = 1, 2, 3$ indexes the services
 
 > - $\beta_{0ts}$ is the effect of year and service type on the response 
 >    - these are correlated
->    - $\beta_{0ts} \sim MVN(\mu_{0s}, \Sigma_{0s})$; $t = 1, 2, 3$
+>    - $\beta_{0ts} \sim MVN(\mu_{0}, \Sigma_{0})$
 
-# Simulations (Contd...)
 
-> - $\beta_{xts}$ is the random-slope effect of the jth year of the kth service on the response
->    - $\beta_{xts} \sim MVN(\mu_{1k}, \Sigma_{tk})$
+> - $\beta_{xs}$ is the (fixed) effect of $x$ on service `s`
+>    - $\beta_{xs} \sim (\beta_{1s}); s = 1, \cdots, 3$
 > - $\epsilon_{hs}$ is the household-level random effect
->    - $\epsilon_{hs} \sim MVN(\mathbf{0}, \Sigma_{s})$
-> - $x_j$ is the ith predictor value
+>    - $\epsilon_{hs} \sim MVN(\mathbf{0}, \Sigma)$
 
-> - Observed value is 1 with probability $\mathrm{plogis}(y_{hts})$
+> - Observed values (\{0, 1}) are drawn from binomial distribution with probability $\mathrm{plogis}(y_{hts})$
 
 # Results
 
-> - The results are [here](https://cygubicko.github.io/wash/simulations_analysis_writeup.html)
+> - The results are [here](https://cygubicko.github.io/wash/simulations_analysis_output.html)

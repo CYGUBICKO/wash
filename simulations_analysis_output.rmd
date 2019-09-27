@@ -1,0 +1,178 @@
+---
+title: 'Analysis of simulated data documentation'
+author: "Steve and Jonathan"
+date: " `r as.Date(Sys.time())` "
+output:
+  slidy_presentation:
+    font_adjustment: +5
+---
+
+
+
+
+```{r setup, include=FALSE, cache=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE
+	, warning = FALSE
+	, message = FALSE
+#	, fig.width = 10
+#	, fig.height = 10
+#	, results = "asis"
+)
+#options(width = 16)
+
+library(DT)
+library(data.table)
+library(ggplot2)
+library(cowplot)
+library(tibble)
+library(tidyr)
+library(dplyr)
+library(rstanarm)
+library(bayesplot)
+library(broom)
+
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+
+#load("simulateHierarchicalmvn.rda")
+load("extract_summaries.rda")
+#load("rstanarmModelbin.rda")
+```
+
+# Data
+
+* It has `r nhouseholds` households per year repeatedly collected for `r nyears` years. Take a look [here](https://cygubicko.github.io/wash/simulations_writeup.html)
+
+
+# Data contd. {.smaller}
+
+```{r}
+sims_df
+```
+
+# Analysis
+
+>    - Bayesian multivariate generalized linear models with correlated group-specific terms via **STAN** to model the binary outcomes
+
+>    - Random intercept model: Assume an intercept that is different for each year
+
+
+# Fitted model contd.
+
+\[y_{hts} = \beta_{0ts} + \beta_{xs}x_{ht} + \epsilon_{hs}\]
+
+		model <- stan_mvmer(
+			formula = list(
+				y1bin ~ wealthindex + (1 | years) + (1 | hhid)
+				, y2bin ~ wealthindex + (1 | years) + (1 | hhid)
+				, y3bin ~ wealthindex + (1 | years) + (1 | hhid)
+			)
+			, data = sim_dflist[[1]]
+			, family = list(binomial, binomial, binomial)
+			, prior_intercept = normal(0, 1, autoscale = FALSE)
+			, prior = normal(0, 1, autoscale = FALSE)
+			, prior_aux = cauchy(0, 5, autoscale = FALSE)
+			, prior_covariance = lkj(1, autoscale = FALSE)
+			, ...
+		)
+
+<!-- # Notes
+
+Here we discuss some of the convergence statistics:
+
+- **Rhat**: Also known as the potential scale reduction factor. `Rhat` compares the variation between the chains to the variation within the chains. It is approximately `1` if all the chains behave relatively the same and converge to the same region, i.e., the variance between chains will approximately equal the variance within the chains.
+- **Effective Sample Size (n\_eff)**: Chains exhibit some degree of autocorrelation due to non-independent MCMC draws. The lower the autocorrelation, the more the independent pieces of information we have about the posterior. The `n_eff` is the approximate number of independent draws having equal estimation accuracy as the sample of correlated draws. `n_eff` larger than `1000` is generally considered sufficient.
+- **Monte Carlo Standard Error (MCSE)**: MCSE is calculated by dividing the posterior standard deviation by the square root of the ESS and it quantifies the amount of error introduced by the MCMC in approximating the posterior. A low MCSE, in comparison to the posterior standard deviation, will yield a desired higher number of `n_eff`, and vice versa.
+- **Posterior Predicitive Check (PPC)**: Provides a way to assess whether the fitted model adequately fits the data. It involves using the fitted model to simulate the data  and then comparing the simulated data to the observed data which an aim of replicating the key features of the observed data.
+- **Posterior Intervals (PI)**: Also know as posterior uncertainity intervals or credible intervals provide a description of model parameters in probabilistic terms. Given the observed data, the priors and the model (data generating process), we can conclude that the probability that a parameter value is within some CI is some value.
+-->
+
+# Results
+
+# Summary
+
+>    - A good convergence (as per `n_eff`) for the slope parameters 
+>    - Intercept parameters do not show a good convergence estimates but closely estimates our `true` parameter values
+>    - Good estimates for both year and household specific variances and correlations
+
+# Fixed effects
+
+>    - The `n_eff` for some parameters (`y1|(intercep)` lower than $1000$. 
+>    - However, `Rhat < 1.1` (though not a guanrantee for convergence but generally recommended) for all the fixed parameters 
+
+
+# Fixed effects
+
+```{r}
+fixed_effects
+```
+
+# Marginal Posterior Parameter Estimates
+
+
+
+
+<!--The  plotfun="areas" argument plots the posterior distribution of each parameter with the uncertainty intervals shaded as areas below the cuve.
+-->
+
+# Fixed: Intercept and slope
+
+
+```{r, fig.align = 'center'}
+population_est_plot
+```
+
+# Random: Year-specific estimates
+
+
+```{r, fig.align = 'center'}
+year_est_plots[[1]]
+#year_est_plots[[2]]
+#year_est_plots[[3]]
+```
+
+# Year: Variance-covariance estimates
+
+```{r, fig.align = 'center'}
+sigma_est_plot_years
+```
+
+
+# Random: Household-specific estimate
+
+```{r, fig.align = 'center', fig.height = 8}
+hhid_est_plots[[1]]
+#hhid_est_plots[[2]]
+#hhid_est_plots[[3]]
+```
+
+# HH: Variance-covariance estimates
+
+```{r, fig.align = 'center'}
+sigma_est_plot_hhids
+```
+
+# Correlation Estimates
+
+```{r}
+cor_tabs
+```
+
+
+```{r}
+#population_est_plot
+#sigma_est_plot_years
+#sigma_est_plot_hhids
+#betas_dens_plot
+#year_est_plots[[1]]
+#year_est_plots[[2]]
+#year_est_plots[[3]]
+#hhid_est_plots[[1]]
+#hhid_est_plots[[2]]
+#hhid_est_plots[[3]]
+#cor_tabs
+#
+```
+
+
