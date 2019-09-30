@@ -1,0 +1,105 @@
+---
+title: 'Modeling approach(es) for multivariate binary response'
+author: "Steve and Jonathan"
+date: " `r as.Date(Sys.time())` "
+output:
+  beamer_presentation
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(echo = FALSE
+	, warning = FALSE
+	, message = FALSE
+	, fig.width = 10
+	, fig.height = 10
+	, results = "asis")
+options(width = 12)
+
+library(DT)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+
+load("additional_summaries.rda")
+```
+
+# Background
+
+>- Longitudinal (2003 - 2015) NUHDSS covering Korogocho and Viwandani
+
+>- Predictors
+>     - Slum area
+>     - Interview year
+>     - Age
+>     - Gender
+>     - Ethnicity
+>     - Household size
+>     - Wealth index
+>     - Household expenditure
+
+> - Response(s): Three WaSH variables were created as per WHO definition
+>     - Drinking water source
+>     - Toilet facility type
+>     - Garbage disposal method
+
+
+# Problems
+
+- How do we account for the repeated measurements within the households across the years?
+	- Model the WaSH variables separately
+	- Pick one of the WaSH indicator and treat the remaining two as fixed covariates
+
+>- \textcolor{red}{The two approaches are not accounting for the unmeasured variations and correlation among the WaSH variables}
+>- We want explore modeling approaches, but we need to understand what we think is working. 
+>    - \textcolor{blue}{Simulation-based validation}
+
+# Objective
+
+- The aim is to investigate the contribution of demographic, social and economic factors to improved water, sanitation and hygiene (WaSH) among the urban poor.
+
+# Data exploration
+
+- WaSH variables (services) are binary (`0 = unimproved` and `1 = improved`)
+	- Each household was surveyed once per year
+	- For some HH, the services have improved or unimproved for different years
+- Aggregated by `year`, all HH have varying `wealth_index` 
+
+# Simulations 
+
+## Assumptions
+
+<!-- * Random effects of year (not correlated across time) -->
+
+* Each household has its own year effect on the intercepts (random-intercept)
+	* These are correlated
+* There is a single measured covariate (corresponding to wealth)
+
+<!-- * Use average income per household, adjusted by the HH size (total number of people in the HH) as the predictor (any opinion or suggestion on this?). -->
+
+# Model
+
+\[y_{hts} = \beta_{0ts} + \beta_{xs}x_{ht} + \epsilon_{hs}\]
+
+> - $y_{hts}$ is the simulated value of household `h` in year `t` of service `s`
+>    - $h$ goes from 1 to the number of households 
+>    - $t = 1,2, \cdots, 30$ years
+>    - $s = 1, 2, 3$ indexes the services
+
+> - $\beta_{0ts}$ is the effect of year and service type on the response 
+>    - these are correlated
+>    - $\beta_{0ts} \sim MVN(\mu_{0}, \Sigma_{0})$
+
+
+> - $\beta_{xs}$ is the (fixed) effect of $x$ on service `s`
+>    - $\beta_{xs} \sim (\beta_{1s}); s = 1, \cdots, 3$
+> - $\epsilon_{hs}$ is the household-level random effect
+>    - $\epsilon_{hs} \sim MVN(\mathbf{0}, \Sigma)$
+
+> - Observed values (\{0, 1}) are drawn from binomial distribution with probability $\mathrm{plogis}(y_{hts})$
+
+# Results
+
+> - The results are [here](https://cygubicko.github.io/wash/simulations_analysis_output.html)

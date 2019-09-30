@@ -10,7 +10,7 @@ current: target
 ## Kind of deprecated now ☺
 ms = makestuff
 
-Sources += Makefile notes.md
+Sources += Makefile notes.md rmd.mk
 
 ## Used by Steve to link data to right place
 Ignore += local.mk
@@ -155,7 +155,7 @@ additional_summaries.Rout: additional_summaries.R
 simulations_writeup.html: simulations_writeup.rmd
 
 ## https://cygubicko.github.io/wash/simulations_writeup.html
-## simulations_writeup.html.pages: simulations_writeup.rmd
+simulations_writeup.html.pages: simulations_writeup.rmd
 
 ## Simulations analyis
 summary_plot_data.Rout: summary_plot_data.R 
@@ -163,11 +163,19 @@ extract_summaries.Rout: extract_summaries.R
 simulations_analysis_writeup.html: simulations_analysis_writeup.rmd
 simulations_plots_temp.Rout: simulations_plots_temp.R
 
+## Data lunch presentation
+## https://cygubicko.github.io/wash/datalunch_wash_presentation.pdf
+datalunch_wash_presentation.pdf: datalunch_wash_presentation.rmd
+simulations_analysis_output.html: simulations_analysis_output.rmd
+
 ## Run and push
 run_push:
-	make simulations_analysis_writeup.html
+	make simulations_analysis_writeup.html.pages
+	make datalunch_wash_presentation.pdf.pages
+	make simulations_analysis_output.html.pages
+	cd pages && git push
 	make sync
-	cd ~/grive && grive
+#	cd ~/grive && grive
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
@@ -196,6 +204,7 @@ makestuff/Makefile:
 	git clone $(msrepo)/makestuff
 	ls $@
 
+include rmd.mk
 -include makestuff/os.mk
 -include makestuff/visual.mk
 -include makestuff/projdir.mk

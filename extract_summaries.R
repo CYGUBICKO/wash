@@ -8,7 +8,11 @@ library(data.table)
 library(tibble)
 library(tidyr)
 library(dplyr)
+
 library(ggplot2)
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+
 library(rstanarm)
 library(bayesplot)
 library(broom)
@@ -16,6 +20,7 @@ library(broom)
 
 load("simulateHierarchicalmvn.rda")
 load("summary_plot_data.rda")
+
 
 ##### ---- Extract some key summaries ----
 nhouseholds <- length(unique(sim_dflist[[1]]$hhid))
@@ -43,46 +48,6 @@ betas_df <- (betas_df
 )
 
 
-## ----------------------------------------------------------------------
-## 
-# Lazy to rerun the whole code to include covMat in the .rda because it takes days. But should work on this in the next rerun
-
-# Correlation matrix
-cor_y1y2 <- 0.20
-cor_y1y3 <- 0.30
-cor_y2y3 <- 0.50
-corMat <- matrix(
-	c(1, cor_y1y2, cor_y1y3
-		, cor_y1y2, 1, cor_y2y3
-		, cor_y1y3, cor_y2y3, 1
-	), 3, 3
-)
-
-# Sd
-y1_sd <- 0.5
-y2_sd <- 0.3
-y3_sd <- 0.7
-sdVec <- c(y1_sd, y2_sd, y3_sd)
-varMat <- sdVec %*% t(sdVec)
-varMat
-corMat
-# varcov matrix
-covMat <- varMat * corMat
-covMat
-
-## Create cov-varaince dataframe
-covmat_df <- (
-	data.frame(coef = c("y1y1", "y2y2", "y3y3", "y2y1", "y3y1", "y3y2")
-		, values = c(diag(covMat), covMat[lower.tri(covMat)])
-	)
-	%>% mutate(n = extract_numeric(coef)
-		, coef_clean = paste0("Sigma[years:y", substr(n, 1, 1), ",y", substr(n, 2, 2), "]")
-	) 
-)
-
-## ----------------------------------------------------------------------
-
-
 # Fixed effects
 
 fixed_effects <- (summary(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
@@ -92,6 +57,51 @@ fixed_effects <- (summary(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|we
 fixed_effects
 
 ## Intercept and slope
+
+
+
+#----------------------------------------------------------------------
+## This stupid but doing it to avoid waiting for 3 days. Will return this in case I have to run simulateHierarchicalmvn.Rout
+
+# Simulation parameters
+nsims <- 1		# Number of simulations to run
+nHH <- 3000		# Number of HH (primary units) per year
+
+nyrs <- 30	# Number of years to simulate
+yrs <- 2000 + c(1:nyrs) # Years to simulate
+N <- nyrs * nHH
+
+set.seed(7777)
+# Generate dataset template
+temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
+		, years = rep(yrs, nHH)
+		, wealthindex = rnorm(n = N)
+	)
+	%>% group_by(hhid)
+#	%>% mutate(wealthindex = mean(wealthindex)) # Average hh wealth index
+	%>% ungroup()
+)
+
+# Beta values
+y1_beta0 <- 0.3
+y2_beta0 <- 0.3
+y3_beta0 <- 0.4
+
+betas0_df <- (MASS::mvrnorm(nyrs
+		, mu = c(y1_beta0, y2_beta0, y3_beta0)
+		, Sigma = covMat
+		, empirical = TRUE
+	)
+	%>% data.frame()
+	%>% mutate(years = yrs)
+	%>% right_join(temp_df)
+	%>% select(c("years", "X1", "X2", "X3"))
+	%>% distinct()
+	%>% setnames(c("X1", "X2", "X3"), c("y1", "y2", "y3"))
+	%>% mutate_at("years", as.factor)
+)
+
+#----------------------------------------------------------------------
 
 #plot(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
 
@@ -127,6 +137,7 @@ population_est_plot <- (plot_df
 		)
 		+ coord_flip()
 		+ labs(x = NULL, y = NULL)
+		+ theme(text = element_text(size=20))
 )
 population_est_plot
 
@@ -174,6 +185,7 @@ sigma_est_plot_years <- (plot_df
 		)
 		+ coord_flip()
 		+ labs(x = NULL, y = NULL)
+		+ theme(text = element_text(size=20))
 )
 sigma_est_plot_years
 
@@ -219,6 +231,7 @@ sigma_est_plot_hhids <- (plot_df
 		)
 		+ coord_flip()
 		+ labs(x = NULL, y = NULL)
+		+ theme(text = element_text(size=20))
 )
 sigma_est_plot_hhids
 
@@ -251,7 +264,9 @@ year_est_plots <- list()
 for (i in 1:length(patterns)){
 	year_est_plot <- (plot_df
 		%>% filter(grepl(patterns[i], parameter) & grepl("years", parameter))
-		%>% ggplot(aes(x = reorder(parameter, m), y = m))
+#		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
+		%>% mutate(parameter = gsub("b\\[y[1-3]\\|\\(Intercept\\) years:|\\]", "", parameter))
+		%>% ggplot(aes(x = as.factor(reorder(parameter, m)), y = m))
 			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
 			+ geom_pointrange(aes(ymin = l
 				, ymax = h
@@ -271,10 +286,15 @@ for (i in 1:length(patterns)){
 				, size = 1, color = "deepskyblue4"
 			)
 			+ geom_point(color = "lightblue", size = 3.5)
+			+ geom_point(data = betas0_df
+				, aes_string(x = "years", y = gsub(".*\\[", "", patterns[i])), colour = "red"
+			)
 			+ coord_flip()
-			+ labs(x = NULL, y = NULL)
+			+ labs(x = "Years", y = "b (Intercept)")
 			+ ggtitle(paste0("Service", " ", gsub(".*\\[", "", patterns[i])))
-			+ theme(plot.title = element_text(hjust = 0.5))
+			+ theme(plot.title = element_text(hjust = 0.5)
+				, text = element_text(size=15)
+			)
 	)
 	year_est_plots[[i]] <- year_est_plot
 }
@@ -293,13 +313,15 @@ year_est_plots[[3]]
 ## HH-specific estimates
 
 # plot(rstanmodel, regex_pars = "^b\\[y[1-3]\\|\\(Intercept\\) hhid:")
-nhhid <- 100	# Number of hhid to vizualize
+nhhid <- 50	# Number of hhid to vizualize
 patterns <- c("^b\\[y1", "^b\\[y2", "^b\\[y3")
 
 hhid_est_plots <- list()
 for (i in 1:length(patterns)){
 	hhid_est_plot <- (plot_df
 		%>% filter(grepl(patterns[i], parameter) & grepl("hhid", parameter))
+#		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
+		%>% mutate(parameter = gsub("b\\[y[1-3]\\|\\(Intercept\\) hhid:|\\]", "", parameter))
 		%>% sample_n(nhhid)
 		%>% ggplot(aes(x = reorder(parameter, m), y = m))
 			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
@@ -322,9 +344,11 @@ for (i in 1:length(patterns)){
 			)
 			+ geom_point(color = "lightblue", size = 3.5)
 			+ coord_flip()
-			+ labs(x = NULL, y = NULL)
+			+ labs(x = "Households", y = "b (Intercept)")
 			+ ggtitle(paste0("Service", " ", gsub(".*\\[", "", patterns[i])))
-			+ theme(plot.title = element_text(hjust = 0.5))
+			+ theme(plot.title = element_text(hjust = 0.5)
+				, text = element_text(size=15)
+			)
 	)
 	hhid_est_plots[[i]] <- hhid_est_plot
 }
@@ -340,9 +364,9 @@ hhid_est_plots[[3]]
 #datatable(print(summaryTwoLevelModelVar, digits = 2))
 
 true_cor_df <- (betas_df
-	%>% filter(grepl("cor_|_sd", coef))
+	%>% filter(grepl("cor_", coef))
 	%>% mutate(Parameter = gsub("years", "hhid", Parameter))
-	%>% rbind(., filter(betas_df, grepl("cor_|_sd", coef)))
+	%>% rbind(., filter(betas_df, grepl("cor_", coef)))
 	%>% select(c("Parameter", "Value"))
 	%>% setnames(names(.), c("term", "true_value"))
 )
@@ -350,6 +374,7 @@ cor_tabs <- (tidy(rstanmodel, parameters = "hierarchical")
 	%>% right_join(true_cor_df)
 	%>% select(c("term", "group", "true_value", "estimate"))
 	%>% mutate(diff = round(abs(estimate - true_value), 2))
+	%>% mutate(term = gsub("\\|\\(Intercept)", "", term))
 	%>% datatable(options = list(pageLength = 20), rownames = FALSE)
 	%>% formatRound(columns=c("estimate"), digits = 4)
 	%>% formatStyle("diff"

@@ -40,18 +40,18 @@ for (s in 1:nsims){
 			, y3bin ~ wealthindex + (1 | years) + (1 | hhid)
 		)
 		, data = sim_dflist[[1]]
-		, refresh = 0
+		, family = list(binomial, binomial, binomial)
 		, prior_intercept = normal(0, 1, autoscale = FALSE)
 		, prior = normal(0, 1, autoscale = FALSE)
 		, prior_aux = cauchy(0, 5, autoscale = FALSE)
 		, prior_covariance = lkj(1, autoscale = FALSE)
-		, adapt_delta = 0.999
-		, family = list(binomial, binomial, binomial)
 		, chains = 4
-		, cores = parallel::detectCores()
+		, iter = 8000
 		, init = 0
 		, seed = 7777
-		, iter = 4000
+		, adapt_delta = 0.999
+		, refresh = 0
+		, cores = parallel::detectCores()
 	)
 	if (s <= report){
 		rstanmodel_list[[s]] <- model # Model to store
@@ -73,6 +73,9 @@ save(file = "rstanarmModelbin.rda"
 	, rstanmodel_list
 	, rstancoef_df
 	, betas_df
+	, covmat_df
 	, betas
+	, covMat
+	, corMat
 )
 

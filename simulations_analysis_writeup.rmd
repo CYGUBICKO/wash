@@ -72,11 +72,39 @@ In other words, the fitted model was specified as:
 			)
 			, data = sim_dflist[[1]]
 			, family = list(binomial, binomial, binomial)
+			, prior_intercept = normal(0, 1, autoscale = FALSE)
+			, prior = normal(0, 1, autoscale = FALSE)
+			, prior_aux = cauchy(0, 5, autoscale = FALSE)
+			, prior_covariance = lkj(1, autoscale = FALSE)
+			, ...
 		)
+
+## Notes
+
+Here we discuss some of the convergence statistics:
+
+- **Rhat**: Also known as the potential scale reduction factor. `Rhat` compares the variation between the chains to the variation within the chains. It is approximately `1` if all the chains behave relatively the same and converge to the same region, i.e., the variance between chains will approximately equal the variance within the chains.
+- **Effective Sample Size (n\_eff)**: Chains exhibit some degree of autocorrelation due to non-independent MCMC draws. The lower the autocorrelation, the more the independent pieces of information we have about the posterior. The `n_eff` is the approximate number of independent draws having equal estimation accuracy as the sample of correlated draws. `n_eff` larger than `1000` is generally considered sufficient.
+- **Monte Carlo Standard Error (MCSE)**: MCSE is calculated by dividing the posterior standard deviation by the square root of the ESS and it quantifies the amount of error introduced by the MCMC in approximating the posterior. A low MCSE, in comparison to the posterior standard deviation, will yield a desired higher number of `n_eff`, and vice versa.
+- **Posterior Predicitive Check (PPC)**: Provides a way to assess whether the fitted model adequately fits the data. It involves using the fitted model to simulate the data  and then comparing the simulated data to the observed data which an aim of replicating the key features of the observed data.
+- **Posterior Intervals (PI)**: Also know as posterior uncertainity intervals or credible intervals provide a description of model parameters in probabilistic terms. Given the observed data, the priors and the model (data generating process), we can conclude that the probability that a parameter value is within some CI is some value.
 
 # Results
 
+## Summary
+
+- A good convergence (as per `n_eff`) for the slope parameters but these do not closely estimate the `true` values of our parameters
+- Intercept parameters do not show a good convergence estimates but closely estimates our `true` parameter values
+- Good estimates for both year and household specific variances and correlations with a very narrow credible interval for the household level variances
+
 ## Fixed effects
+
+
+Table below summarises the model output for the fixed effect parameters. 
+
+- The `n_eff` for some parameters (`y1|(intercep)` and `y2|(intercept)`) are much lower than the posterior samples. This could be as a result of correlated samples. 
+- However, `Rhat < 1.1` (though not a guanrantee for convergence but generally recommended) for all the fixed parameters 
+
 
 ```{r}
 fixed_effects
@@ -84,27 +112,91 @@ fixed_effects
 
 ## Marginal Posterior Parameter Estimates Plots
 
-Plots point estimates for each parameter along with credibility intervals. In this case we are plotting the $50\%$ uncertainty interval (thick horizontal lines) and the $90\%$ uncertainty interval (thin horizontal lines). In terms of interpretation, the $50\%$ uncertainty interval identifies where $50\%$ of the marginal distribution lies for each parameter. 
+Plots point estimates for each parameter along with credibility intervals. In this case we are plotting the $50\%$ uncertainty interval (thick horizontal lines) and the $90\%$ uncertainty interval (thin horizontal lines). In terms of interpretation, the $50\%$ uncertainty interval identifies where $50\%$ of the marginal distribution lies for each parameter.
+
+
 
 <!--The  plotfun="areas" argument plots the posterior distribution of each parameter with the uncertainty intervals shaded as areas below the cuve.
 -->
 
-## Intercept and slope
+### Intercept and slope
+
+- Generally, parameters which had a good estimate of `true value` had a wider credible intervals (CI) i.e., the intercept parameters.
+- On the other hand, the slope parameters had a narrower CI but did not capture the `true` parameter value well expext for `y2|wealthindex`.
 
 
 ```{r}
 population_est_plot
-sigma_est_plot_years
-sigma_est_plot_hhids
-betas_dens_plot
-year_est_plots[[1]]
-year_est_plots[[2]]
-year_est_plots[[3]]
-hhid_est_plots[[1]]
-hhid_est_plots[[2]]
-hhid_est_plots[[3]]
-cor_tabs
+```
 
+### Year-specific estimates and variance
+
+Here, we present estimates for the service 1 (`y1`) only. However, relatively similar trends are observed in the other remaining services.
+
+- Although variations are observed across the years, no noticeable yearly trend. 
+- The highest `year-intercept` variation is observed in `2019`.
+
+```{r}
+year_est_plots[[1]]
+#year_est_plots[[2]]
+#year_est_plots[[3]]
+```
+
+In general, our model is performing relatively well in estimating the `true` estimates of $\sigma^2$.
+
+- For example: the year-specific intercepts, for `y1`, vary around the mean `y1|(Intercept)` estimate with a variance of `0.306` (95\% `CI = [0.179, 0.525]`).
+
+However, the CI estimates for some of variances are very wide:
+
+- For example: the `year-specific` variance estimate for `y2` intercept `0.55` (95\% `CI = [0.319, 0.926]`)
+
+```{r}
+sigma_est_plot_years
+```
+
+
+### Household-specific estimates and variance
+
+Only `100` randomly sampled households are displayed (and only service 1 (`y1`) result). Generally, the variability among across the households is not very "clear".
+
+
+```{r}
+hhid_est_plots[[1]]
+#hhid_est_plots[[2]]
+#hhid_est_plots[[3]]
+```
+
+The estimates for household-specifiec variance for all the parameters are very close to the `true` values and have very narrow credible intervals. 
+
+```{r}
+sigma_est_plot_hhids
+```
+
+## Correlation Estimates
+
+The table summarises the model correlation estimates.
+
+- The household level correlation estimates are very close to the respective `true` parameter values
+- Though not as close as household level correlation estimates, year level estimates are also good
+
+```{r}
+cor_tabs
+```
+
+
+```{r}
+#population_est_plot
+#sigma_est_plot_years
+#sigma_est_plot_hhids
+#betas_dens_plot
+#year_est_plots[[1]]
+#year_est_plots[[2]]
+#year_est_plots[[3]]
+#hhid_est_plots[[1]]
+#hhid_est_plots[[2]]
+#hhid_est_plots[[3]]
+#cor_tabs
+#
 ```
 
 
