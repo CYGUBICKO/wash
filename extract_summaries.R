@@ -31,6 +31,10 @@ sims_df <- (sim_dflist[[1]]
 	%>% datatable(caption = "Simulated dataset", rownames = FALSE)
 )
 
+betas0_df <- (betas0_dflist[[1]]
+	%>% mutate_at("years", as.factor)
+)
+hhRE_df <- hhRE_dflist[[1]]
 
 # Tidy true betas and sigma
 betas_df <- (betas_df
@@ -58,53 +62,7 @@ fixed_effects
 
 ## Intercept and slope
 
-
-
-#----------------------------------------------------------------------
-## This stupid but doing it to avoid waiting for 3 days. Will return this in case I have to run simulateHierarchicalmvn.Rout
-
-# Simulation parameters
-nsims <- 1		# Number of simulations to run
-nHH <- 3000		# Number of HH (primary units) per year
-
-nyrs <- 30	# Number of years to simulate
-yrs <- 2000 + c(1:nyrs) # Years to simulate
-N <- nyrs * nHH
-
-set.seed(7777)
-# Generate dataset template
-temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
-		, years = rep(yrs, nHH)
-		, wealthindex = rnorm(n = N)
-	)
-	%>% group_by(hhid)
-#	%>% mutate(wealthindex = mean(wealthindex)) # Average hh wealth index
-	%>% ungroup()
-)
-
-# Beta values
-y1_beta0 <- 0.3
-y2_beta0 <- 0.3
-y3_beta0 <- 0.4
-
-betas0_df <- (MASS::mvrnorm(nyrs
-		, mu = c(y1_beta0, y2_beta0, y3_beta0)
-		, Sigma = covMat
-		, empirical = TRUE
-	)
-	%>% data.frame()
-	%>% mutate(years = yrs)
-	%>% right_join(temp_df)
-	%>% select(c("years", "X1", "X2", "X3"))
-	%>% distinct()
-	%>% setnames(c("X1", "X2", "X3"), c("y1", "y2", "y3"))
-	%>% mutate_at("years", as.factor)
-)
-
-#----------------------------------------------------------------------
-
 #plot(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
-
 
 # Population level estimate plot
 
