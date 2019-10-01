@@ -15,11 +15,10 @@ Sources += Makefile notes.md rmd.mk
 ## Used by Steve to link data to right place
 Ignore += local.mk
 -include local.mk
+## ln -fs ~/Dropbox/aphrc/wash/data  ##
 
 ######################################################################
 
-## Loading data and defining some important functions
-## ln -fs ~/Dropbox/aphrc/wash/data  ##
 
 Ignore += data docs temp_files 
 
@@ -29,6 +28,7 @@ Sources += $(wildcard *.R *.rmd *.tex *.sage)
 globalFunctions.Rout: globalFunctions.R
 
 # Read data
+## loadData.rda: loadData.R
 loadData.Rout: data/NUHDSS_Wash.dta loadData.R
 
 # Some cleaning
