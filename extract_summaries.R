@@ -8,6 +8,7 @@ library(data.table)
 library(tibble)
 library(tidyr)
 library(dplyr)
+options(dplyr.width = Inf)
 
 library(ggplot2)
 theme_set(theme_bw() +
@@ -22,6 +23,9 @@ load("simulateHierarchicalmvn.rda")
 load("summary_plot_data.rda")
 
 
+#### ---- Setup for Viz ----
+nhhid <- 30	# Number of hhid to vizualize
+
 ##### ---- Extract some key summaries ----
 nhouseholds <- length(unique(sim_dflist[[1]]$hhid))
 nyears <- length(unique(sim_dflist[[1]]$years))
@@ -30,11 +34,6 @@ sims_df <- (sim_dflist[[1]]
 	%>% mutate_at(c("y1", "y2", "y3", "wealthindex"), function(y){round(y, 3)})
 	%>% datatable(caption = "Simulated dataset", rownames = FALSE)
 )
-
-betas0_df <- (betas0_dflist[[1]]
-	%>% mutate_at("years", as.factor)
-)
-hhRE_df <- hhRE_dflist[[1]]
 
 # Tidy true betas and sigma
 betas_df <- (betas_df
@@ -51,6 +50,20 @@ betas_df <- (betas_df
    )
 )
 
+# Tidy the random intercept estimates
+betas0_df <- (betas0_dflist[[1]]
+	%>% mutate_at("years", as.factor)
+	# I thing these estimates include B0 (so substract to compare)
+	%>% mutate(y1 = y1 - betas[["y1_beta0"]]
+		, y2 = y2 - betas[["y2_beta0"]]
+		, y3 = y3 - betas[["y3_beta0"]]
+	)
+)
+hhRE_df <- (hhRE_dflist[[1]]
+	%>% setnames(c("X1", "X2", "X3"), c("y1", "y2", "y3"))
+	%>% mutate_at("hhid", as.factor)
+	%>% distinct()
+)
 
 # Fixed effects
 
@@ -271,8 +284,11 @@ year_est_plots[[3]]
 ## HH-specific estimates
 
 # plot(rstanmodel, regex_pars = "^b\\[y[1-3]\\|\\(Intercept\\) hhid:")
-nhhid <- 50	# Number of hhid to vizualize
+sampledHH_df <- sample_n(hhRE_df, nhhid)
+sampledHHid <- pull(sampledHH_df, hhid)
+
 patterns <- c("^b\\[y1", "^b\\[y2", "^b\\[y3")
+
 
 hhid_est_plots <- list()
 for (i in 1:length(patterns)){
@@ -280,7 +296,8 @@ for (i in 1:length(patterns)){
 		%>% filter(grepl(patterns[i], parameter) & grepl("hhid", parameter))
 #		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
 		%>% mutate(parameter = gsub("b\\[y[1-3]\\|\\(Intercept\\) hhid:|\\]", "", parameter))
-		%>% sample_n(nhhid)
+#		%>% sample_n(nhhid)
+		%>% filter(parameter %in% sampledHHid)
 		%>% ggplot(aes(x = reorder(parameter, m), y = m))
 			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
 			+ geom_pointrange(aes(ymin = l
@@ -301,6 +318,9 @@ for (i in 1:length(patterns)){
 				, size = 1, color = "deepskyblue4"
 			)
 			+ geom_point(color = "lightblue", size = 3.5)
+			+ geom_point(data = sampledHH_df
+				, aes_string(x = "hhid", y = gsub(".*\\[", "", patterns[i])), colour = "red"
+			)
 			+ coord_flip()
 			+ labs(x = "Households", y = "b (Intercept)")
 			+ ggtitle(paste0("Service", " ", gsub(".*\\[", "", patterns[i])))
