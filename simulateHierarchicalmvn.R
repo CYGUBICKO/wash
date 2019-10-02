@@ -65,7 +65,10 @@ covMat <- varMat * corMat
 covMat
 
 # Generate dataset
-sim_dflist <- list()
+sim_dflist <- list() # Simulated datasets
+betas0_dflist <- list() # Simulated random effects estimates for Year 
+hhRE_dflist <- list() # Simulated random effects datasets estimates for HH
+
 for (i in 1:nsims){
 	
 	# Simulate B0 for each year and then merge to HH data. Different HH has same B0 for same year
@@ -77,9 +80,20 @@ for (i in 1:nsims){
    	%>% data.frame()
 		%>% mutate(years = yrs)
 		%>% right_join(temp_df)
-		%>% select(c("X1", "X2", "X3"))
+		%>% select(c("years", "X1", "X2", "X3"))
 	)
-	
+
+	# Save the B0 RE estimates
+	betas0_dflist[[i]] <- (betas0
+		%>% distinct()
+		%>% setnames(c("X1", "X2", "X3"), c("y1", "y2", "y3"))
+	)
+
+	# Remove year from betas0
+	betas0 <- (betas0
+		%>% select(-years)
+	)
+
 	# Simulate HH-level random effects (residual error)
 	hhRE <- MASS::mvrnorm(nHH
 		, mu = c(0, 0, 0)
@@ -87,6 +101,13 @@ for (i in 1:nsims){
 		, empirical = TRUE
 	)
 	hhRE <- hhRE[temp_df$hhid, ]
+	
+	# Save HH RE simulation estimates
+	hhRE_dflist[[i]] <- (hhRE
+		%>% data.frame()
+		%>% mutate(hhid = pull(temp_df, hhid))
+		%>% distinct()
+	)
 	
 	dat <- (temp_df
 		%>% mutate(y1 = betas0[,1] + y1_beta1*wealthindex + hhRE[,1]
@@ -134,6 +155,8 @@ save(file = "simulateHierarchicalmvn.rda"
 	, sim_dflist
 	, betas_df
 	, covmat_df
+	, betas0_dflist
+	, hhRE_dflist
 	, betas
 	, corMat
 	, covMat

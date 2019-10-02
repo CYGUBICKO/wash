@@ -15,11 +15,10 @@ Sources += Makefile notes.md rmd.mk
 ## Used by Steve to link data to right place
 Ignore += local.mk
 -include local.mk
+## ln -fs ~/Dropbox/aphrc/wash/data  ##
 
 ######################################################################
 
-## Loading data and defining some important functions
-## ln -fs ~/Dropbox/aphrc/wash/data  ##
 
 Ignore += data docs temp_files 
 
@@ -29,6 +28,7 @@ Sources += $(wildcard *.R *.rmd *.tex *.sage)
 globalFunctions.Rout: globalFunctions.R
 
 # Read data
+## loadData.rda: loadData.R
 loadData.Rout: data/NUHDSS_Wash.dta loadData.R
 
 # Some cleaning
@@ -166,11 +166,13 @@ simulations_plots_temp.Rout: simulations_plots_temp.R
 ## Data lunch presentation
 ## https://cygubicko.github.io/wash/datalunch_wash_presentation.pdf
 datalunch_wash_presentation.pdf: datalunch_wash_presentation.rmd
+simulations_analysis_output.html: simulations_analysis_output.rmd
 
 ## Run and push
 run_push:
 	make simulations_analysis_writeup.html.pages
 	make datalunch_wash_presentation.pdf.pages
+	make simulations_analysis_output.html.pages
 	cd pages && git push
 	make sync
 #	cd ~/grive && grive

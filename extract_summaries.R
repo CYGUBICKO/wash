@@ -8,6 +8,7 @@ library(data.table)
 library(tibble)
 library(tidyr)
 library(dplyr)
+options(dplyr.width = Inf)
 
 library(ggplot2)
 theme_set(theme_bw() +
@@ -21,6 +22,10 @@ library(broom)
 load("simulateHierarchicalmvn.rda")
 load("summary_plot_data.rda")
 
+
+#### ---- Setup for Viz ----
+nhhid <- 30	# Number of hhid to vizualize
+
 ##### ---- Extract some key summaries ----
 nhouseholds <- length(unique(sim_dflist[[1]]$hhid))
 nyears <- length(unique(sim_dflist[[1]]$years))
@@ -29,7 +34,6 @@ sims_df <- (sim_dflist[[1]]
 	%>% mutate_at(c("y1", "y2", "y3", "wealthindex"), function(y){round(y, 3)})
 	%>% datatable(caption = "Simulated dataset", rownames = FALSE)
 )
-
 
 # Tidy true betas and sigma
 betas_df <- (betas_df
@@ -46,46 +50,20 @@ betas_df <- (betas_df
    )
 )
 
-
-## ----------------------------------------------------------------------
-## 
-# Lazy to rerun the whole code to include covMat in the .rda because it takes days. But should work on this in the next rerun
-
-# Correlation matrix
-cor_y1y2 <- 0.20
-cor_y1y3 <- 0.30
-cor_y2y3 <- 0.50
-corMat <- matrix(
-	c(1, cor_y1y2, cor_y1y3
-		, cor_y1y2, 1, cor_y2y3
-		, cor_y1y3, cor_y2y3, 1
-	), 3, 3
-)
-
-# Sd
-y1_sd <- 0.5
-y2_sd <- 0.3
-y3_sd <- 0.7
-sdVec <- c(y1_sd, y2_sd, y3_sd)
-varMat <- sdVec %*% t(sdVec)
-varMat
-corMat
-# varcov matrix
-covMat <- varMat * corMat
-covMat
-
-## Create cov-varaince dataframe
-covmat_df <- (
-	data.frame(coef = c("y1y1", "y2y2", "y3y3", "y2y1", "y3y1", "y3y2")
-		, values = c(diag(covMat), covMat[lower.tri(covMat)])
+# Tidy the random intercept estimates
+betas0_df <- (betas0_dflist[[1]]
+	%>% mutate_at("years", as.factor)
+	# I thing these estimates include B0 (so substract to compare)
+	%>% mutate(y1 = y1 - betas[["y1_beta0"]]
+		, y2 = y2 - betas[["y2_beta0"]]
+		, y3 = y3 - betas[["y3_beta0"]]
 	)
-	%>% mutate(n = extract_numeric(coef)
-		, coef_clean = paste0("Sigma[years:y", substr(n, 1, 1), ",y", substr(n, 2, 2), "]")
-	) 
 )
-
-## ----------------------------------------------------------------------
-
+hhRE_df <- (hhRE_dflist[[1]]
+	%>% setnames(c("X1", "X2", "X3"), c("y1", "y2", "y3"))
+	%>% mutate_at("hhid", as.factor)
+	%>% distinct()
+)
 
 # Fixed effects
 
@@ -98,7 +76,6 @@ fixed_effects
 ## Intercept and slope
 
 #plot(rstanmodel, regex_pars = "^y[1-3]\\|\\(Intercept\\)|wealthindex")
-
 
 # Population level estimate plot
 
@@ -131,6 +108,7 @@ population_est_plot <- (plot_df
 		)
 		+ coord_flip()
 		+ labs(x = NULL, y = NULL)
+		+ theme(text = element_text(size=20))
 )
 population_est_plot
 
@@ -178,6 +156,7 @@ sigma_est_plot_years <- (plot_df
 		)
 		+ coord_flip()
 		+ labs(x = NULL, y = NULL)
+		+ theme(text = element_text(size=20))
 )
 sigma_est_plot_years
 
@@ -223,6 +202,7 @@ sigma_est_plot_hhids <- (plot_df
 		)
 		+ coord_flip()
 		+ labs(x = NULL, y = NULL)
+		+ theme(text = element_text(size=20))
 )
 sigma_est_plot_hhids
 
@@ -255,8 +235,9 @@ year_est_plots <- list()
 for (i in 1:length(patterns)){
 	year_est_plot <- (plot_df
 		%>% filter(grepl(patterns[i], parameter) & grepl("years", parameter))
-		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
-		%>% ggplot(aes(x = reorder(parameter, m), y = m))
+#		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
+		%>% mutate(parameter = gsub("b\\[y[1-3]\\|\\(Intercept\\) years:|\\]", "", parameter))
+		%>% ggplot(aes(x = as.factor(reorder(parameter, m)), y = m))
 			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
 			+ geom_pointrange(aes(ymin = l
 				, ymax = h
@@ -276,10 +257,15 @@ for (i in 1:length(patterns)){
 				, size = 1, color = "deepskyblue4"
 			)
 			+ geom_point(color = "lightblue", size = 3.5)
+			+ geom_point(data = betas0_df
+				, aes_string(x = "years", y = gsub(".*\\[", "", patterns[i])), colour = "red"
+			)
 			+ coord_flip()
-			+ labs(x = NULL, y = NULL)
+			+ labs(x = "Years", y = "b (Intercept)")
 			+ ggtitle(paste0("Service", " ", gsub(".*\\[", "", patterns[i])))
-			+ theme(plot.title = element_text(hjust = 0.5))
+			+ theme(plot.title = element_text(hjust = 0.5)
+				, text = element_text(size=15)
+			)
 	)
 	year_est_plots[[i]] <- year_est_plot
 }
@@ -298,15 +284,20 @@ year_est_plots[[3]]
 ## HH-specific estimates
 
 # plot(rstanmodel, regex_pars = "^b\\[y[1-3]\\|\\(Intercept\\) hhid:")
-nhhid <- 100	# Number of hhid to vizualize
+sampledHH_df <- sample_n(hhRE_df, nhhid)
+sampledHHid <- pull(sampledHH_df, hhid)
+
 patterns <- c("^b\\[y1", "^b\\[y2", "^b\\[y3")
+
 
 hhid_est_plots <- list()
 for (i in 1:length(patterns)){
 	hhid_est_plot <- (plot_df
 		%>% filter(grepl(patterns[i], parameter) & grepl("hhid", parameter))
-		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
-		%>% sample_n(nhhid)
+#		%>% mutate(parameter = gsub("\\|\\(Intercept)", "", parameter))
+		%>% mutate(parameter = gsub("b\\[y[1-3]\\|\\(Intercept\\) hhid:|\\]", "", parameter))
+#		%>% sample_n(nhhid)
+		%>% filter(parameter %in% sampledHHid)
 		%>% ggplot(aes(x = reorder(parameter, m), y = m))
 			+ geom_hline(yintercept = 0, size = 1/2, color = "firebrick4", alpha = 1/10)
 			+ geom_pointrange(aes(ymin = l
@@ -327,10 +318,15 @@ for (i in 1:length(patterns)){
 				, size = 1, color = "deepskyblue4"
 			)
 			+ geom_point(color = "lightblue", size = 3.5)
+			+ geom_point(data = sampledHH_df
+				, aes_string(x = "hhid", y = gsub(".*\\[", "", patterns[i])), colour = "red"
+			)
 			+ coord_flip()
-			+ labs(x = NULL, y = NULL)
+			+ labs(x = "Households", y = "b (Intercept)")
 			+ ggtitle(paste0("Service", " ", gsub(".*\\[", "", patterns[i])))
-			+ theme(plot.title = element_text(hjust = 0.5))
+			+ theme(plot.title = element_text(hjust = 0.5)
+				, text = element_text(size=15)
+			)
 	)
 	hhid_est_plots[[i]] <- hhid_est_plot
 }
