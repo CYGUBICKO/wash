@@ -1,4 +1,21 @@
 
+2019 Oct 02 (Wed)
+=================
+
+Committee
+* Steve will finalize the GD and we will send to committee in advance of meeting
+* Steve will send CES comprehensive material; JD will send to committee with comments
+* Steve may create an overarching repo and share with JD. This can contain anything about his graduate career and thesis that is not project-specific
+
+WASH
+* Steve to email BB, cc JD
+* Take a look at some resources
+	* https://mc-stan.org/docs/2_18/stan-users-guide/autoregressive-section.html
+	* https://bbolker.github.io/mixedmodels-misc/notes/corr_braindump.html
+	* https://en.wikipedia.org/wiki/Autoregressive%E2%80%93moving-average_model 
+	* Maybe see ARIMA also
+
+
 2019 Aug 29 (Thu)
 =================
 
