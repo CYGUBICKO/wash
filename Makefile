@@ -150,6 +150,9 @@ rstanarmModel.Rout: rstanarmModel.R
 rstanarmModelbin.Rout: rstanarmModelbin.R
 rstanarmModelbinDiagnostics.Rout: rstanarmModelbinDiagnostics.R
 
+# Fit brms model
+brmsModelbin.Rout: brmsModelbin.R
+
 ## Simulations writeup
 additional_summaries.Rout: additional_summaries.R
 simulations_writeup.html: simulations_writeup.rmd
