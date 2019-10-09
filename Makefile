@@ -10,6 +10,7 @@ current: target
 ms = makestuff
 
 Sources += Makefile notes.md rmd.mk
+Sources += $(wildcard *.md)
 
 ## Used by Steve to link data to right place
 Ignore += local.mk
