@@ -2,6 +2,12 @@
 2019 Oct 02 (Wed)
 =================
 
+Steve:
+* Trying to figure out these examples
+	* https://github.com/bbolker/mixedmodels-misc/blob/master/notes/corr_braindump.rmd
+	* http://www.flutterbys.com.au/stats/tut/tut8.3a.html
+
+
 Committee
 * Steve will finalize the GD and we will send to committee in advance of meeting
 * Steve will send CES comprehensive material; JD will send to committee with comments
