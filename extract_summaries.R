@@ -338,9 +338,9 @@ hhid_est_plots[[3]]
 ## Covariance and Sigma
 
 #plot(rstanmodel, "mcmc_areas", pars = "varying")
-#summaryTwoLevelModelVar<- tidy(rstanmodel, intervals=TRUE, prob=.95, parameters = "hierarchical")
-#datatable(print(summaryTwoLevelModelVar, digits = 2))
-
+summaryTwoLevelModelVar<- tidy(rstanmodel, intervals=TRUE, prob=.95)
+datatable(print(summaryTwoLevelModelVar, digits = 2))
+quit()
 true_cor_df <- (betas_df
 	%>% filter(grepl("cor_", coef))
 	%>% mutate(Parameter = gsub("years", "hhid", Parameter))
