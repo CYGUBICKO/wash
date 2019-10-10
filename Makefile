@@ -7,10 +7,10 @@ current: target
 
 ##################################################################
 
-## Kind of deprecated now ☺
 ms = makestuff
 
 Sources += Makefile notes.md rmd.mk
+Sources += $(wildcard *.md)
 
 ## Used by Steve to link data to right place
 Ignore += local.mk
@@ -18,7 +18,6 @@ Ignore += local.mk
 ## ln -fs ~/Dropbox/aphrc/wash/data  ##
 
 ######################################################################
-
 
 Ignore += data docs temp_files 
 
@@ -182,6 +181,9 @@ run_push:
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
+
+### Simple ar simulation
+ar.Rout: ar.R
 
 ######################################################################
 
