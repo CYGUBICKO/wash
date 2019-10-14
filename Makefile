@@ -165,6 +165,9 @@ extract_summaries.Rout: extract_summaries.R
 simulations_analysis_writeup.html: simulations_analysis_writeup.rmd
 simulations_plots_temp.Rout: simulations_plots_temp.R
 
+## Extract posterior summaries from all the models for comparison
+extract_posterior_summaries.Rout: extract_posterior_summaries.R
+
 ## Data lunch presentation
 ## https://cygubicko.github.io/wash/datalunch_wash_presentation.pdf
 datalunch_wash_presentation.pdf: datalunch_wash_presentation.rmd

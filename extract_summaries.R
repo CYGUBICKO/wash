@@ -49,7 +49,7 @@ betas_df <- (betas_df
       )
    )
 )
-
+print(betas_df)
 # Tidy the random intercept estimates
 betas0_df <- (betas0_dflist[[1]]
 	%>% mutate_at("years", as.factor)
@@ -338,9 +338,8 @@ hhid_est_plots[[3]]
 ## Covariance and Sigma
 
 #plot(rstanmodel, "mcmc_areas", pars = "varying")
-summaryTwoLevelModelVar<- tidy(rstanmodel, intervals=TRUE, prob=.95)
-datatable(print(summaryTwoLevelModelVar, digits = 2))
-quit()
+#summaryTwoLevelModelVar<- tidy(rstanmodel, intervals=TRUE, prob=.95)
+#datatable(print(summaryTwoLevelModelVar, digits = 2))
 true_cor_df <- (betas_df
 	%>% filter(grepl("cor_", coef))
 	%>% mutate(Parameter = gsub("years", "hhid", Parameter))
