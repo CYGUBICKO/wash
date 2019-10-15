@@ -14,11 +14,13 @@ library(ggplot2)
 theme_set(theme_bw() +
 	theme(panel.spacing=grid::unit(0,"lines")))
 
+library(lme4)
 library(rstanarm)
 library(brms)
 library(broom)
 library(ggstance)
 
+load("glmerModelbin.rda")
 load("rstanarmModelbin.rda")
 load("brmsModelbin.rda")
 load("simulateHierarchicalmvn.rda")
@@ -36,6 +38,7 @@ plot_text_size <- 13
 # Models
 rstanmodel <- rstanmodel_list[[1]]
 brmsmodel <- brmsmodel_list[[1]]
+glmermodel <- glmermodel_list[[1]]
 
 # Covariance matrix
 covmat_df <- (covmat_df
@@ -214,6 +217,52 @@ brms_summaries_df <- (brms_summaries
 	%>% mutate(model = "brms")
 )
 
+
+# glmer
+
+## Variance-covariance matrix
+glmer_vcov_df <- (VarCorr(glmermodel)
+	%>% as.data.frame()
+	%>% mutate_at(c("var1", "var2"), function(x){gsub("service|bin", "", x)})
+	%>% mutate(variable = "Sigma"
+		, model = "glmer"
+		, effect = "Hierarchical"
+		, std.error = NA
+		, lower = NA
+		, upper = NA
+		, term = ifelse(is.na(var2), paste0("Sigma[", var1, ",", var1, "]")
+			, paste0("Sigma[", var2, ",", var1, "]")
+		)
+		, term_labels = term
+	)
+	%>% select(-c("var1", "var2", "sdcor"))
+	%>% setnames(c("grp", "vcov"), c("grouping", "estimate"))
+)
+
+glmer_summaries_df <- broom.mixed::tidy(glmermodel, effects=c("fixed", "ran_pars", "ran_vals"), conf.int = TRUE)
+
+glmer_summaries_df <- (glmer_summaries_df
+	%>% filter(!grepl("^sd_", term))
+	%>% mutate(term = gsub("bin|service", "", term)
+		, term = ifelse(grepl("^y[1-3]", term) & effect == "fixed", paste0(term, "_intercept")
+			, ifelse(grepl("^wealthind", term) & effect == "fixed", paste0(gsub(".*\\:", "", term), "_", gsub("\\:.*", "", term))
+				, ifelse(grepl("^cor_", term), paste0("Cor[", gsub("\\.", ",", gsub(".*\\_", "", term)), "]")
+					, term
+				)
+			)
+		)
+		, term_labels = ifelse(!is.na(level), level, term)
+	 	, variable = ifelse(grepl("^y[1-3]", term), gsub(".*\\_", "", term), paste0(gsub("\\[.*", "", term), "r"))
+	 	, effect = ifelse(grepl("^fixed", effect), "Fixef"
+			, ifelse(grepl("^ran_vals", effect), "Randef", "Hierarchical")
+		)
+		, model = "glmer"
+	)
+	%>% setnames(c("group", "conf.low", "conf.high"), c("grouping", "lower", "upper"))
+	%>% select(-c("level", "statistic", "p.value"))
+	%>% rbind(., glmer_vcov_df)
+)
+
 # Put all the model estimates together
 posterior_estimates_df <- (rbind(rstanarm_summaries_df, brms_summaries_df)
 	%>% mutate(variable = ifelse(!grepl("^cor_", term), gsub(".*_|\\[.*", "", term), "Corr")
@@ -228,7 +277,7 @@ posterior_estimates_df <- (rbind(rstanarm_summaries_df, brms_summaries_df)
 			)
 		)
 	)
-	%>% rbind(., rstanarm_cor_df)
+	%>% rbind(., rstanarm_cor_df, glmer_summaries_df)
 )
 
 #### ---- Plot model estimates ----
@@ -243,7 +292,7 @@ base_plot <- (ggplot(posterior_estimates_df
 	+ scale_colour_brewer(palette="Dark2"
 		, guide = guide_legend(reverse = TRUE)
 	)
-	+ geom_vline(xintercept=0,lty=2)
+	+ geom_vline(xintercept=0,lty=2, colour = "grey")
 	+ labs(x = "Estimate"
 		, y = ""
 		, colour = "Model"

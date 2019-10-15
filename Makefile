@@ -152,6 +152,9 @@ rstanarmModelbinDiagnostics.Rout: rstanarmModelbinDiagnostics.R
 # Fit brms model
 brmsModelbin.Rout: brmsModelbin.R
 
+# Fit lme4 (glmer) model
+glmerModelbin.Rout: glmerModelbin.R
+
 ## Simulations writeup
 additional_summaries.Rout: additional_summaries.R
 simulations_writeup.html: simulations_writeup.rmd
