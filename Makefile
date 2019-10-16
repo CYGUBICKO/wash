@@ -142,6 +142,9 @@ binjointDiagnostics.Rout: binjointDiagnostics.R
 ## Simulate Hierarchical Multivariate data
 simulateHierarchicalmvn.Rout: simulateHierarchicalmvn.R
 
+## Simulate Hierarchical Multivariate data with AR1 process
+simulateHierarchicalmvnAR1.Rout: simulateHierarchicalmvnAR1.R
+
 ## Fit stan model using rstanarm
 rstanarmModel.Rout: rstanarmModel.R
 
@@ -151,6 +154,7 @@ rstanarmModelbinDiagnostics.Rout: rstanarmModelbinDiagnostics.R
 
 # Fit brms model
 brmsModelbin.Rout: brmsModelbin.R
+brmsModelbinAR1.Rout: brmsModelbinAR1.R
 
 # Fit lme4 (glmer) model
 glmerModelbin.Rout: glmerModelbin.R

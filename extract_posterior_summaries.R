@@ -32,7 +32,7 @@ ci_probs <- c(0.025, 0.975) # CI to extact
 
 # Plots
 pos <- ggstance::position_dodgev(height=0.5)
-plot_alpha <- 0.3
+plot_alpha <- 1
 plot_text_size <- 13
 
 # Models
