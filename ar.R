@@ -1,16 +1,18 @@
 ## We want to simulate an ar(1) random effect
 ## This means that the mean is zero, and we have some autocorrelation ρ
+
 ## My only question (JD) is do we need to worry about starting point,
 ## or does the asymptotic distribution already match the error distribution?
+## The only issue is in fact the sd, and the sd did need to be adjusted
 
 numYears <- 100000
 phi <- 0.9
-sd <- 1
-sdAsymp <- sd/sqrt(1-phi^2)
+sdSim <- 1
+sdAsymp <- sdSim/sqrt(1-phi^2)
 
 x0 <- rnorm(1, 0, sdAsymp)
 
-eps <- rnorm(numYears, 0, sd)
+eps <- rnorm(numYears, 0, sdSim)
 x <- numeric(numYears)
 
 for (y in 1:numYears){
