@@ -16,9 +16,9 @@ set.seed(7777)
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-nHH <- 500		# Number of HH (primary units) per year
+nHH <- 100		# Number of HH (primary units) per year
 
-nyrs <- 30	# Number of years to simulate
+nyrs <- 100	# Number of years to simulate
 yrs <- 2000 + c(1:nyrs) # Years to simulate
 N <- nyrs * nHH
 
@@ -71,57 +71,50 @@ phi <- 0.2
 y1_sd_ar1 <- 0.6
 y2_sd_ar1 <- 0.4
 y3_sd_ar1 <- 0.7
-sd_vec_ar1 <- c(y1_sd_ar1, y2_sd_ar1, y3_sd_ar1) 
-varMat_ar1 <- sd_vec_ar1 %*% t(sd_vec_ar1)
 
-## Since we are jointly simulating y1, y2 and y3, we use the corMat to construct covMat for the AR1 process
-
-corMat_ar1 <- corMat
-
-## Cov-var matrix for the ARI errors
-covMat_ar1 <- varMat_ar1 * corMat_ar1
-
-## Cov-var matrix for jointly drawing x0
-
-sdAsympt <- sd_vec_ar1/sqrt(1 - phi^2)
-varAsymptMat_ar1 <- sdAsympt %*% t(sdAsympt)
-covAsymptMat_ar1 <- varAsymptMat_ar1 * corMat_ar1
+y1_sdAsympt <- y1_sd_ar1/sqrt(1 - phi^2)
+y2_sdAsympt <- y2_sd_ar1/sqrt(1 - phi^2)
+y3_sdAsympt <- y3_sd_ar1/sqrt(1 - phi^2)
 
 # Generate dataset
 sim_dflist <- list() # Simulated datasets
 betas0_dflist <- list() # Simulated random effects estimates for Year 
 hhRE_dflist <- list() # Simulated random effects datasets estimates for HH
-ar1_dflist <- list() # Simuated yearly ar1
+ar1_dflist <- list() # Simulated yearly ar1
 
 for (i in 1:nsims){
 	
-	# Simulate AR1 process
-	## Jointly simulate x0 for all the 3 services
-	x0Ar1 <- MASS::mvrnorm(1
-		, mu = c(0,0,0)
-		, Sigma = covAsymptMat_ar1
-	)
+	# Simulate AR1 process separately for each service
+	# These includes epsilons too
+	y1_ar1_eps <- rnorm(nyrs, 0, y1_sd_ar1)
+	y2_ar1_eps <- rnorm(nyrs, 0, y2_sd_ar1)
+	y3_ar1_eps <- rnorm(nyrs, 0, y3_sd_ar1)
 
-	## e ~ N(0, Sigma)
-	epsAr1 <- MASS::mvrnorm(nyrs
-		, mu = c(0,0,0)
-		, Sigma = covMat_ar1
-		, empirical = TRUE
-	)
+	# Starting values for the AR1
+	y1_0 <- rnorm(1, 0, y1_sdAsympt)
+	y2_0 <- rnorm(1, 0, y2_sdAsympt)
+	y3_0 <- rnorm(1, 0, y3_sdAsympt)
 
-	xAr1 <- array(0, c(nyrs, 3)) # 3 is the number of responses
-	for (y in 1:nyrs){
-		xar1Prev <- ifelse(y==1, x0Ar1, xAr1[y-1, ])
-		xAr1[y,] <- phi * xar1Prev + epsAr1[y, ]
+	yAr1 <- array(0, c(nyrs, 3)) # 3 is the number of responses
+	for (yr in 1:nyrs){
+		y1Prev <- ifelse(yr==1, y1_0, yAr1[yr-1, 1])
+		yAr1[yr, 1] <- phi * y1Prev + y1_ar1_eps[yr]
+		
+		y2Prev <- ifelse(yr==1, y2_0, yAr1[yr-1, 2])
+		yAr1[yr, 2] <- phi * y2Prev + y2_ar1_eps[yr]
+		
+		y3Prev <- ifelse(yr==1, y3_0, yAr1[yr-1, 3])
+		yAr1[yr, 3] <- phi * y3Prev + y3_ar1_eps[yr]
 	}
 
-	ar1_df <- (data.frame(xAr1)
+	ar1_df <- (data.frame(yAr1)
 		%>% mutate(years = yrs)
 		%>% right_join(temp_df)
-		%>% select(c("X1", "X2", "X3"))
-		%>% setnames(names(.), c("y1", "y2", "y3"))
+		%>% select(c("years", "X1", "X2", "X3"))
+		%>% setnames(names(.), c("years", "y1", "y2", "y3"), skip_absent = TRUE)
 	)
 	ar1_dflist[[i]] <- ar1_df
+	ar1_df <- select(ar1_df, -years)
 	
 	# Simulate B0 for each year and then merge to HH data. Different HH has same B0 for same year
 	betas0 <- (MASS::mvrnorm(nyrs
@@ -176,7 +169,7 @@ for (i in 1:nsims){
 print((sim_dflist[[1]]))
 
 # Extract beta values assigned in the simulation
-betas <- sapply(grep("y[1-9]|cor_y", ls(), value = TRUE), get)
+betas <- sapply(grep("y[1-3]_beta|cor_y[1-3]|y[1-3]_sd$", ls(), value = TRUE), get)
 #betas <- betas[!names(betas) %in% grep("_sd", names(betas), value = TRUE)]
 betas_df <- (data.frame(betas) 
 	%>% rownames_to_column("coef")
@@ -205,12 +198,32 @@ covmat_df <- (
 
 # Maybe there is a better way but I am lazy!!!
 ar1_objs <- list(phi = phi
-	, sd_vec_ar1 = sd_vec_ar1
-	, covMat_ar1 = covMat_ar1
-	, sdAsympt = sdAsympt
-	, varAsymptMat_ar1 = varAsymptMat_ar1
-	, covAsymptMat_ar1 = covAsymptMat_ar1
+	, y1_sd_ar1 = y1_sd_ar1
+	, y2_sd_ar1 = y2_sd_ar1
+	, y3_sd_ar1 = y3_sd_ar1
+	, y1_sdAsympt = y1_sdAsympt
+	, y2_sdAsympt = y2_sdAsympt
+	, y3_sdAsympt = y3_sdAsympt
 )
+
+
+## View the AR1 from the simulations
+### From the y response
+d1 <- (sim_dflist[[1]]
+	%>% filter(hhid==1)
+	%>% select(c("y1", "y2", "y3"))
+)
+matplot(d1, type = "l")
+
+### From the AR1
+d2 <- (ar1_dflist[[1]]
+	%>% distinct()
+	%>% select(-years)
+)
+print(apply(d2, 2, sd))
+matplot(d2, type = "l")
+apply(d2, 2, function(x){cor.test(x[-1], x[-nyrs])})
+
 
 save(file = "simulateHierarchicalmvnAR1.rda"
 	, sim_dflist
