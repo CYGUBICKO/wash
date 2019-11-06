@@ -144,6 +144,7 @@ simulateHierarchicalmvn.Rout: simulateHierarchicalmvn.R
 
 ## Simulate Hierarchical Multivariate data with AR1 process
 simulateHierarchicalmvnAR1.Rout: simulateHierarchicalmvnAR1.R
+simulateHierarchicalmvnAR1_simple.Rout: simulateHierarchicalmvnAR1_simple.R
 
 ## Fit stan model using rstanarm
 rstanarmModel.Rout: rstanarmModel.R
