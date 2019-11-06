@@ -1,4 +1,17 @@
 
+2019 Oct 23 (Wed)
+=================
+
+Simulating: Steve has made separate AR(1) series for each service within each household
+* In future, maybe incorporate correlations with a household-level AR(1) series to be added to those
+
+Next steps:
+* fit new sims with old fitting machine
+* fit new sims with new fitting machine
+
+At some point the goal should be to see from simulations:
+* when does the fancier method provide more accuracy or clarity 
+
 2019 Oct 02 (Wed)
 =================
 
