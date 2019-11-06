@@ -1,0 +1,96 @@
+
+R version 3.5.1 (2018-07-02) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(brms)
+> load("brmsModelbinAR1.rda")
+> 
+> 
+> ar1_model <- brmsmodel_list[[1]]
+> 
+> summary(ar1_model)
+ Family: MV(bernoulli, bernoulli, bernoulli) 
+  Links: mu = logit
+         mu = logit
+         mu = logit 
+Formula: y1bin ~ 0 + intercept + wealthindex + (0 + 1 | g | years) + (0 + 1 | p | hhid) 
+         y2bin ~ 0 + intercept + wealthindex + (0 + 1 | g | years) + (0 + 1 | p | hhid) 
+         y3bin ~ 0 + intercept + wealthindex + (0 + 1 | g | years) + (0 + 1 | p | hhid) 
+   Data: df (Number of observations: 3000) 
+Samples: 4 chains, each with iter = 10000; warmup = 1000; thin = 1;
+         total post-warmup samples = 36000
+
+Correlation Structures:
+            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+ar_y1bin[1]     0.17      0.20     0.01     0.83 1.08       32       53
+ar_y2bin[1]     0.06      0.20    -0.40     0.57 1.02     1686      525
+ar_y3bin[1]     0.19      0.12     0.06     0.53 1.01      249      356
+sderr_y1bin     4.88      2.88     0.31    10.71 1.13       21       50
+sderr_y2bin     2.17      1.49     0.06     5.28 1.08       56      308
+sderr_y3bin     3.35      1.79     0.72     7.22 1.02      186      388
+
+Group-Level Effects: 
+~hhid (Number of levels: 100) 
+                                     Estimate Est.Error l-95% CI u-95% CI Rhat
+sd(y1bin_Intercept)                      1.59      0.81     0.38     3.36 1.12
+sd(y2bin_Intercept)                      0.76      0.32     0.36     1.51 1.07
+sd(y3bin_Intercept)                      1.80      0.74     0.81     3.52 1.02
+cor(y1bin_Intercept,y2bin_Intercept)     0.29      0.18    -0.07     0.64 1.00
+cor(y1bin_Intercept,y3bin_Intercept)     0.36      0.15     0.06     0.64 1.00
+cor(y2bin_Intercept,y3bin_Intercept)     0.23      0.15    -0.08     0.52 1.00
+                                     Bulk_ESS Tail_ESS
+sd(y1bin_Intercept)                        22       46
+sd(y2bin_Intercept)                        59      215
+sd(y3bin_Intercept)                       202      542
+cor(y1bin_Intercept,y2bin_Intercept)     6876     6451
+cor(y1bin_Intercept,y3bin_Intercept)     4730     2720
+cor(y2bin_Intercept,y3bin_Intercept)     6233    10865
+
+~years (Number of levels: 30) 
+                                     Estimate Est.Error l-95% CI u-95% CI Rhat
+sd(y1bin_Intercept)                      1.65      0.85     0.47     3.53 1.12
+sd(y2bin_Intercept)                      0.68      0.30     0.30     1.40 1.06
+sd(y3bin_Intercept)                      1.66      0.71     0.72     3.34 1.02
+cor(y1bin_Intercept,y2bin_Intercept)     0.20      0.22    -0.25     0.59 1.00
+cor(y1bin_Intercept,y3bin_Intercept)     0.29      0.19    -0.11     0.63 1.00
+cor(y2bin_Intercept,y3bin_Intercept)     0.47      0.18     0.07     0.78 1.00
+                                     Bulk_ESS Tail_ESS
+sd(y1bin_Intercept)                        23       52
+sd(y2bin_Intercept)                        64      548
+sd(y3bin_Intercept)                       217      525
+cor(y1bin_Intercept,y2bin_Intercept)    11808     6224
+cor(y1bin_Intercept,y3bin_Intercept)     9858     7643
+cor(y2bin_Intercept,y3bin_Intercept)     9713    15972
+
+Population-Level Effects: 
+                  Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+y1bin_intercept       0.60      0.43    -0.05     1.57 1.04       69     3698
+y1bin_wealthindex     1.32      0.63     0.41     2.65 1.12       22       61
+y2bin_intercept       0.48      0.24     0.13     1.05 1.04      118     1167
+y2bin_wealthindex     1.50      0.57     0.81     2.84 1.08       51      268
+y3bin_intercept       0.79      0.42     0.12     1.77 1.00      705     3263
+y3bin_wealthindex     1.32      0.52     0.62     2.51 1.02      198      425
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).
+> 
+> save(file = "temp_summaries.rda")
+> 
+> 
+> 

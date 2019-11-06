@@ -114,6 +114,6 @@ save(file = "brmsModelbinAR1.rda"
 	, covMat
 	, corMat
 	, ar1_objs
-	, ar1_dflist
+	, ar1Errors_dflist
 )
 

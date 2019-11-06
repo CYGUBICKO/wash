@@ -144,6 +144,7 @@ simulateHierarchicalmvn.Rout: simulateHierarchicalmvn.R
 
 ## Simulate Hierarchical Multivariate data with AR1 process
 simulateHierarchicalmvnAR1.Rout: simulateHierarchicalmvnAR1.R
+simulateHierarchicalmvnAR1_simple.Rout: simulateHierarchicalmvnAR1_simple.R
 
 ## Fit stan model using rstanarm
 rstanarmModel.Rout: rstanarmModel.R
@@ -155,6 +156,7 @@ rstanarmModelbinDiagnostics.Rout: rstanarmModelbinDiagnostics.R
 # Fit brms model
 brmsModelbin.Rout: brmsModelbin.R
 brmsModelbinAR1.Rout: brmsModelbinAR1.R
+temp_summaries.Rout: temp_summaries.R
 
 # Fit lme4 (glmer) model
 glmerModelbin.Rout: glmerModelbin.R
