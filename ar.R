@@ -5,7 +5,7 @@
 ## or does the asymptotic distribution already match the error distribution?
 ## The only issue is in fact the sd, and the sd did need to be adjusted
 
-numYears <- 100000
+numYears <- 1e3
 phi <- 0.9
 sdSim <- 1
 sdAsymp <- sdSim/sqrt(1-phi^2)
