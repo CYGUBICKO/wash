@@ -28,7 +28,7 @@ nsims <- length(sim_dflist)
 
 get_prior(
 	mvbind(y1bin, y2bin, y3bin) ~ 0 + intercept + wealthindex + (0 + 1|g|years) +  (0 + 1|p|hhid)
-		, autocor = list(cor_ar(form = ~years, p = 1, cov = TRUE), cor_ar(form = ~years, p = 1, cov = TRUE), cor_ar(form = ~years, p = 1, cov = TRUE))
+		, autocor = list(cor_ar(form = ~1, p = 1, cov = TRUE), cor_ar(form = ~1, p = 1, cov = TRUE), cor_ar(form = ~1, p = 1, cov = TRUE))
 		, data = sim_dflist[[1]]
 		, family = list(bernoulli(link = "logit"), bernoulli(link = "logit"), bernoulli(link = "logit")) 
 )
@@ -61,30 +61,37 @@ priors <- c(prior(normal(0, 1), class = b, resp = y1bin)
 	, prior(cauchy(0, 5), class = sd, coef = Intercept, group = years, resp = y2bin)
 	, prior(cauchy(0, 5), class = sd, coef = Intercept, group = years, resp = y3bin)
 	, set_prior("lkj(1)", class = "cor")
-	, prior(normal(0, 1), class = ar, resp = y1bin)
-	, prior(normal(0, 1), class = ar, resp = y2bin)
-	, prior(normal(0, 1), class = ar, resp = y3bin)
-	, prior(cauchy(0, 5), class = sderr, resp = y1bin)
-	, prior(cauchy(0, 5), class = sderr, resp = y2bin)
-	, prior(cauchy(0, 5), class = sderr, resp = y3bin)
+#	, prior(normal(0, 1), class = ar, resp = y1bin)
+#	, prior(normal(0, 1), class = ar, resp = y2bin)
+#	, prior(normal(0, 1), class = ar, resp = y3bin)
+#	, prior(cauchy(0, 5), class = sderr, resp = y1bin)
+#	, prior(cauchy(0, 5), class = sderr, resp = y2bin)
+#	, prior(cauchy(0, 5), class = sderr, resp = y3bin)
 )
 
 for (s in 1:nsims){
    df <- (sim_dflist[[s]]
       %>% data.frame()
+		%>% mutate_at(c("hhid", "years"), as.factor)
    )
 	model <- brm(
-		mvbind(y1bin, y2bin, y3bin) ~ 0 + intercept + wealthindex + (0 + 1|g|years) + (0 + 1|p|hhid)
-			, autocor = list(cor_ar(form = ~years|hhid, p = 1, cov = TRUE), cor_ar(form = ~years|hhid, p = 1, cov = TRUE), cor_ar(form = ~years|hhid, p = 1, cov = TRUE))
+		mvbind(y1, y2, y3) ~ 0 + intercept + wealthindex + (1|g|years) + (1|q|hhid)
+			, autocor = list(cor_ar(form = ~years|hhid, p = 1, cov = FALSE)
+				, cor_ar(form = ~years|hhid, p = 1, cov = FALSE)
+				, cor_ar(form = ~years|hhid, p = 1, cov = FALSE)
+			)
 			, data = df
-			, family = list(bernoulli(link = "logit"), bernoulli(link = "logit"), bernoulli(link = "logit")) 
+#			, family = list(bernoulli(link = "logit")
+#				, bernoulli(link = "logit")
+#				, bernoulli(link = "logit")
+#			) 
 			, warmup = 1e3
 			, iter = 1e4
 			, chains = 4
 			, cores = parallel::detectCores()
 			, control = list(adapt_delta = 0.95)
 			, seed = 7777
-			, prior = priors
+#			, prior = priors
 	)
 	if (s <= report){
 		brmsmodel_list[[s]] <- model # Model to store

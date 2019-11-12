@@ -182,6 +182,9 @@ extract_posterior_summaries.Rout: extract_posterior_summaries.R
 datalunch_wash_presentation.pdf: datalunch_wash_presentation.rmd
 simulations_analysis_output.html: simulations_analysis_output.rmd
 
+## AR1 based covariates simulations
+simSwitch.Rout: simSwitch.R
+
 ## Run and push
 run_push:
 	make simulations_analysis_writeup.html.pages

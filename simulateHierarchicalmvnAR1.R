@@ -17,7 +17,7 @@ set.seed(7777)
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-nHH <- 100		# Number of HH (primary units) per year
+nHH <- 30		# Number of HH (primary units) per year
 
 nyrs <- 30	# Number of years to simulate
 yrs <- 2000 + c(1:nyrs) # Years to simulate
@@ -64,22 +64,20 @@ covMat <- varMat * corMat
 covMat
 
 # Simulate AR1 process: 
-## [Code from here](http://www.flutterbys.com.au/stats/tut/tut8.3a.html)
+## https://newonlinecourses.science.psu.edu/stat502/lesson/10/10.3
+## https://stats.stackexchange.com/questions/295102/how-to-write-variance-covariance-matrix-of-ar1-process-in-r
 
 phi <- 0.8
 
-## define a constructor for a first-order correlation structure
-new_yrs <- 1:N
-ar1 <- corAR1(form = ~new_yrs, value = phi)
-
-## initialize this constructor against our data
-AR1 <- Initialize(ar1, data = data.frame(new_yrs))
-
-## generate a correlation matrix
-V <- corMatrix(AR1)
-
-## Cholesky factorization of V
-CV <- chol(V)
+simAr1 <- function(phi
+		, sdar1
+		, ngrp
+		, npergrp){
+	cmat <- sdar1*phi^abs(outer(0:(npergrp-1), 0:(npergrp-1), "-"))
+	errs <- MASS::mvrnorm(ngrp, mu = rep(0, npergrp), Sigma = cmat)
+	errs <- c(t(errs)) ## unpack errors by row
+	return(errs)
+}
 
 # Generate dataset
 sim_dflist <- list() # Simulated datasets
@@ -90,9 +88,9 @@ ar1Errors_dflist <- list() # Simulated yearly ar1
 for (i in 1:nsims){
 	
 	# AR1 process errors
-	y1_ar1 <- t(CV) %*% rnorm(N, 0, y1_sd)
-	y2_ar1 <- t(CV) %*% rnorm(N, 0, y2_sd)
-	y3_ar1 <- t(CV) %*% rnorm(N, 0, y3_sd)
+	y1_ar1 <- simAr1(phi = phi, sdar1 = y1_sd, ngrp = nHH, npergrp = nyrs)
+	y2_ar1 <- simAr1(phi = phi, sdar1 = y2_sd, ngrp = nHH, npergrp = nyrs)
+	y3_ar1 <- simAr1(phi = phi, sdar1 = y3_sd, ngrp = nHH, npergrp = nyrs)
 	
 	# Save the ar1 df
 	ar1Errors <- (data.frame(X1 = y1_ar1, X2 = y2_ar1, X3 = y3_ar1)
@@ -182,24 +180,8 @@ covmat_df <- (
 
 # Maybe there is a better way but I am lazy!!!
 ar1_objs <- list(phi = phi
-	, CV = CV
+	, sdar1 = c(y1_sd, y2_sd, y3_sd)
 )
-
-
-## View the AR1 from the simulations
-### From the y response
-d1 <- (sim_dflist[[1]]
-	%>% filter(hhid==1)
-	%>% select(c("y1", "y2", "y3"))
-)
-matplot(d1, type = "l")
-
-### From the AR1
-d2 <- ar1Errors_dflist[[1]]
-
-print(apply(d2, 2, sd))
-matplot(d2, type = "l")
-apply(d2, 2, function(x){cor.test(x[-1], x[-nyrs])})
 
 save(file = "simulateHierarchicalmvnAR1.rda"
 	, sim_dflist
