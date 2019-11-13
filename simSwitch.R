@@ -86,9 +86,13 @@ s1_U <- 0.4
 s2_U <- 0.8
 
 ## Switch probabilities
-b_gain = -0.5
-b_lose = -0.4
-b_add = -(b_gain + b_lose)
+b_gain1 = -0.5
+b_lose1 = -0.4
+b_add1 = -(b_gain1 + b_lose1)
+
+b_gain2 = -0.5
+b_lose2 = -0.4
+b_add2 = -(b_gain2 + b_lose2)
 
 print(names(temp_df))
 print(summary(temp_df))
@@ -103,11 +107,8 @@ print(summary(temp_df))
 dat <- (temp_df
 	%>% mutate(lp1 = s1_M*xm + s1_U*xu
 		, lp2 = s2_M*xm + s2_U*xu
-		, ran1 = runif(N)
-		, ran2 = runif(N)
-		, y1 = rbinom(N, 1, prob=1/2)
-		, osmech = NA
-		, osstat = NA
+		, y1 = NA
+		, y2 = NA
 	) %>% select(-xu)
 )
 
@@ -116,35 +117,23 @@ dat <- (temp_df
 
 ## We should still add a beta here
 ## Need to be tidy!!
-dat[1, "osmech"] = dat[1, "lp1"]
-dat[1, "osstat"] = dat[1, "lp1"]
-## qbinom(dat[1, "ran1"], 1, plogis(something about os…))
+dat[1, "y1"] = dat[1, "lp1"]
+dat[1, "y2"] = dat[1, "lp1"]
+os1 <- b_gain1 + b_add1/2
+os2 <- b_gain2 + b_add2/2
+
+dat[1, "y1"] <- rbinom(1, 1, plogis(os1))
+dat[1, "y2"] <- rbinom(1, 1, plogis(os2))
 
 ## Is there a tidy way to loop and use short varnames?
 for (r in 2:nrow(dat)){
-	 dat[r, "osmech"] <- dat[r, "lp1"] + ifelse(
-		dat[r-1, "y1"] == 0
-		, b_gain
-		, -b_lose
-	)
-	dat[r, "osstat"] <- dat[r, "lp1"] + b_gain + b_add*dat[r-1, "y1"]
+	os1 <- dat[r, "lp1"] + b_gain1 + b_add1*dat[r-1, "y1"]
+	os2 <- dat[r, "lp2"] + b_gain2 + b_add2*dat[r-1, "y2"]
+
+	dat[r, "y1"] <- rbinom(1, 1, plogis(os1))
+	dat[r, "y2"] <- rbinom(1, 1, plogis(os2))
 }
 
 print(dat, N=Inf)
 
-quit()
-
-## Plot simulated services (continuous)
-
-print(ggplot(dat, aes(x = years, y = s1, colour = as.factor(hhid), group = as.factor(hhid)))
-	+ geom_line()
-#	+ scale_colour_viridis_d(name = "HHID")
-)
-
-
-
-save(file = "simSwitch.rda"
-	, corMat
-	, covMat
-)
-
+with(dat, print(table(y1, y2)))
