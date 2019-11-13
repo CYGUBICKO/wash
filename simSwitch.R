@@ -122,13 +122,12 @@ dat[1, "osstat"] = dat[1, "lp1"]
 
 ## Is there a tidy way to loop and use short varnames?
 for (r in 2:nrow(dat)){
-
-	 dat[r, "osmech"] <- dat[1, "lp1"] + ifelse(
+	 dat[r, "osmech"] <- dat[r, "lp1"] + ifelse(
 		dat[r-1, "y1"] == 0
 		, b_gain
-		, 1-b_lose
+		, -b_lose
 	)
-	dat[r, "osstat"] <- dat[1, "lp1"] + b_gain + b_add*dat[r-1, "y1"]
+	dat[r, "osstat"] <- dat[r, "lp1"] + b_gain + b_add*dat[r-1, "y1"]
 }
 
 print(dat, N=Inf)
