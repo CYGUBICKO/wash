@@ -49,6 +49,7 @@ ar1Fun <- function(phi, sdeps, nyrs, nHH){
 		dat <- data.frame(x = x, years = years, hhid = hh)
 		df_list[[hh]] <- dat
 	}
+	## Rewrite this with bind_rows; you will be happy
 	df <- do.call(rbind, df_list) # Merge all the dataset for all the HH
 	return(df)
 }
@@ -67,7 +68,7 @@ print(ggplot(x1_df, aes(x = years, y = x, colour = as.factor(hhid), group = as.f
 xu <- ar1Fun(phi = phi, sdeps = sdeps, nyrs = nyrs, nHH = nHH)
 xm <- ar1Fun(phi = phi, sdeps = sdeps, nyrs = nyrs, nHH = nHH)
 
-## Create dataframe of the two coveriates
+## Create dataframe of the two covariates
 temp_df <- (xu
 	%>% setnames("x", "xu")
 	%>% right_join(xm)
@@ -77,7 +78,7 @@ temp_df <- (xu
 
 # True parameter values
 
-## Intercept
+## Intercept (change to gain and lose?)
 s1_B0 <- 0.2
 s2_B0 <- 0.3
 
@@ -89,26 +90,26 @@ s2_M <- 0.5
 s1_U <- 0.6
 s2_U <- 0.7
 
-# Construct varaice covariance matrix
-## Correlation matrix
+## Covariance
+s1_sd <- 0.5
+s2_sd <- 0.3
 cor_s1s2 <- 0.20
+
+# Construct covariance matrix
+## Correlation matrix
 corMat <- matrix(
 	c(1, cor_s1s2
 		, cor_s1s2, 1
 	), 2, 2
 )
 
-## Sd
-s1_sd <- 0.5
-s2_sd <- 0.3
 sdVec <- c(s1_sd, s2_sd)
 varMat <- sdVec %*% t(sdVec)
 varMat
 corMat
-# varcov matrix
+# matrix
 covMat <- varMat * corMat
 covMat
-
 
 # Simulate B0 for each year and then merge to temp_df data. Different HHs have same B0 for same year
 betas0 <- (MASS::mvrnorm(nyrs
