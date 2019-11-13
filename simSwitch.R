@@ -75,75 +75,65 @@ temp_df <- (xu
 	%>% setnames("x", "xm")
 )
 
-
 # True parameter values
 
-## Intercept (change to gain and lose?)
-s1_B0 <- 0.2
-s2_B0 <- 0.3
-
 ## Measured
-s1_M <- 0.4
-s2_M <- 0.5
+s1_M <- 0.3
+s2_M <- 0.6
 
 ## Unmeasured
-s1_U <- 0.6
-s2_U <- 0.7
+s1_U <- 0.4
+s2_U <- 0.8
 
-## Covariance
-s1_sd <- 0.5
-s2_sd <- 0.3
-cor_s1s2 <- 0.20
+## Switch probabilities
+b_gain = -0.5
+b_lose = -0.4
+b_add = -(b_gain + b_lose)
 
-# Construct covariance matrix
-## Correlation matrix
-corMat <- matrix(
-	c(1, cor_s1s2
-		, cor_s1s2, 1
-	), 2, 2
-)
-
-sdVec <- c(s1_sd, s2_sd)
-varMat <- sdVec %*% t(sdVec)
-varMat
-corMat
-# matrix
-covMat <- varMat * corMat
-covMat
-
-# Simulate B0 for each year and then merge to temp_df data. Different HHs have same B0 for same year
-betas0 <- (MASS::mvrnorm(nyrs
-		, mu = c(s1_B0, s2_B0)
-		, Sigma = covMat
-		, empirical = TRUE
-	)
-	%>% data.frame()
-	%>% mutate(years = 1:nyrs)
-	%>% right_join(temp_df)
-	%>% select(c("X1", "X2"))
-	%>% setnames(names(.), c("s1_B0", "s2_B0"))
-)
-print(betas0)
+print(names(temp_df))
+print(summary(temp_df))
 
 # Question: Should we also simulate HH randef?
+## Maybe: it would have to be AR1 across years
+## Don't do it to correlate services (not mechanistic)
 
-## Simulate HH-level random effects (residual error)
-hhRE <- MASS::mvrnorm(nHH
-	, mu = c(0, 0)
-	, Sigma = covMat
-	, empirical = TRUE
-)
-hhRE <- hhRE[temp_df$hhid, ]
+# Question: Should we have year effects?
+## Probably
 
 dat <- (temp_df
-	%>% mutate(s1 = betas0[,1] + s1_M*xm + s1_U*xu + hhRE[,1]
-		, s2 = betas0[,2] + s2_M*xm + s2_U*xu + hhRE[,2]  
-		, s1bin = rbinom(N, 1, plogis(s1))
-		, s2bin = rbinom(N, 1, plogis(s2))
-	)
+	%>% mutate(lp1 = s1_M*xm + s1_U*xu
+		, lp2 = s2_M*xm + s2_U*xu
+		, ran1 = runif(N)
+		, ran2 = runif(N)
+		, y1 = rbinom(N, 1, prob=1/2)
+		, osmech = NA
+		, osstat = NA
+	) %>% select(-xu)
 )
 
-print(data.frame(dat))
+## Simulate the first entry using the random draw but not worrying too much
+## We can improve this later, using an average of something
+
+## We should still add a beta here
+## Need to be tidy!!
+dat[1, "osmech"] = dat[1, "lp1"]
+dat[1, "osstat"] = dat[1, "lp1"]
+## qbinom(dat[1, "ran1"], 1, plogis(something about os…))
+
+## Is there a tidy way to loop and use short varnames?
+for (r in 2:nrow(dat)){
+
+	 dat[r, "osmech"] <- dat[1, "lp1"] + ifelse(
+		dat[r-1, "y1"] == 0
+		, b_gain
+		, 1-b_lose
+	)
+	dat[r, "osstat"] <- dat[1, "lp1"] + b_gain + b_add*dat[r-1, "y1"]
+}
+
+print(dat, N=Inf)
+
+quit()
 
 ## Plot simulated services (continuous)
 
@@ -152,8 +142,6 @@ print(ggplot(dat, aes(x = years, y = s1, colour = as.factor(hhid), group = as.fa
 #	+ scale_colour_viridis_d(name = "HHID")
 )
 
-
-quit()
 
 
 save(file = "simSwitch.rda"

@@ -205,7 +205,7 @@ covmat_df <- (
 	) 
 )
 
-save(file = "simulateHierarchicalmvnAR1.rda"
+save(file = "simulateHierarchicalmvnAR1_simple.rda"
 	, sim_dflist
 	, betas_df
 	, covmat_df
