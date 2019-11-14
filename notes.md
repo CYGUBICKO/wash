@@ -1,3 +1,29 @@
+2019 Nov 14 (Thu)
+=================
+
+Simulation: 
+- Simulate two AR1 process covariates
+	- Unmeasured and measured
+- Two services for the start
+- 1000 households for 10 years of data 
+	- We can simulate many years and `throw` away some at the beginning to take of the stationarity  
+
+- The household services for the time period $t` = t + 1$ are generated using switch probabilities: These are either defined in a:
+
+	- mechanistic way
+		- If the value of service at current time is $1$ then the switch probability to the next year is 
+			- $\beta_{lose}$ minus the value of linear predictor $L$ at the current time
+		- Otherwise, if the HH has no service at the current time, then the switch probability is
+			- $\beta_{gain}$ plus the value of linear predictor $L$ at the current time
+	
+	- simplified (or statistical) way
+		- The probability of having service at time $t + 1$ is given by 
+			- $y_{t+1} = L_{t+1} + \beta_{gain} + \beta_{add}y_t$
+
+			- Where $\beta_{add} = -(\beta_{gain} + \beta_lose)$
+
+	- We established that the two simulation approaches give the same results.
+
 
 2019 Oct 23 (Wed)
 =================
