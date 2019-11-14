@@ -6,7 +6,7 @@ Simulation:
 	- Unmeasured and measured
 - Two services for the start
 - 1000 households for 10 years of data 
-	- We can simulate many years and 'throw' away some at the beginning to take of the stationarity  
+	- We can simulate many years and 'throw' away some at the beginning to take care of the stationarity  
 
 - The household services for the time period `t' = t + 1` are generated using switch probabilities: These are either defined in a:
 
