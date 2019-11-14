@@ -75,23 +75,23 @@ for (s in 1:nsims){
 		%>% mutate_at(c("hhid", "years"), as.factor)
    )
 	model <- brm(
-		mvbind(y1, y2, y3) ~ 0 + intercept + wealthindex + (1|g|years) + (1|q|hhid)
-			, autocor = list(cor_ar(form = ~years|hhid, p = 1, cov = FALSE)
-				, cor_ar(form = ~years|hhid, p = 1, cov = FALSE)
-				, cor_ar(form = ~years|hhid, p = 1, cov = FALSE)
+		mvbind(y1bin, y2bin, y3bin) ~ 0 + intercept + wealthindex + (1|g|years) + (1|q|hhid)
+			, autocor = list(cor_ar(form = ~years|hhid, p = 1, cov = TRUE)
+				, cor_ar(form = ~years|hhid, p = 1, cov = TRUE)
+				, cor_ar(form = ~years|hhid, p = 1, cov = TRUE)
 			)
 			, data = df
-#			, family = list(bernoulli(link = "logit")
-#				, bernoulli(link = "logit")
-#				, bernoulli(link = "logit")
-#			) 
+			, family = list(bernoulli(link = "logit")
+				, bernoulli(link = "logit")
+				, bernoulli(link = "logit")
+			) 
 			, warmup = 1e3
 			, iter = 1e4
 			, chains = 4
 			, cores = parallel::detectCores()
 			, control = list(adapt_delta = 0.95)
 			, seed = 7777
-#			, prior = priors
+			, prior = priors
 	)
 	if (s <= report){
 		brmsmodel_list[[s]] <- model # Model to store
