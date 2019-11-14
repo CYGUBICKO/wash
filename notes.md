@@ -12,15 +12,15 @@ Simulation:
 
 	- mechanistic way
 		- If the value of service at current time is `1` then the switch probability to the next year is 
-			- \[\beta_{lose}\] minus the value of linear predictor `L` at the current time
+			- $\beta_{lose}$ minus the value of linear predictor `L` at the current time
 		- Otherwise, if the HH has no service at the current time, then the switch probability is
-			- \[\beta_{gain}\] plus the value of linear predictor `L` at the current time
+			- $\beta_{gain}$ plus the value of linear predictor `L` at the current time
 	
 	- simplified (or statistical) way
 		- The probability of having service at time `t + 1` is given by 
-			- \[y_{t+1} = L_{t+1} + \beta_{gain} + \beta_{add}y_t\]
+			- $y_{t+1} = L_{t+1} + \beta_{gain} + \beta_{add}y_t$
 
-			- Where \[\beta_{add} = -(\beta_{gain} + \beta_lose)\]
+			- Where $\beta_{add} = -(\beta_{gain} + \beta_lose)$
 
 	- We established that the two simulation approaches give the same results.
 
