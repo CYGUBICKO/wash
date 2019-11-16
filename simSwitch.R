@@ -21,7 +21,7 @@ set.seed(7777)
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
-nHH <- 3			# Number of HH (primary units) per year
+nHH <- 1			# Number of HH (primary units) per year
 
 nyrs <- 100		# Number of years to simulate
 yrs <- 1:nyrs 	# Years to simulate
@@ -145,3 +145,23 @@ for (r in 1:nrow(dat)){
 print(dat, N=Inf)
 
 with(dat, print(table(y1, y2)))
+
+## Analysis: Stepback trick??
+## Remove the last year and first year in the data and merge the two
+
+dat <- (dat
+	%>% filter(years != unique(max(years)))
+	%>% select(-hhid)
+	%>% setnames(names(.), paste0("c", names(.))) # c implies current time
+	%>% cbind(dat
+		%>% filter(years != unique(min(years)))
+		%>% setnames(names(.), paste0("f", names(.))) # f implies future time
+		%>% setnames("fhhid", "hhid")
+	)
+)
+
+print(b_add1)
+print(b_gain1)
+summary(glm(fy1 ~ cy1, data = dat))
+print(dat, N=Inf)
+
