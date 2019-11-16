@@ -117,21 +117,29 @@ dat <- (temp_df
 
 ## We should still add a beta here
 ## Need to be tidy!!
-dat[1, "y1"] = dat[1, "lp1"]
-dat[1, "y2"] = dat[1, "lp1"]
-os1 <- b_gain1 + b_add1/2
-os2 <- b_gain2 + b_add2/2
 
-dat[1, "y1"] <- rbinom(1, 1, plogis(os1))
-dat[1, "y2"] <- rbinom(1, 1, plogis(os2))
+## Steve trying to tidy but not today
+#df2 <- (dat
+#	%>% mutate(r = 1:n()
+#		, y1 = ifelse(r==1, rbinom(1, 1, plogis(b_gain1 + b_add1/2))
+#			, rbinom(1, 1, plogis(lp1 + b_gain1 + b_add1 * lag(y1, default = first(y1))))
+#		)
+#	)
+#)
 
-## Is there a tidy way to loop and use short varnames?
-for (r in 2:nrow(dat)){
-	os1 <- dat[r, "lp1"] + b_gain1 + b_add1*dat[r-1, "y1"]
-	os2 <- dat[r, "lp2"] + b_gain2 + b_add2*dat[r-1, "y2"]
+for (r in 1:nrow(dat)){
+	if (r == 1){
+		os1 <- b_gain1 + b_add1/2
+		os2 <- b_gain2 + b_add2/2
+		dat[r, "y1"] <- rbinom(r, 1, plogis(os1))
+		dat[r, "y2"] <- rbinom(r, 1, plogis(os2))
+	} else{
+		os1 <- dat[r, "lp1"] + b_gain1 + b_add1*dat[r-1, "y1"]
+		os2 <- dat[r, "lp2"] + b_gain2 + b_add2*dat[r-1, "y2"]
 
-	dat[r, "y1"] <- rbinom(1, 1, plogis(os1))
-	dat[r, "y2"] <- rbinom(1, 1, plogis(os2))
+		dat[r, "y1"] <- rbinom(1, 1, plogis(os1))
+		dat[r, "y2"] <- rbinom(1, 1, plogis(os2))	
+	}
 }
 
 print(dat, N=Inf)

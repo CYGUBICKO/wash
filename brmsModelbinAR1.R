@@ -87,7 +87,7 @@ for (s in 1:nsims){
 			) 
 			, warmup = 1e3
 			, iter = 1e4
-			, chains = 4
+			, chains = 2
 			, cores = parallel::detectCores()
 			, control = list(adapt_delta = 0.95)
 			, seed = 7777
