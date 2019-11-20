@@ -24,6 +24,7 @@ lines <- 200
 # AR1 process simulation
 phi <- 0.0
 phi <- 0.8
+phimult <- 0 ## control unmeasured AR for debugging
 sdeps <- 1
 
 ar1Fun <- function(phi, sdeps, nyrs, nHH){
@@ -49,7 +50,7 @@ ar1Fun <- function(phi, sdeps, nyrs, nHH){
 }
 
 ## Simulate Unmeasured (xu) and Measured (xm) covariates
-xu <- ar1Fun(phi = phi, sdeps = sdeps, nyrs = nyrs, nHH = nHH)
+xu <- ar1Fun(phi = phi*phimult, sdeps = sdeps, nyrs = nyrs, nHH = nHH)
 xm <- ar1Fun(phi = phi, sdeps = sdeps, nyrs = nyrs, nHH = nHH)
 
 ## Create dataframe of the two covariates
@@ -155,6 +156,6 @@ print(dat)
 
 print(b_add1)
 print(b_gain1)
-summary(glm(y1 ~ xm+y1p, family=binomial, data = dat))
-summary(glm(y2 ~ xm+y2p, family=binomial, data = dat))
+coef(glm(y1 ~ xm+y1p, family=binomial, data = dat))
+coef(glm(y2 ~ xm+y2p, family=binomial, data = dat))
 
