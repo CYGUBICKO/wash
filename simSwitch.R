@@ -9,13 +9,13 @@ library(dplyr); options(dplyr.width = Inf)
 library(tidyr)
 library(tibble)
 
-set.seed(7777)
+set.seed(7775)
 
 # Simulation parameters
 nsims <- 1		# Number of simulations to run
 nHH <- 1			# Number of HH (primary units) per year
 
-nyrs <- 100		# Number of years to simulate
+nyrs <- 10000		# Number of years to simulate
 yrs <- 1:nyrs 	# Years to simulate
 N <- nyrs * nHH
 
@@ -37,8 +37,8 @@ ar1Fun <- function(phi, sdeps, nyrs, nHH){
 			xprev <- ifelse(yr==1, x0, x[[yr-1]])
 			x[[yr]] <- phi*xprev + eps[[yr]]
 		}
-		dat <- data.frame(x = x, years = years, hhid = hh)
-		df_list[[hh]] <- dat
+		tempdat <- data.frame(x = x, years = years, hhid = hh)
+		df_list[[hh]] <- tempdat
 	}
 	## Rewrite this with bind_rows; you will be happy
 	df <- do.call(rbind, df_list) # Merge all the dataset for all the HH
@@ -50,7 +50,7 @@ xu <- ar1Fun(phi = phi, sdeps = sdeps, nyrs = nyrs, nHH = nHH)
 xm <- ar1Fun(phi = phi, sdeps = sdeps, nyrs = nyrs, nHH = nHH)
 
 ## Create dataframe of the two covariates
-temp_df <- (xu
+tempdat <- (xu
 	%>% setnames("x", "xu")
 	%>% right_join(xm)
 	%>% setnames("x", "xm")
@@ -82,7 +82,7 @@ b_add2 = -(b_gain2 + b_lose2)
 # Question: Should we have year effects?
 ## Probably
 
-dat <- (temp_df
+tempdat <- (tempdat
 	%>% mutate(lp1 = s1_M*xm + s1_U*xu
 		, lp2 = s2_M*xm + s2_U*xu
 		, y1 = NA
@@ -97,7 +97,7 @@ dat <- (temp_df
 ## Need to be tidy!!
 
 ## Steve trying to tidy but not today
-#df2 <- (dat
+#dat <- (tempdat
 #	%>% mutate(r = 1:n()
 #		, y1 = ifelse(r==1, rbinom(1, 1, plogis(b_gain1 + b_add1/2))
 #			, rbinom(1, 1, plogis(lp1 + b_gain1 + b_add1 * lag(y1, default = first(y1))))
@@ -105,41 +105,51 @@ dat <- (temp_df
 #	)
 #)
 
-for (r in 1:nrow(dat)){
+## Why do we divide by 2??
+## Could this also be tidy now?
+
+for (r in 1:nrow(tempdat)){
 	if (r == 1){
 		os1 <- b_gain1 + b_add1/2
 		os2 <- b_gain2 + b_add2/2
-		dat[r, "y1"] <- rbinom(r, 1, plogis(os1))
-		dat[r, "y2"] <- rbinom(r, 1, plogis(os2))
+		tempdat[r, "y1"] <- rbinom(r, 1, plogis(os1))
+		tempdat[r, "y2"] <- rbinom(r, 1, plogis(os2))
 	} else{
-		os1 <- dat[r, "lp1"] + b_gain1 + b_add1*dat[r-1, "y1"]
-		os2 <- dat[r, "lp2"] + b_gain2 + b_add2*dat[r-1, "y2"]
+		os1 <- tempdat[r, "lp1"] + b_gain1 + b_add1*tempdat[r-1, "y1"]
+		os2 <- tempdat[r, "lp2"] + b_gain2 + b_add2*tempdat[r-1, "y2"]
 
-		dat[r, "y1"] <- rbinom(1, 1, plogis(os1))
-		dat[r, "y2"] <- rbinom(1, 1, plogis(os2))	
+		tempdat[r, "y1"] <- rbinom(1, 1, plogis(os1))
+		tempdat[r, "y2"] <- rbinom(1, 1, plogis(os2))	
 	}
 }
 
-print(dat, N=Inf)
+print(tempdat, N=Inf)
+
+dat <- (tempdat
+	%>% select(-c("lp1", "lp2"))
+)
 
 with(dat, print(table(y1, y2)))
 
 ## Analysis: Stepback trick??
 ## Remove the last year and first year in the data and merge the two
 
-dat <- (dat
-	%>% filter(years != unique(max(years)))
-	%>% select(-hhid)
-	%>% setnames(names(.), paste0("c", names(.))) # c implies current time
-	%>% cbind(dat
-		%>% filter(years != unique(min(years)))
-		%>% setnames(names(.), paste0("f", names(.))) # f implies future time
-		%>% setnames("fhhid", "hhid")
+prevdat <- (dat
+	%>% transmute(hhid=hhid
+		, years = years+1
+		, y1p = y1
+		, y2p = y2
 	)
 )
 
+dat <- (dat
+	%>% left_join(prevdat)
+)
+
+print(dat)
+
 print(b_add1)
 print(b_gain1)
-summary(glm(fy1 ~ cy1, data = dat))
-print(dat, N=Inf)
+summary(glm(y1 ~ xm+y1p, family=binomial, data = dat))
+summary(glm(y2 ~ xm+y2p, family=binomial, data = dat))
 
