@@ -4,18 +4,10 @@
 #### ---- By: Steve and Jonathan ----
 #### ---- Date: 2019 Nov 09 (Sat) ----
 
-library(mvtnorm)
 library(data.table)
-library(dplyr)
-options(dplyr.width = Inf)
-
+library(dplyr); options(dplyr.width = Inf)
 library(tidyr)
 library(tibble)
-library(nlme)
-
-library(ggplot2)
-theme_set(theme_bw() +
-   theme(panel.spacing=grid::unit(0,"lines")))
 
 set.seed(7777)
 
@@ -32,7 +24,6 @@ phi <- 0.8
 sdeps <- 1
 
 ar1Fun <- function(phi, sdeps, nyrs, nHH){
-	
 	# Simulate for every HH for all the years
 	df_list <- list()
 	for (hh in 1:nHH){
@@ -53,16 +44,6 @@ ar1Fun <- function(phi, sdeps, nyrs, nHH){
 	df <- do.call(rbind, df_list) # Merge all the dataset for all the HH
 	return(df)
 }
-
-## Try the ar1Fun function
-x1_df <- ar1Fun(phi = 0.8, sdeps = 1, nyrs = 100, nHH = 3)
-
-print(x1_df)
-
-print(ggplot(x1_df, aes(x = years, y = x, colour = as.factor(hhid), group = as.factor(hhid)))
-	+ geom_line()
-#	+ scale_colour_viridis_d(name = "HHID")
-)
 
 ## Simulate Unmeasured (xu) and Measured (xm) covariates
 xu <- ar1Fun(phi = phi, sdeps = sdeps, nyrs = nyrs, nHH = nHH)
@@ -93,9 +74,6 @@ b_add1 = -(b_gain1 + b_lose1)
 b_gain2 = -0.5
 b_lose2 = -0.4
 b_add2 = -(b_gain2 + b_lose2)
-
-print(names(temp_df))
-print(summary(temp_df))
 
 # Question: Should we also simulate HH randef?
 ## Maybe: it would have to be AR1 across years
