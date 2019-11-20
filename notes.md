@@ -1,3 +1,13 @@
+
+
+2019 Nov 20 (Wed)
+=================
+
+Current ideas:
+* figure out why we can't even match the main slope
+* add more than one household (and an hhid RE)
+* does modeling jointly help with some problems?
+
 2019 Nov 14 (Thu)
 =================
 
