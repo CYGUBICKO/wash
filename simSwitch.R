@@ -15,11 +15,14 @@ set.seed(7775)
 nsims <- 1		# Number of simulations to run
 nHH <- 1			# Number of HH (primary units) per year
 
-nyrs <- 10000		# Number of years to simulate
+nyrs <- 1000		# Number of years to simulate
 yrs <- 1:nyrs 	# Years to simulate
 N <- nyrs * nHH
 
+lines <- 200
+
 # AR1 process simulation
+phi <- 0.0
 phi <- 0.8
 sdeps <- 1
 
@@ -75,6 +78,8 @@ b_gain2 = -0.5
 b_lose2 = -0.4
 b_add2 = -(b_gain2 + b_lose2)
 
+## b_add1 = b_add2 = 0
+
 # Question: Should we also simulate HH randef?
 ## Maybe: it would have to be AR1 across years
 ## Don't do it to correlate services (not mechanistic)
@@ -123,7 +128,7 @@ for (r in 1:nrow(tempdat)){
 	}
 }
 
-print(tempdat, N=Inf)
+print(tempdat, N=lines)
 
 dat <- (tempdat
 	%>% select(-c("lp1", "lp2"))
