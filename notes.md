@@ -1,3 +1,12 @@
+2019 Dec 03 (Tue)
+=================
+
+Steve:
+* With several simulations (500), we somehow capture the true parameters
+	* Haven't tried it much yet but we might have to play with `phimult`
+* Added HH level random effect and used glmer for `y1` and `y2` separately
+	* More than 1 HH
+* Tried joint model and I was able to capture true values but was slow and could do many simulations so back to above
 
 
 2019 Nov 20 (Wed)
