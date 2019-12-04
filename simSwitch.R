@@ -12,14 +12,14 @@ library(tibble)
 set.seed(7775)
 
 # Simulation parameters
-nsims <- 500		# Number of simulations to run
+nsims <- 100		# Number of simulations to run
 nHH <- 30			# Number of HH (primary units) per year
 
 nyrs <- 100		# Number of years to simulate
 yrs <- 1:nyrs 	# Years to simulate
 N <- nyrs * nHH
 
-lines <- 200
+printLines <- 200
 
 # True parameter values
 
@@ -43,7 +43,7 @@ b_add2 = -(b_gain2 + b_lose2)
 
 # AR1 process simulation
 phi <- 0.8
-phimult <- 0.3 ## control unmeasured AR for debugging
+phimult <- 0 ## control unmeasured AR for debugging
 sdeps <- 1
 
 

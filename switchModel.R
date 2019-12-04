@@ -10,7 +10,6 @@ library(tibble)
 library(ggplot2); theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines")))
 library(lme4)
 
-
 load("simSwitch.rda")
 
 # Objects in
@@ -60,16 +59,16 @@ for (s in 1:nsims){
 	)
 	tryCatch({
 		# y1 model
-   	y1_model <- glmer(y1 ~ y1p + xm + (1|years) + (1|hhid)
+   	y1_model <- glmer(y1 ~ y1p + xm + (1|hhid)
       	, data = df
       	, family = binomial
-			, control=lmerControl(check.nobs.vs.nlev="ignore",check.nobs.vs.nRE="ignore")
+			, control=glmerControl(check.nobs.vs.nlev="ignore",check.nobs.vs.nRE="ignore")
    	)
    	y1_coef_list[[s]] <- fixef(y1_model)
 		y1_model_list[[s]] <- y1_model
 		
 		# y2 model
-   	y2_model <- glmer(y2 ~ y2p + xm + (1|years) + (1|hhid)
+   	y2_model <- glmer(y2 ~ y2p + xm + (1|hhid)
       	, data = df
       	, family = binomial
 			, control = glmerControl(check.nobs.vs.nlev="ignore" ,check.nobs.vs.nRE="ignore")
@@ -77,7 +76,7 @@ for (s in 1:nsims){
    	y2_coef_list[[s]] <- fixef(y2_model)
 		y2_model_list[[s]] <- y2_model
 	}
-	, error = function(e){print(e)}
+	, error = function(e){print(paste("ERROR caught:", e))}
 	)
 }
 
@@ -119,6 +118,8 @@ print(ggplot(y2_coef_df, aes(x = values))
 	+ facet_wrap(~coefs, scales = "free")
 	+ guides(colour = FALSE)
 )
+
+warnings( )
 
 ## Joint model: Working but slow for now
 #f1 <- bf(y1 ~ 0 + intercept + y1p + xm + (1|g|years) + (1|q|hhid))
