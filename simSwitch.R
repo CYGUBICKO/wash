@@ -12,7 +12,7 @@ library(tibble)
 set.seed(7775)
 
 # Simulation parameters
-nsims <- 100		# Number of simulations to run
+nsims <- 5000		# Number of simulations to run
 nHH <- 30			# Number of HH (primary units) per year
 
 nyrs <- 100		# Number of years to simulate

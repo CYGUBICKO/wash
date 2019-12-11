@@ -47,108 +47,98 @@ betas_df <- (data.frame(y1_M = s1_M
 print(betas_df)
 
 nsims <- length(sim_dflist)
-y1_coef_list <- list()
-y1_model_list <- list()
+y1coef_list <- list()
+y1model_list <- list()
 
-y2_coef_list <- list()
-y2_model_list <- list()
+y2coef_list <- list()
+y2model_list <- list()
+
+glmercoef_list <- list()
+glmermodel_list <- list()
 
 for (s in 1:nsims){
 	df <- (sim_dflist[[s]]
-		%>% filter(years >= 10) #Throw away first 10 years
+		%>% filter(years >= 20) #Throw away first 10 years
 	)
+	long_df1 <- (df
+		%>% gather(services, status, c("y1", "y2"))
+	)
+	long_df2 <- (df
+		%>% select(-xm)
+		%>% gather(serviceP, statusP, c("y1p", "y2p"))
+		%>% mutate_at("serviceP", function(x)gsub("p", "", x))
+	)
+	long_df <- (long_df1
+		%>% full_join(long_df2, by = c("hhid", "years", c(services="serviceP")))
+	)
+	
 	tryCatch({
 		# y1 model
    	y1_model <- glmer(y1 ~ y1p + xm + (1|hhid)
       	, data = df
       	, family = binomial
-			, control=glmerControl(check.nobs.vs.nlev="ignore",check.nobs.vs.nRE="ignore")
    	)
-   	y1_coef_list[[s]] <- fixef(y1_model)
-		y1_model_list[[s]] <- y1_model
+   	y1coef_list[[s]] <- fixef(y1_model)
+		y1model_list[[s]] <- y1_model
 		
 		# y2 model
    	y2_model <- glmer(y2 ~ y2p + xm + (1|hhid)
       	, data = df
       	, family = binomial
-			, control = glmerControl(check.nobs.vs.nlev="ignore" ,check.nobs.vs.nRE="ignore")
    	)
-   	y2_coef_list[[s]] <- fixef(y2_model)
-		y2_model_list[[s]] <- y2_model
+   	y2coef_list[[s]] <- fixef(y2_model)
+		y2model_list[[s]] <- y2_model
+   	
+		# Joint model
+		glmer_model <- glmer(status ~ -1 + (services + statusP + xm):services + (0 + services|hhid)
+      	, data = long_df
+      	, family = binomial(link = "logit")
+			, control=glmerControl(optimizer="bobyqa")
+   	)
+   	glmercoef_list[[s]] <- fixef(glmer_model)
+		glmermodel_list[[s]] <- glmer_model
 	}
 	, error = function(e){print(paste("ERROR caught:", e))}
 	)
 }
 
-y1_coef_df <- (Reduce(rbind, y1_coef_list)
+#### ---- Tidy coefficients ----
+
+y1coef_df <- (Reduce(rbind, y1coef_list)
 	%>% as_tibble()
 	%>% gather(coefs, values)
 )
-print(y1_coef_df)
+print(data.frame(y1coef_df))
 
-y2_coef_df <- (Reduce(rbind, y2_coef_list)
+y2coef_df <- (Reduce(rbind, y2coef_list)
 	%>% as_tibble()
 	%>% gather(coefs, values)
 )
-print(y2_coef_df)
+print(data.frame(y2coef_df))
 
-
-## Histograms
-
-### y1
-print(ggplot(y1_coef_df, aes(x = values))
-	+ geom_histogram()
-   + geom_vline(data = betas_df
-		%>% filter(grepl("^y1", coefs2))
-		, aes(xintercept = betas, color = coefs2)
-      , linetype="dashed"
-   )
-	+ facet_wrap(~coefs, scales = "free")
-	+ guides(colour = FALSE)
+glmercoef_df <- (Reduce(rbind, glmercoef_list)
+	%>% as_tibble()
+	%>% gather(coefs, values)
+	%>% mutate(variables = paste0("y", extract_numeric(coefs))
+		, coefs = gsub(".*y[1-2]", "(Intercept)", gsub(".*statusP", "yp", gsub(".*\\:", "", coefs)))
+	)
 )
+print(data.frame(glmercoef_df))
 
-### y2
-print(ggplot(y2_coef_df, aes(x = values))
-	+ geom_histogram()
-   + geom_vline(data = betas_df
-		%>% filter(grepl("^y2", coefs2))
-		, aes(xintercept = betas, color = coefs2)
-      , linetype="dashed"
-   )
-	+ facet_wrap(~coefs, scales = "free")
-	+ guides(colour = FALSE)
+
+save(file = "switchModel.rda"
+	, glmercoef_df
+	, glmermodel_list
+	, y1coef_df
+	, y1model_list
+	, y2coef_df
+	, y2model_list
+	, betas_df
+	, s1_M
+	, s2_M
+	, b_gain1
+	, b_add1
+	, b_gain2
+	, b_add2
 )
-
-warnings( )
-
-## Joint model: Working but slow for now
-#f1 <- bf(y1 ~ 0 + intercept + y1p + xm + (1|g|years) + (1|q|hhid))
-#f2 <- bf(y2 ~ 0 + intercept + y2p + xm + (1|g|years) + (1|q|hhid))
-#
-#model3 <- brm(
-#	mvbf(f1, f2)
-#		, data = dat
-#		, family = list(bernoulli(link = "logit")
-#			, bernoulli(link = "logit")
-#		) 
-#		, warmup = 1e3
-#		, iter = 2000
-#		, chains = 2
-#		, cores = parallel::detectCores()
-#		, control = list(adapt_delta = 0.95)
-#		, seed = 7777
-##		, prior = priors
-#)
-
-
-#save(file = "glmerModelbin.rda"
-#	, glmermodel_list
-#   , glmercoef_df
-#	, glmerdf_list
-#	, betas_df
-#	, betas
-#	, covmat_df
-#	, covMat
-#	, corMat
-#)
 

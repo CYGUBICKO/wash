@@ -185,6 +185,7 @@ simulations_analysis_output.html: simulations_analysis_output.rmd
 ## AR1 based covariates simulations
 simSwitch.Rout: simSwitch.R
 switchModel.Rout: switchModel.R
+switchSummary.Rout: switchSummary.R
 
 ## Run and push
 run_push:
