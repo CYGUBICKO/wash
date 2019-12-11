@@ -11,6 +11,7 @@ library(ggplot2); theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines
 library(lme4)
 
 load("switchModel.rda")
+source("../checkPlots/checkFuns.R")
 
 set.seed(7748)
 
@@ -63,13 +64,7 @@ for(p in names(pp)){
 		%>% filter(parms == p)
 	)
 	pvalues <- pull(df, pvalues)
-#	print(ggplot(df, aes(x = pvalues))
-#		+ geom_histogram()
-#		+ labs(title = p
-#			, x = "P-values"
-#		)
-#	)
-	hist(pvalues, main = p)
+	print(pianoPlot(pvalues, tag = p))
 }
 
 
