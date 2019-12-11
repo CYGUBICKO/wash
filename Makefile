@@ -187,6 +187,8 @@ simSwitch.Rout: simSwitch.R
 switchModel.Rout: switchModel.R
 switchSummary.Rout: switchSummary.R
 
+switchInspect.Rout: switchInspect.R 
+
 ## Run and push
 run_push:
 	make simulations_analysis_writeup.html.pages
