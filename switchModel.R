@@ -21,7 +21,7 @@ load("simSwitch.rda")
 # * b_gain2
 # * b_add2
 
-set.seed(7748)
+set.seed(7775)
 
 # True parameters
 betas_df <- (data.frame(y1_M = s1_M

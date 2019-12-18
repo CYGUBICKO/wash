@@ -187,6 +187,9 @@ simSwitch.Rout: simSwitch.R
 switchModel.Rout: switchModel.R
 switchSummary.Rout: switchSummary.R
 
+## Complete simulation report
+simulations_report.html: simulations_report.rmd
+
 switchInspect.Rout: switchInspect.R 
 
 ## Run and push

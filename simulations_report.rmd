@@ -1,0 +1,149 @@
+---
+title: 'Simulated data documentation'
+author: "Steve and Jonathan"
+date: " `r as.Date(Sys.time())` "
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(echo = FALSE
+	, warning = FALSE
+	, message = FALSE
+	, fig.width = 10
+	, fig.height = 10
+	, results = "asis")
+options(width = 12)
+
+library(ggplot2)
+theme_set(theme_bw() +
+	theme(panel.spacing=grid::unit(0,"lines")))
+
+load("switchSummary.rda")
+```
+
+In this task, we simulate data for the three WASH services using two approaches, namely:
+	
+- Latent variable approach
+- Matrix based approach (known covariances and correlations)
+
+The details are discussed in the sections below.
+
+
+## Latent variable approach
+
+The main idea is to simulate both measured and unmeasured covariates from a given distribution with know parameters. For simplicity, we consider only one measured covariate $(xm)$ and one unmeasured covariate $(xu)$.
+
+We assume that the availability of services at time $t$ depends on availability at time $t-1$ and simulate the two covariates as a first-order autoregressive, AR(1), process:
+
+\[
+xm_{ht} = xm_{h0} + \phi_m xm_{ht-1} + \epsilon_{ht}
+\]
+
+and
+
+\[
+xu_{ht} = xu_{h0} + \phi_u xu_{ht-1} + \epsilon_{ht}
+\]
+
+Where:
+
+\[
+|\phi_m|, |\phi_u| < 1\\ 
+\epsilon_{ht} \sim \mathit{N}(0, \sigma^2)\\
+xm_{h0} \sim \mathit{N}(0, \sigma^2_{Asympt})\\
+xu_{h0} \sim \mathit{N}(0, \sigma^2_{Asympt})\\
+\sigma^2_{Asympt} = \frac{\sigma^2}{1 - \phi^2}
+\]
+
+- $\phi$ and $\sigma^2_{Asympt}$ are the slope defining the autocorrelation at lag 1 and the theoretical variance of the AR(1) process, respectively.
+- $xm_{ht}$ and $xu_{ht}$ are the measured and unmeasured covariates for household $h$ at time $t$.
+
+Let $\beta_{u1}$ and $\beta_{m1}$ be the effect sizes of measured and unmeasured covariates defined above. Define linear predictor for a given service for household $h$ at time $t$ as
+
+\[
+l_{ht} = \beta_{u1}xu_{ht} + \beta_{m1}xm_{ht} + \epsilon_{h} 
+\]
+
+- $\epsilon_{h}$ are the household random effects such that
+
+\[
+\epsilon_{h} \sim \mathit{N}(0, 1)
+\]
+
+
+The household services for the time period $t + 1$ are generated using _switch_ probabilities. Let $\beta_{lose}$ be the odd of losing service and $\beta_{gain}$ be the odd of gaining service, switch probabilities are either defined in a:
+
+- **mechanistic way**
+	- If the household has service at the current time, $S_{ht} = 1$, then the odd of having service in $t+1$ is $\beta_{lose} - l_{ht}$. The switch probability is given by
+\[
+P_{ht} = \frac{1}{1 + \exp{(-(\beta_{lose} - l_{ht})})}
+\]
+	- Otherwise, if $S_{ht} = 0$, switch probability is given by
+\[
+P_{ht} = \frac{1}{1 + \exp{(-(\beta_{gain} + l_{ht})})}
+\]
+
+- **simplified (or statistical) way**
+
+	- The odd of household $h$ having service at time $t$ is defined as
+\[
+O_{ht} = l_{ht} + \beta_{gain} + \beta_{add}O_{ht-1}\\
+\beta_{add} = -(\beta_{gain} + \beta_{lose}).
+\]
+	Thus, switch probability is defined as
+\[
+P_{ht} = \frac{1}{1 + \exp{(-O_{ht})}}
+\]
+	- $O_{ht}$, $t = 0$ can be chosen at random
+
+For this task, we use the simplified approach since we established that the two simulation approaches give the same results.
+
+Observed service of household $h$ at time $t$ is drawn from a binomial distribution i.e.,
+\[
+S_{ht} \sim \mathit{Bin}(1, P_{ht}).
+\]
+
+We simulated two services for $5000$ households running for $100$ years. Cases for the first $20$ years were excluded from the analysis (to take care of stationarity of the AR(1) process).
+
+### Fitting method
+
+
+
+```{R}
+print(checkPlot_list[[1]])
+```
+
+```{R}
+print(checkPlot_list[[2]])
+```
+
+```{R}
+print(checkPlot_list[[3]])
+```
+
+```{R}
+print(checkPlot_list[[4]])
+```
+
+```{R}
+print(checkPlot_list[[5]])
+```
+
+```{R}
+print(checkPlot_list[[6]])
+```
+
+
+```{R}
+print(y1Beta_plot)
+```
+
+```{R}
+print(y2Beta_plot)
+```

@@ -13,7 +13,7 @@ library(lme4)
 load("switchModel.rda")
 source("../checkPlots/checkFuns.R")
 
-set.seed(7748)
+set.seed(7775)
 
 ## check plots: Extract pvalue estimates to do checkplots
 ### parms = list(parm est. as per the glmer object = true value)
@@ -59,12 +59,15 @@ for (s in 1:nsims){
 
 pv_df <- bind_rows(checkvals)
 
+checkPlot_list <- list()
 for(p in names(pp)){
 	df <- (pv_df
 		%>% filter(parms == p)
 	)
 	pvalues <- pull(df, pvalues)
-	print(pianoPlot(pvalues, tag = p))
+	cplot <- pianoPlot(pvalues, tag = p)
+	checkPlot_list[[p]] <- cplot
+	print(cplot)
 }
 
 
@@ -74,7 +77,7 @@ for(p in names(pp)){
 ### Joint models
 
 # y1
-print(ggplot(glmercoef_df %>% filter(variables=="y1"), aes(x = values))
+y1Beta_plot <- (ggplot(glmercoef_df %>% filter(variables=="y1"), aes(x = values))
 	+ geom_histogram()
    + geom_vline(data = betas_df
 		%>% filter(grepl("^y1", coefs2))
@@ -85,9 +88,10 @@ print(ggplot(glmercoef_df %>% filter(variables=="y1"), aes(x = values))
 	+ facet_wrap(~coefs, scales = "free")
 	+ guides(colour = FALSE)
 )
+print(y1Beta_plot)
 
 # y2
-print(ggplot(glmercoef_df %>% filter(variables=="y2"), aes(x = values))
+y2Beta_plot <- (ggplot(glmercoef_df %>% filter(variables=="y2"), aes(x = values))
 	+ geom_histogram()
    + geom_vline(data = betas_df
 		%>% filter(grepl("^y2", coefs2))
@@ -98,31 +102,39 @@ print(ggplot(glmercoef_df %>% filter(variables=="y2"), aes(x = values))
 	+ facet_wrap(~coefs, scales = "free")
 	+ guides(colour = FALSE)
 )
+print(y2Beta_plot)
 
-quit()
+
 ### Separate models
 
 ### y1
-print(ggplot(y1coef_df, aes(x = values))
-	+ geom_histogram()
-   + geom_vline(data = betas_df
-		%>% filter(grepl("^y1", coefs2))
-		, aes(xintercept = betas, color = coefs2)
-      , linetype="dashed"
-   )
-	+ facet_wrap(~coefs, scales = "free")
-	+ guides(colour = FALSE)
-)
+#print(ggplot(y1coef_df, aes(x = values))
+#	+ geom_histogram()
+#   + geom_vline(data = betas_df
+#		%>% filter(grepl("^y1", coefs2))
+#		, aes(xintercept = betas, color = coefs2)
+#      , linetype="dashed"
+#   )
+#	+ facet_wrap(~coefs, scales = "free")
+#	+ guides(colour = FALSE)
+#)
+#
+#### y2
+#print(ggplot(y2coef_df, aes(x = values))
+#	+ geom_histogram()
+#   + geom_vline(data = betas_df
+#		%>% filter(grepl("^y2", coefs2))
+#		, aes(xintercept = betas, color = coefs2)
+#      , linetype="dashed"
+#   )
+#	+ facet_wrap(~coefs, scales = "free")
+#	+ guides(colour = FALSE)
+#)
+#
 
-### y2
-print(ggplot(y2coef_df, aes(x = values))
-	+ geom_histogram()
-   + geom_vline(data = betas_df
-		%>% filter(grepl("^y2", coefs2))
-		, aes(xintercept = betas, color = coefs2)
-      , linetype="dashed"
-   )
-	+ facet_wrap(~coefs, scales = "free")
-	+ guides(colour = FALSE)
-)
 
+save(file = "switchSummary.rda"
+	, checkPlot_list
+	, y1Beta_plot
+	, y2Beta_plot
+)
