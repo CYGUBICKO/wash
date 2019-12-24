@@ -207,6 +207,9 @@ mvnSim.Rout: mvnSim.R
 ### Simple ar simulation
 ar.Rout: ar.R
 
+### Ben Bolker suggestions
+corr_effs.html: corr_effs.rmd
+
 ######################################################################
 
 ## Why does Steve need so many? Should some be in stepR?
