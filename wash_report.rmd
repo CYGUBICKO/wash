@@ -37,8 +37,8 @@ theme_set(theme_bw() +
 ```{r}
 load("cleaning.rda")
 load("descriptives.rda")
-load("simpleGlm.rda")
-load("glmerSummary.rda")
+#load("simpleGlm.rda")
+#load("glmerSummary.rda")
 ```
 
 <br><br>
@@ -237,7 +237,7 @@ The three simulated wash variables were transformed to long format; Services is 
 * `model <- glm(status ~ 0 + service:wealthindex + service, data = data, family = "binomial") `
 
 ```{r}
-glm_beta_plot
+#glm_beta_plot
 ```
 
 ## Complex GMLER
@@ -246,7 +246,7 @@ glm_beta_plot
 * `model <- gmler(status ~ 0 + wealthindex:services + service + (1|hhid_anon), data = data, family = binomial)`
 
 ```{r}
-complexglmer_plot 
+#complexglmer_plot 
 ```
 
 

@@ -187,19 +187,10 @@ simSwitch.Rout: simSwitch.R
 switchModel.Rout: switchModel.R
 switchSummary.Rout: switchSummary.R
 
-## Complete simulation report
-simulations_report.html: simulations_report.rmd
-
 switchInspect.Rout: switchInspect.R 
 
-## Run and push
-run_push:
-	make simulations_analysis_writeup.html.pages
-	make datalunch_wash_presentation.pdf.pages
-	make simulations_analysis_output.html.pages
-	cd pages && git push
-	make sync
-#	cd ~/grive && grive
+## Complete simulation report
+simulations_report.html: simulations_report.rmd
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
@@ -210,7 +201,26 @@ ar.Rout: ar.R
 ### Ben Bolker suggestions
 corr_effs.html: corr_effs.rmd
 
+
 ######################################################################
+
+## WASH Analysis of real data
+washdataInspect.Rout: washdataInspect.R
+washModelfit.Rout: washModelfit.R
+washTidyestimates.Rout: washTidyestimates.R
+washdataInspect_report.html: washdataInspect_report.rmd
+
+
+######################################################################
+
+## Run and push
+run_push:
+	make simulations_analysis_writeup.html.pages
+	make datalunch_wash_presentation.pdf.pages
+	make simulations_analysis_output.html.pages
+	cd pages && git push
+	make sync
+#	cd ~/grive && grive
 
 ## Why does Steve need so many? Should some be in stepR?
 Ignore += *.rda
