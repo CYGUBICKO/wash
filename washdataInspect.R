@@ -30,8 +30,7 @@ wash_df <- (working_df
 	)
 	%>% setnames(names(.), gsub(".*_hh|.*hhd|_anon|is|intvw|years", "", names(.)))
 	%>% setnames("numpeople_total", "hhsize")
-	%>% mutate_at(c("age", "wealthindex", "hhsize"), function(x){x = drop(scale(x))})
-	%>% mutate(year = as.numeric(as.factor(year)))
+	%>% mutate_at(c("age", "wealthindex"), function(x){x = drop(scale(x))})
 )
 str(wash_df)
 
@@ -84,7 +83,7 @@ wash_consec_df <- (wash_df
 	)
 	%>% ungroup()
 )
-#print(wash_consec_df, n = 50, width = Inf)
+#print(wash_consec_df, n = 100, width = Inf)
 
 ## Randomly pick starting values for services for base year
 wash_consec_ryr0_df <- (wash_consec_df
@@ -110,7 +109,7 @@ prevcases_df <- (wash_consec_df
 
 #print(prevcases_df, n = 50, width = Inf)
 
-print(nrow(wash_consec_df))
+#print(nrow(wash_consec_df))
 #print(sum(prevcases_df$n))
 #print(nrow(prevdat))
 
@@ -119,7 +118,7 @@ print(nrow(wash_consec_df))
 #	%>% filter(!is.na(watersourceP))
 #)
 
-print(wash_consec_df, n = 50, width = Inf)
+#print(wash_consec_df, n = 50, width = Inf)
 
 save(file = "washdataInspect.rda"
 	, wash_consec_df

@@ -32,8 +32,10 @@ longDFunc <- function(df){
 	
 	long_df <- (temp_df1
 		%>% full_join(temp_df2, by = c("hhid", "year", c(services = "serviceP")))	
+		%>% mutate_at(c("hhsize", "year"), function(x){as.numeric(as.factor(x))})
+		%>% data.frame()
 	)
-	
+		
 	return(long_df)
 }
 
@@ -53,12 +55,12 @@ fixed_effects <- paste0(c("-1"
 	)
 	, collapse = "+"
 )
-rand_effects <- paste0("(", "services-1", "|", "hhid", ")")
+rand_effects <- paste0("(services-1|hhid)") #, " + ", "(services-1|year)")
 model_form <- as.formula(paste0("status ~ ", fixed_effects, " + ", rand_effects))
 
 #### Model 1: Case 1 above
 
-lagged_long_df <- longDFunc(wash_lagged_df)
+#lagged_long_df <- longDFunc(wash_lagged_df)
 #print(lagged_long_df, n = 50, width = Inf)
 
 #glmer_model_lagged <- glmer(model_form
@@ -70,6 +72,7 @@ lagged_long_df <- longDFunc(wash_lagged_df)
 #### Model 2: Case 2 above
 
 consec_long_df <- longDFunc(wash_consec_df)
+head(consec_long_df, n = 50)
 
 glmer_model_consec <- glmer(model_form
 	, data = consec_long_df
