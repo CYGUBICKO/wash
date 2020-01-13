@@ -30,7 +30,10 @@ wash_df <- (working_df
 	)
 	%>% setnames(names(.), gsub(".*_hh|.*hhd|_anon|is|intvw|years", "", names(.)))
 	%>% setnames("numpeople_total", "hhsize")
-	%>% mutate_at(c("age", "wealthindex"), function(x){x = drop(scale(x))})
+	%>% mutate(year = as.numeric(as.factor(year))
+		, year_scaled = drop(scale(year))
+	)
+	%>% mutate_at(c("age", "wealthindex", "hhsize"), function(x){x = drop(scale(x))})
 )
 str(wash_df)
 

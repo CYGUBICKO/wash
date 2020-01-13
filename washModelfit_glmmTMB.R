@@ -9,7 +9,7 @@ library(dplyr)
 library(tidyr)
 library(data.table)
 library(tibble)
-library(lme4)
+library(glmmTMB)
 
 load("washdataInspect.rda")
 
@@ -57,28 +57,15 @@ fixed_effects <- paste0(c("-1"
 rand_effects <- paste0("(services-1|hhid)") #, " + ", "(services-1|year)")
 model_form <- as.formula(paste0("status ~ ", fixed_effects, " + ", rand_effects))
 
-#### Model 1: Case 1 above
-
-#lagged_long_df <- longDFunc(wash_lagged_df)
-#print(lagged_long_df, n = 50, width = Inf)
-
-#glmer_model_lagged <- glmer(model_form
-#	, data = lagged_long_df
-#	, family = binomial(link = "logit")
-#	, control = glmerControl(optimizer="bobyqa")
-#)
 
 #### Model 2: Case 2 above
 
 consec_long_df <- longDFunc(wash_consec_df)
 head(consec_long_df, n = 50)
 
-glmer_model_consec <- glmer(model_form
+glmmTMB_model_consec <- glmmTMB(model_form
 	, data = consec_long_df
-	, family = binomial(link = "logit")
-	, control = glmerControl(optimizer="bobyqa"
-		, optCtrl=list(maxfun=2e5)
-	)
+	, family = list(family="binomial",link="logit")
 )
 
 
@@ -86,18 +73,15 @@ glmer_model_consec <- glmer(model_form
 consec_long_df_scaledyr <- (consec_long_df
 	%>% mutate(year = year_scaled)
 )
-glmer_model_consec_scaledyr <- glmer(model_form
+glmmTMB_model_consec_scaledyr <- glmmTMB(model_form
 	, data = consec_long_df_scaledyr
-	, family = binomial(link = "logit")
-	, control = glmerControl(optimizer="bobyqa"
-		, optCtrl=list(maxfun=2e5)
-	)
+	, family = list(family="binomial",link="logit")
 )
 
-save(file = "washModelfit.rda"
-#	, glmer_model_lagged
-	, glmer_model_consec
-	, glmer_model_consec_scaledyr
+save(file = "washModelfit_glmmTMB.rda"
+#	, glmmTMB_model_lagged
+	, glmmTMB_model_consec
+	, glmmTMB_model_consec_scaledyr
 	, consec_long_df
 	, consec_long_df_scaledyr
 	, model_form

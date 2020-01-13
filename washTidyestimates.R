@@ -8,18 +8,22 @@ library(dplyr)
 library(tidyr)
 library(tibble)
 library(purrr)
-library(broom)
+library(broom.mixed)
 
 library(data.table)
 library(lme4)
 
 load("washModelfit.rda")
+load("washModelfit_glmmTMB.rda")
 
-extract_coefs_df <- (map(list(#lagged = glmer_model_lagged
-#		, lagged_randYear0 = glmer_model_lagged_ryr0
-#		, lagged_vyears = glmer_model_lagged_accross_years
-		consec = glmer_model_consec
-#		, consec_randYear0 = glmer_model_consec_ryr0
+unscaled_glmer = glmer_model_consec
+scaled_glmer = glmer_model_consec_scaledyr
+unscaled_TMB = glmmTMB_model_consec
+scaled_TMB = glmmTMB_model_consec_scaledyr
+extract_coefs_df <- (map(list(unscaled_glmer = unscaled_glmer
+		, scaled_glmer = scaled_glmer
+		, unscaled_TMB = unscaled_TMB
+		, scaled_TMB = scaled_TMB
 	)
 		, tidy
 		, conf.int = TRUE
@@ -27,7 +31,7 @@ extract_coefs_df <- (map(list(#lagged = glmer_model_lagged
 	%>% bind_rows(.id = "model")
 	%>% mutate(term = factor(term, levels = unique(term))
 		, term = gsub("services", "", term)
-		, parameter = ifelse(!grepl("\\:|\\.", term), "Overall", term)
+		, parameter = ifelse(!grepl("\\:|\\.|^cor|^sd", term), "Services", term)
 		, parameter = ifelse(grepl("^cor|^sd", parameter)
 			, paste0(gsub("\\_.*", "", parameter), "_", group)
 			, gsub(".*\\:", "", parameter)
@@ -42,6 +46,8 @@ print(extract_coefs_df, n = Inf, width = Inf)
 
 save(file = "washTidyestimates.rda"
 	, extract_coefs_df
-#	, glmer_model_lagged
-	, glmer_model_consec
+	, unscaled_glmer
+	, unscaled_TMB
+	, scaled_glmer
+	, scaled_TMB
 )

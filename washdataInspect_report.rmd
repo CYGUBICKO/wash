@@ -23,6 +23,7 @@ options(width = 12)
 library(ggplot2)
 theme_set(theme_bw() +
 	theme(panel.spacing=grid::unit(0,"lines")))
+library(ggpubr)
 
 library(dplyr)
 library(DT)
@@ -31,10 +32,14 @@ library(dotwhisker)
 library(ggstance)
 library(corrplot)
 library(lme4)
+library(splines)
 
 source("../funs/ggplot_theme.R")
+source("../funs/effectsPlot.R")
+
 load("washdataInspect.rda")
 load("washTidyestimates.rda")
+load("washPredEffects.rda")
 ```
 
 ## Variables
@@ -205,9 +210,9 @@ summary_df3 <- (wash_lagged_df
 	- Should we impute services for the previous year in the first year (household specific)?
 
 
-## Compare estimates
+## Estimates
 
-```{R fig.width = 12, fig.height = 12}
+```{R fig.width = 12, fig.height = 14}
 estimates_df <- extract_coefs_df
 parameters <- pull(estimates_df, parameter) %>% unique()
 estimates_df <- (estimates_df
@@ -235,6 +240,67 @@ print(ggplot(estimates_df
 	+ theme(legend.position = "bottom")
 )
 
+```
+
+## Predictor effect plots
+
+
+```{R}
+#names(mod_effect_df) <- gsub(".*\\:|.*\\(|\\,.*", "", names(mod_effect_df))
+service_df <- (data.frame(mod_effect_df[["services"]])[, c("services", "fit", "lower", "upper")]
+	%>% group_by(services) 
+	%>% summarise_at(vars(fit:upper), mean, na.rm = TRUE)
+)
+service_plot <- (ggplot(service_df, aes(x = services, y = fit))
+	+ geom_point(size = 0.6)
+	+ geom_errorbar(aes(ymin = lower, ymax = upper), width = 0)
+	+ scale_x_discrete(limits = c("watersource", "garbagedposal", "toilettype"))
+	+ labs(x = "Services"
+		, y = "Probability of\nimproved service"
+	)
+)
+```
+
+
+```{R fig.height=8}
+num_vars <- c("age"
+	, "hhsize"
+	, "year"
+	, "wealthindex"
+	, "statusP"
+)
+num_plots <- lapply(num_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
+ggarrange(service_plot
+	, num_plots[[1]] + rremove("ylab")
+	, num_plots[[2]] + rremove("ylab")
+	, num_plots[[3]] #+ rremove("ylab")
+	, num_plots[[4]] + rremove("ylab")
+	, num_plots[[5]] + rremove("ylab")
+	, common.legend = TRUE
+	, legend = "bottom"
+	, nrow = 2
+	, ncol = 3
+)
+```
+
+```{R fig.height = 8}
+cat_vars <- c("slumarea", "gender")
+cat_plots <- lapply(cat_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
+p1 <- (cat_plots[[1]]
+   + theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
+      , panel.spacing.x = unit(1, "lines")
+   )
+)
+p2 <- (cat_plots[[2]]
+	+ theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
+		, panel.spacing.x = unit(1, "lines")
+	)
+)
+ggarrange(p1 #+ rremove("ylab")
+	, p2 #+ rremove("ylab")
+	, nrow = 3 
+	, ncol = 1
+)
 ```
 
 ```{R fig.width=8, fig.height=8, fig.align="center"}

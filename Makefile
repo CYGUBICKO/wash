@@ -207,8 +207,20 @@ corr_effs.html: corr_effs.rmd
 ## WASH Analysis of real data
 washdataInspect.Rout: washdataInspect.R
 washModelfit.Rout: washModelfit.R
+washModelfit_glmmTMB.Rout: washModelfit_glmmTMB.R
 washTidyestimates.Rout: washTidyestimates.R
+
+### Wash predictor effects
+washPredEffects.Rout: washPredEffects.R
+
+### Analysis report
 washdataInspect_report.html: washdataInspect_report.rmd
+
+### Calculate variable level p-values
+washModelPvalues.Rout: washModelPvalues.R
+
+washModel_isoplots.Rout: washModel_isoplots.R
+
 
 
 ######################################################################
