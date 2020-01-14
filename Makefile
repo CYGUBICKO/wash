@@ -187,10 +187,23 @@ simSwitch.Rout: simSwitch.R
 switchModel.Rout: switchModel.R
 switchSummary.Rout: switchSummary.R
 
-switchInspect.Rout: switchInspect.R 
+switchInspect.Rout: switchInspect.R
 
 ## Complete simulation report
 simulations_report.html: simulations_report.rmd
+
+
+### Exploring effects plots by JD
+switchSingleModel.Rout: switchSingleModel.R
+eplotsFuns.Rout: eplotsFuns.R
+ordFuns.Rout: ordFuns.R
+
+### Iso effect plots - JD
+switchEffect_plots.Rout: switchEffect_plots.R
+
+### Effects plot effects package
+switchPredEffects.Rout: switchPredEffects.R
+
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
@@ -206,14 +219,37 @@ corr_effs.html: corr_effs.rmd
 
 ## WASH Analysis of real data
 washdataInspect.Rout: washdataInspect.R
-washModelfit.Rout: washModelfit.R
-washModelfit_glmmTMB.Rout: washModelfit_glmmTMB.R
+
+## Restructured data for hhid-year-services
+longDFunc.Rout: longDFunc.R
+washModeldata.Rout: washModeldata.R
+
+## Fitting models
+
+## glmer
+
+### Scaled year variable
+washModelfit_glmerS.Rout: washModelfit_glmerS.R
+
+### Unscaled year variable
+washModelfit_glmerU.Rout: washModelfit_glmerU.R
+
+## glmmTMB
+
+### Scaled
+washModelfit_tmbS.Rout: washModelfit_tmbS.R
+
+### Unscaled
+washModelfit_tmbU.Rout: washModelfit_tmbU.R
+
+## Tidy model estimates
 washTidyestimates.Rout: washTidyestimates.R
 
 ### Wash predictor effects
 washPredEffects.Rout: washPredEffects.R
 
 ### Analysis report
+washdataAnalysis_report.html: washdataAnalysis_report.rmd
 washdataInspect_report.html: washdataInspect_report.rmd
 
 ### Calculate variable level p-values

@@ -46,29 +46,7 @@ miss_cases_df <- (wash_df
 
 ## Restructure the data to have the services in current and previous year in a row per hhid
 
-### Case 1: Ignore whether the HHs conducted interviews consecutively or not
-
-wash_lagged_df <- (wash_df
-	%>% group_by(hhid)
-	%>% mutate(watersourceP = lag(watersource, order_by = year)
-		, toilettypeP = lag(toilettype, order_by = year)
-		, garbagedposalP = lag(garbagedposal, order_by = year)
-	)
-	%>% ungroup()
-)
-#print(wash_lagged_df, n = 50, width = Inf)
-
-## Randomly pick starting values for services for base year
-wash_lagged_ryr0_df <- (wash_lagged_df
-	%>% group_by(hhid)
-	%>% mutate(watersourceP = ifelse(year==min(year), rbinom(1, 1, 0.5), watersourceP)
-		, toilettypeP = ifelse(year==min(year), rbinom(1, 1, 0.5), toilettypeP)
-		, garbagedposalP = ifelse(year==min(year), rbinom(1, 1, 0.5), garbagedposalP)
-	)
-	%>% ungroup()
-)
-
-### Case 2: Adjust for missing consecutive interviews
+### Case 1: Adjust for missing consecutive interviews
 prevdat <- (wash_df
 	%>% transmute(hhid = hhid
 		, year = year + 1
@@ -88,16 +66,6 @@ wash_consec_df <- (wash_df
 )
 #print(wash_consec_df, n = 100, width = Inf)
 
-## Randomly pick starting values for services for base year
-wash_consec_ryr0_df <- (wash_consec_df
-	%>% group_by(hhid)
-	%>% mutate(watersourceP = ifelse(year==min(year), rbinom(1, 1, 0.5), watersourceP)
-		, toilettypeP = ifelse(year==min(year), rbinom(1, 1, 0.5), toilettypeP)
-		, garbagedposalP = ifelse(year==min(year), rbinom(1, 1, 0.5), garbagedposalP)
-	)
-	%>% ungroup()
-)
-
 # HH which had missing interviews in consecutive years
 prevcases_df <- (wash_consec_df
 	%>% group_by(hhid)
@@ -112,10 +80,6 @@ prevcases_df <- (wash_consec_df
 
 #print(prevcases_df, n = 50, width = Inf)
 
-#print(nrow(wash_consec_df))
-#print(sum(prevcases_df$n))
-#print(nrow(prevdat))
-
 ## Drop interviews which didn't have succesive interviews after the first interview
 #wash_consec_df <- (wash_consec_df
 #	%>% filter(!is.na(watersourceP))
@@ -125,9 +89,7 @@ prevcases_df <- (wash_consec_df
 
 save(file = "washdataInspect.rda"
 	, wash_consec_df
-	, wash_lagged_df
-	, wash_consec_ryr0_df
-	, wash_lagged_ryr0_df
 	, miss_cases_df
 	, prevcases_df
+	, wash_df
 )
