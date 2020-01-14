@@ -8,12 +8,14 @@ library(effects)
 library(lme4)
 library(splines)
 
-load("washModelfit.rda")
+load("washModelfit_glmerS.rda")
 
-mod <- glmer_model_consec_scaledyr
+mod <- glmer_scaled
 mod_effect_df <- predictorEffects(mod)
 mod_effect_df <- as.data.frame(mod_effect_df)
 
 save(file = "washPredEffects.rda"
 	, mod_effect_df
+	, modData_scaled
+	, model_form
 )

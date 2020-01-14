@@ -11,19 +11,22 @@ library(purrr)
 library(broom.mixed)
 
 library(data.table)
+library(glmmTMB)
 library(lme4)
 
-load("washModelfit.rda")
-load("washModelfit_glmmTMB.rda")
+load("washModelfit_glmerS.rda")
+load("washModelfit_glmerU.rda")
+load("washModelfit_tmbS.rda")
+load("washModelfit_tmbU.rda")
 
-unscaled_glmer = glmer_model_consec
-scaled_glmer = glmer_model_consec_scaledyr
-unscaled_TMB = glmmTMB_model_consec
-scaled_TMB = glmmTMB_model_consec_scaledyr
-extract_coefs_df <- (map(list(unscaled_glmer = unscaled_glmer
-		, scaled_glmer = scaled_glmer
-		, unscaled_TMB = unscaled_TMB
-		, scaled_TMB = scaled_TMB
+glmerScaled <- glmer_scaled
+glmerUnscaled <- glmer_unscaled
+tmbScaled <- tmb_scaled
+tmbUnscaled <- tmb_unscaled
+extract_coefs_df <- (map(list(glmerScaled = glmerScaled
+		, glmerUnscaled = glmerUnscaled
+		, tmbScaled = tmbScaled
+		, tmbUnscaled = tmbUnscaled
 	)
 		, tidy
 		, conf.int = TRUE
@@ -31,7 +34,7 @@ extract_coefs_df <- (map(list(unscaled_glmer = unscaled_glmer
 	%>% bind_rows(.id = "model")
 	%>% mutate(term = factor(term, levels = unique(term))
 		, term = gsub("services", "", term)
-		, parameter = ifelse(!grepl("\\:|\\.|^cor|^sd", term), "Services", term)
+		, parameter = ifelse(!grepl("\\:|\\.|^cor|^sd", term), "Service gain", term)
 		, parameter = ifelse(grepl("^cor|^sd", parameter)
 			, paste0(gsub("\\_.*", "", parameter), "_", group)
 			, gsub(".*\\:", "", parameter)
@@ -46,8 +49,8 @@ print(extract_coefs_df, n = Inf, width = Inf)
 
 save(file = "washTidyestimates.rda"
 	, extract_coefs_df
-	, unscaled_glmer
-	, unscaled_TMB
-	, scaled_glmer
-	, scaled_TMB
+	, glmerScaled
+	, glmerUnscaled
+	, tmbScaled
+	, tmbUnscaled
 )

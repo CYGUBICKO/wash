@@ -250,7 +250,6 @@ washPredEffects.Rout: washPredEffects.R
 
 ### Analysis report
 washdataAnalysis_report.html: washdataAnalysis_report.rmd
-washdataInspect_report.html: washdataInspect_report.rmd
 
 ### Calculate variable level p-values
 washModelPvalues.Rout: washModelPvalues.R

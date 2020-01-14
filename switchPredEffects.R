@@ -63,7 +63,7 @@ service_plot <- (ggplot(service_df, aes(x = services, y = fit))
 	+ geom_point(size = 0.6)
 	+ geom_errorbar(aes(ymin = lower, ymax = upper), width = 0)
 	+ scale_x_discrete(limits = c("y1", "y2"))
-	+ labs(x = "Services"
+	+ labs(x = "Services gain"
 		, y = "Probability of\nimproved service"
 	)
 )

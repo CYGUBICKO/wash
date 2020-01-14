@@ -37,9 +37,10 @@ library(splines)
 source("../funs/ggplot_theme.R")
 source("../funs/effectsPlot.R")
 
+load("washdataInspect.rda")
 load("washModeldata.rda")
-#load("washTidyestimates.rda")
-#load("washPredEffects.rda")
+load("washTidyestimates.rda")
+load("washPredEffects.rda")
 ```
 
 ## Distribution of services
@@ -90,9 +91,271 @@ print(prop_plot)
 
 ## Variables
 
-Distribution of missing cases for each of the variables. 
+Distribution of missing cases per variable is shown in the table below
+
+- There are `r length(unique(wash_df$hhid))` households, each interviewed once for every interview year
+- Study was conducted between $2002 - 2015$. Not all households had interviews conducted in all the years
 - Although `hungerscale` and `belowpovertyline` have more proportion of missing cases, `wealthindex` is used as a proxy for the two.
 
 ```{R missingness}
+nint <- nrow(wash_consec_df)
+summary_df <- (prevcases_df
+	%>% group_by(nprev_miss1)
+	%>% summarise(nn = sum(nprev_miss1))
+)
 datatable(miss_cases_df, rownames = FALSE)
 ```
+
+- Variables with missing cases are not currently included in the model. A mixed model, `glmer`, with:
+
+- **Fixed effect variables**
+	- `age`
+	- `gender`
+	- `slumarea` - Slum area (Korogocho or Viwandani)
+	- `hhsize` - number of people living in the household as at survey
+	- `wealthindex` - The wealth index was constructed using principle component analysis (PCA) with input as indicator variables on ownership of household and individual assets/items (such as TV, electricity, fridge, radio, bicycle, motorcycle, shoes, blanket, clothes, etc.), and nature of their housing
+	- `StatusP` - Availability of service in the previous year (0/1)
+
+- **Random effect variables**
+	- `(services-1|hhid)` - time-independent variation among households
+	- \*`(services-1|years)` - household-independent variation across years (not implemented)
+
+- **Response variables**
+
++-----------------------+-----------------------+-----------------------+
+|                       | **Improved**          | **Unimproved**        |
++-----------------------+-----------------------+-----------------------+
+|- **Drinking water     | -   Piped water into  | -   Unprotected dug   |
+| source**              |     dwelling, plot or |     well              |
+|                       |     yard              |                       |
+|                       |                       | -   Unprotected       |
+|                       | -   Public            |     spring            |
+|                       |     tap/standpipe     |                       |
+|                       |                       | -   Small water       |
+|                       | -   Tube well /       |     vendor (cart with |
+|                       |     borehole          |     small tank or     |
+|                       |                       |     drum)             |
+|                       | -   Protected dug     |                       |
+|                       |     well with hand    | -   Bottled water     |
+|                       |     pump              |                       |
+|                       |                       | -   Tanker truck      |
+|                       | -   Protected spring  |                       |
+|                       |                       | -   Rainwater         |
+|                       | -   Rainwater         |     collection from   |
+|                       |     collection from   |     surface run off.  |
+|                       |     the roof          |     Surface water     |
+|                       |                       |     (river, dam,      |
+|                       |                       |     lake, pond,       |
+|                       |                       |     stream, canal,    |
+|                       |                       |     irrigation        |
+|                       |                       |     channels)         |
+|                       |                       |                       |
+|                       |                       | -   Protected dug     |
+|                       |                       |     well with bucket  |
++-----------------------+-----------------------+-----------------------+
+|- **Toilet facility    | -   Flush / pour      | -   Flush / pour      |
+| type**                |     flush to piped    |     flush to          |
+|                       |     sewer system or   |     elsewhere e.g. to |
+|                       |     septic tank or    |     open drain        |
+|                       |     pit latrine       |                       |
+|                       |                       | -   Pit latrine       |
+|                       | -   VIP latrine       |     without slab      |
+|                       |                       |     (slab with holes) |
+|                       | -   Pit latrine with  |     /open pit         |
+|                       |     slab              |                       |
+|                       |                       | -   Bucket            |
+|                       | -   Composting toilet |                       |
+|                       |                       | -   Hanging toilet /  |
+|                       |                       |     hanging latrine   |
+|                       |                       |                       |
+|                       |                       | -   No facilities or  |
+|                       |                       |     bush or field     |
++-----------------------+-----------------------+-----------------------+
+|- **Garbage disposal   | -   Garbage dump      | -   In the river      |
+| method**              |                       |                       |
+|                       | -   Private pits      | -   On the road,      |
+|                       |                       |     railway           |
+|                       | -   Public pits       |     line/station      |
+|                       |                       |                       |
+|                       | -   Proper garbage    | -   In                |
+|                       |     disposal services |     drainage/sewage/  |
+|                       |                       | trench                |
+|                       | -   Other organized   |                       |
+|                       |     groups such as    | -   Vacant/abandoned  |
+|                       |     the national      |     house/plot/field  |
+|                       |     youth service     |                       |
+|                       |                       | -   No designated     |
+|                       |                       |     place/all over    |
+|                       |                       |                       |
+|                       |                       | -   Street            |
+|                       |                       |     boys/urchins      |
+|                       |                       |                       |
+|                       |                       | -   Burning           |
+|                       |                       |                       |
+|                       |                       | -   Other             |
++-----------------------+-----------------------+-----------------------+
+
+## Data format choices
+
+There two choices to be made:
+
+- **Consecutive year interviews per household**: We assume that households conducted interviews every year. Consequently, a case missing an interview in the previous (immediate) year is dropped (`r percent(sum(summary_df$nn/nint))`). See the Figure below. Fitted model is based on this.
+
+
+```{R fig.width = 5, fig.height = 5}
+print(ggplot(summary_df, aes(x = as.factor(nprev_miss1), y = nn))
+	+ geom_bar(stat='identity')
+	+ geom_text(aes(label=paste0(percent(nn/nint)))
+		, stat='identity'
+		, position=position_dodge(0.9)
+		, vjust=-0.2
+	)
+	+ labs(x = "Missing consecutive interviews"
+		, y = "No. of interviews"
+	)
+)
+```
+
+```{R}
+summary_df2 <- (prevcases_df
+	%>% filter(nprev_miss2 > 0)
+	%>% group_by(nprev_miss2)
+	%>% summarise(nn = sum(nprev_miss2))
+)
+```
+
+- The `r percent(sum(summary_df$nn/nint))` includes first year (specific to household) cases which do not have the previous years. These are dropped by model matrix. Thus the proportion of interviews we are actually dropping due to missing previous (immediate) interviews is `r percent(sum(summary_df2$nn/nint))`.
+
+```{R, fig.width = 5, fig.height = 5}
+print(ggplot(summary_df2, aes(x = as.factor(nprev_miss2), y = nn))
+	+ geom_bar(stat='identity')
+	+ geom_text(aes(label=paste0(percent(nn/nint)))
+		, stat='identity'
+		, position=position_dodge(0.9)
+		, vjust=-0.2
+	)
+	+ labs(x = "Missing consecutive interviews"
+		, y = "No. of interviews"
+	)
+)
+```
+
+```{R}
+summary_df3 <- (wash_df
+	%>% group_by(hhid)
+	%>% mutate(watersourceP = lag(watersource, order_by = year)
+		, toilettypeP = lag(toilettype, order_by = year)
+		, garbagedposalP = lag(garbagedposal, order_by = year)
+	)
+	%>% mutate(n = n()
+		, nprev_miss1 = sum(is.na(watersourceP))
+	)
+	%>% ungroup()
+	%>% mutate_at("hhid", as.numeric)
+	%>% select(hhid, n, nprev_miss1)
+	%>% distinct()
+	%>% summarise(nn = sum(nprev_miss1))
+)
+```
+
+- **Lagged interviews**: Any household interview (most recent) preceding the current household interview is considered consecutive interview. In this case, only interviews in the first year (household specific) will have missing previous year. Consequently, only first year interviews will be dropped (`r percent(summary_df3$nn/nint)`). Not fitted.
+
+- **Thoughts**
+	- Fit the first case model and have a separate household specific first year model
+
+
+## Estimates
+
+- Compared estimates when year is unscaled (mean centered) vs unscaled (but 1 being the ), both for `glmer` and `glmmTMB`.
+	- In subsequent analysis, we present `glmer` scaled year estimates
+
+```{R fig.width = 12, fig.height = 16}
+estimates_df <- extract_coefs_df
+parameters <- pull(estimates_df, parameter) %>% unique()
+estimates_df <- (estimates_df
+	%>% mutate(parameter = factor(parameter, levels = parameters, labels = parameters))
+)
+
+pos <- ggstance::position_dodgev(height=0.5)
+
+print(ggplot(estimates_df, aes(x = estimate, y = term, colour = model))
+	+ geom_point(position = pos)
+	+ ggstance::geom_linerangeh(aes(xmin = conf.low, xmax = conf.high), position = pos)
+	+ scale_colour_brewer(palette="Dark2"
+		, guide = guide_legend(reverse = TRUE)
+	)
+	+ geom_vline(xintercept=0,lty=2)
+	+ labs(x = "Estimate"
+		, y = ""
+		, colour = "Model"
+	)
+	+ facet_wrap(~parameter, scale = "free", ncol = 2)
+	+ facet_theme
+	+ theme(legend.position = "bottom")
+)
+
+```
+
+
+
+## Predictor effect plots
+
+- These are based on `effects package` - I think based on averaging and conditioning. Couldn't modify JD's effects plots to work for joint models!
+
+```{R}
+service_df <- (data.frame(mod_effect_df[["services"]])[, c("services", "fit", "lower", "upper")]
+	%>% group_by(services)
+	%>% summarise_at(vars(fit:upper), mean, na.rm = TRUE)
+)
+service_plot <- (ggplot(service_df, aes(x = services, y = fit))
+	+ geom_point(size = 0.6)
+	+ geom_errorbar(aes(ymin = lower, ymax = upper), width = 0)
+	+ scale_x_discrete(limits = c("watersource", "garbagedposal", "toilettype"))
+	+ labs(x = "Service gain"
+		, y = "Probability of\nimproved service"
+	)
+)
+```
+
+
+```{R fig.height=8}
+num_vars <- c("age"
+	, "hhsize"
+	, "year"
+	, "wealthindex"
+	, "statusP"
+)
+num_plots <- lapply(num_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
+ggarrange(service_plot
+	, num_plots[[1]] + rremove("ylab")
+	, num_plots[[2]] + rremove("ylab")
+	, num_plots[[3]] #+ rremove("ylab")
+	, num_plots[[4]] + rremove("ylab")
+	, num_plots[[5]] + rremove("ylab")
+	, common.legend = TRUE
+	, legend = "bottom"
+	, nrow = 2
+	, ncol = 3
+)
+```
+
+```{R fig.height = 8}
+cat_vars <- c("slumarea", "gender")
+cat_plots <- lapply(cat_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
+p1 <- (cat_plots[[1]]
+   + theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
+      , panel.spacing.x = unit(1, "lines")
+   )
+)
+p2 <- (cat_plots[[2]]
+	+ theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
+		, panel.spacing.x = unit(1, "lines")
+	)
+)
+ggarrange(p1 #+ rremove("ylab")
+	, p2 #+ rremove("ylab")
+	, nrow = 3
+	, ncol = 1
+)
+```
+
