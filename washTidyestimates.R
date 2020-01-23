@@ -49,8 +49,8 @@ print(extract_coefs_df, n = Inf, width = Inf)
 
 save(file = "washTidyestimates.rda"
 	, extract_coefs_df
-	, glmerScaled
-	, glmerUnscaled
-	, tmbScaled
-	, tmbUnscaled
+#	, glmerScaled
+#	, glmerUnscaled
+#	, tmbScaled
+#	, tmbUnscaled
 )

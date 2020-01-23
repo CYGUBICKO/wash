@@ -242,6 +242,15 @@ washModelfit_tmbS.Rout: washModelfit_tmbS.R
 ### Unscaled
 washModelfit_tmbU.Rout: washModelfit_tmbU.R
 
+### Interaction model
+washModelfit_inter_glmerS.Rout: washModelfit_inter_glmerS.R
+
+
+## BRMS model
+
+### Scaled
+washModelfit_brmsS.Rout: washModelfit_brmsS.R
+
 ## Tidy model estimates
 washTidyestimates.Rout: washTidyestimates.R
 

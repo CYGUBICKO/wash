@@ -21,24 +21,14 @@ modData_scaled <- (modData
 	%>% select(-year_scaled)
 )
 
-## Model formula
-fixed_effects <- paste0(c("-1"
-		, "(services" 
-		, "ns(age, 3)"
-		, "gender"
-		, "slumarea"
-		, "hhsize"
-		, "year"
-		, "ns(wealthindex, 3)"
-		, "statusP):services"
-	)
-	, collapse = "+"
+model_form <- as.formula(
+	status ~ -1 
+	+ (services + (ns(age, 3) + gender + slumarea + year + statusP) * ns(wealthindex, 3) + hhsize):services
+	+ (services-1|hhid)
 )
-rand_effects <- "(services-1|hhid)"
-model_form <- as.formula(paste0("status ~ ", fixed_effects, " + ", rand_effects))
 
 ## Fit glmer model
-glmer_scaled <- glmer(model_form
+glmer_inter <- glmer(model_form
 	, data = modData_scaled
 	, family = binomial(link = "logit")
 	, control = glmerControl(optimizer="nloptwrap"
@@ -46,8 +36,8 @@ glmer_scaled <- glmer(model_form
 	)
 )
 
-save(file = "washModelfit_glmerS.rda"
-	, glmer_scaled
+save(file = "washModelfit_inter_glmerS.rda"
+	, glmer_inter
 	, modData_scaled
 	, model_form
 )
