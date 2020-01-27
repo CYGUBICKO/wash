@@ -12,7 +12,7 @@ library(lme4)
 
 load("switchModel.rda")
 load("simSwitch.rda")
-source("../checkPlots/checkFuns.R")
+source("checkFuns.R")
 
 set.seed(7775)
 
