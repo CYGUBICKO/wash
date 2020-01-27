@@ -189,14 +189,13 @@ switchSummary.Rout: switchSummary.R
 
 switchInspect.Rout: switchInspect.R
 
-## Complete simulation report
-simulations_report.html: simulations_report.rmd
-
-
 ### Exploring effects plots by JD
 switchSingleModel.Rout: switchSingleModel.R
 eplotsFuns.Rout: eplotsFuns.R
 ordFuns.Rout: ordFuns.R
+
+### Tidy estimates
+switchTidy.Rout: switchTidy.R
 
 ### Iso effect plots - JD
 switchEffect_plots.Rout: switchEffect_plots.R
@@ -204,6 +203,8 @@ switchEffect_plots.Rout: switchEffect_plots.R
 ### Effects plot effects package
 switchPredEffects.Rout: switchPredEffects.R
 
+## Complete simulation report
+simulations_report.html: simulations_report.rmd
 
 ## Bottomline test with multivariate normal response
 mvnSim.Rout: mvnSim.R
@@ -224,6 +225,9 @@ washdataInspect.Rout: washdataInspect.R
 longDFunc.Rout: longDFunc.R
 washModeldata.Rout: washModeldata.R
 
+### Temp to avoid remaking the pipe
+hhsizeInspect.Rout: hhsizeInspect.R
+
 ## Fitting models
 
 ## glmer
@@ -231,8 +235,14 @@ washModeldata.Rout: washModeldata.R
 ### Scaled year variable
 washModelfit_glmerS.Rout: washModelfit_glmerS.R
 
+### Scaled but linear age and wealth index
+washModelfit_glmerL.Rout: washModelfit_glmerL.R
+
 ### Unscaled year variable
 washModelfit_glmerU.Rout: washModelfit_glmerU.R
+
+### All fit: to troubleshoot optimizer in lme4
+washModel_allFit.Rout: washModel_allFit.R
 
 ## glmmTMB
 

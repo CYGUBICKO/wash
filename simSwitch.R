@@ -12,10 +12,10 @@ library(tibble)
 set.seed(7775)
 
 # Simulation parameters
-nsims <- 5000		# Number of simulations to run
-nHH <- 30			# Number of HH (primary units) per year
+nsims <- 2			# Number of simulations to run
+nHH <- 10000		# Number of HH (primary units) per year
 
-nyrs <- 100		# Number of years to simulate
+nyrs <- 50		# Number of years to simulate
 yrs <- 1:nyrs 	# Years to simulate
 N <- nyrs * nHH
 
@@ -32,12 +32,12 @@ s1_U <- 0.2
 s2_U <- 0.3
 
 ## Switch probabilities
-b_gain1 = -0.5
-b_lose1 = -0.4
+b_gain1 = 0.8
+b_lose1 = 0.3
 b_add1 = -(b_gain1 + b_lose1)
 
-b_gain2 = -0.5
-b_lose2 = -0.4
+b_gain2 = -0.7
+b_lose2 = 0.3
 b_add2 = -(b_gain2 + b_lose2)
 
 

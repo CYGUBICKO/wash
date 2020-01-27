@@ -24,10 +24,33 @@ load("simSwitch.rda")
 
 set.seed(7775)
 
+# True parameters
+betas_df <- (data.frame(y1_M = s1_M
+		, y2_M = s2_M
+		, y1_bgain = b_gain1
+		, y2_bgain = b_gain2
+		, y1_add = b_add1
+		, y2_add = b_add2
+	)
+	%>% t()
+	%>% data.frame()
+	%>% rename("betas"=".")
+	%>% rownames_to_column("coefs")
+	%>% mutate(coefs2 = coefs
+		, coefs = ifelse(grepl("gain", coefs), "(Intercept)"
+			, ifelse(grepl("_M", coefs), "xm"
+				, ifelse(grepl("_add", coefs), paste0("y", extract_numeric(coefs), "p"), coefs)
+			)
+		)
+	)
+)
+
+print(betas_df)
 
 df <- (sim_dflist[[1]]
 	%>% group_by(hhid)
 	%>% mutate(slumarea = sample(c("Korogocho", "Viwandani"), 1))
+	%>% mutate_at(c("y1p", "y2p"), as.factor)
 	%>% ungroup()
 	%>% filter(years >= 20) #Throw away first 10 years
 )
@@ -49,24 +72,24 @@ long_df <- (long_df1
 #print(long_df, n = 200, width = Inf)
 
 # y1 model
-dd <- (df
-	%>% mutate(years = drop(scale(years)))
-	%>% data.frame()
-)
-singMod_df <- model.frame(
-	y1 ~ slumarea
-	+ y1p
-	+ xm
-	+ years
-	+ hhid
-	, data = dd
-	, na.action = na.exclude
-	, drop.unused.levels = TRUE
-)
-y1_model <- glmer(y1 ~ slumarea + years + y1p + ns(xm, 3) + (1|hhid)
-	, data = singMod_df
-	, family = binomial
-)
+#dd <- (df
+#	%>% mutate(years = drop(scale(years)))
+#	%>% data.frame()
+#)
+#singMod_df <- model.frame(
+#	y1 ~ slumarea
+#	+ y1p
+#	+ xm
+#	+ years
+#	+ hhid
+#	, data = dd
+#	, na.action = na.exclude
+#	, drop.unused.levels = TRUE
+#)
+#y1_model <- glmer(y1 ~ slumarea + years + y1p + ns(xm, 3) + (1|hhid)
+#	, data = singMod_df
+#	, family = binomial
+#)
 
 # Joint model
 jointMod_df <- model.frame(
@@ -80,7 +103,7 @@ jointMod_df <- model.frame(
 	, na.action = na.exclude
 	, drop.unused.levels = TRUE
 )
-glmer_model <- glmer(status ~ -1 + (services + slumarea + years + statusP + ns(xm,3)):services + (services-1|hhid)
+glmer_model <- glmer(status ~ -1 + (services + statusP + xm):services + (services-1|hhid)
 	, data = jointMod_df
 	, family = binomial(link = "logit")
 	, control=glmerControl(optimizer="bobyqa")
@@ -88,9 +111,10 @@ glmer_model <- glmer(status ~ -1 + (services + slumarea + years + statusP + ns(x
 
 
 save(file = "switchSingleModel.rda"
-	, singMod_df
+	, betas_df
+#	, singMod_df
 	, jointMod_df
-	, y1_model
+#	, y1_model
 	, glmer_model
 )
 

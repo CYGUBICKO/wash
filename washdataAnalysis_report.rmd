@@ -41,6 +41,7 @@ load("washdataInspect.rda")
 load("washModeldata.rda")
 load("washTidyestimates.rda")
 load("washPredEffects.rda")
+load("hhsizeInspect.rda")
 ```
 
 ## Distribution of services
@@ -88,6 +89,48 @@ prop_plot <- (ggplot(service_props_df, aes(x = factor(year, levels = 1:14, label
 print(prop_plot)
 
 ```
+
+### Household size
+
+```{R}
+print(hhsize_plot)
+```
+
+### No. of interviews completed by HH
+
+
+```{R fig.width = 7, fig.height = 5}
+n_intv_hh <- (wash_df
+	%>% group_by(hhid)
+	%>% summarise(n = n())
+)
+print(ggplot(n_intv_hh, aes(x = n))
+	+ geom_histogram(binwidth = 1)
+	+ stat_bin(binwidth = 1, geom="text", color='white'
+		, aes(label = paste0(percent(..count../sum(..count..))))
+		, position=position_stack(vjust = 0.5)	
+	)
+)
+```
+
+### No. of interviews per year
+
+
+```{R fig.width = 7, fig.height = 5}
+n_intv_year <- (wash_df
+	%>% group_by(year)
+	%>% summarise(n = n())
+)
+print(ggplot(n_intv_year, aes(x = year, y = n))
+	+ geom_bar(stat='identity')
+	+ geom_text(aes(label=paste0(percent(n/sum(n))))
+		, stat='identity'
+		, position=position_dodge(0.9)
+		, vjust=-0.2
+	)
+)
+```
+
 
 ## Variables
 
@@ -318,12 +361,11 @@ service_plot <- (ggplot(service_df, aes(x = services, y = fit))
 ```
 
 
-```{R fig.height=8}
+```{R fig.height=10}
 num_vars <- c("age"
 	, "hhsize"
 	, "year"
 	, "wealthindex"
-	, "statusP"
 )
 num_plots <- lapply(num_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
 ggarrange(service_plot
@@ -331,16 +373,16 @@ ggarrange(service_plot
 	, num_plots[[2]] + rremove("ylab")
 	, num_plots[[3]] #+ rremove("ylab")
 	, num_plots[[4]] + rremove("ylab")
-	, num_plots[[5]] + rremove("ylab")
+#	, num_plots[[5]] + rremove("ylab")
 	, common.legend = TRUE
 	, legend = "bottom"
-	, nrow = 2
-	, ncol = 3
+	, nrow = 3
+	, ncol = 2
 )
 ```
 
 ```{R fig.height = 8}
-cat_vars <- c("slumarea", "gender")
+cat_vars <- c("statusP", "slumarea", "gender")
 cat_plots <- lapply(cat_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
 p1 <- (cat_plots[[1]]
    + theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
@@ -352,8 +394,15 @@ p2 <- (cat_plots[[2]]
 		, panel.spacing.x = unit(1, "lines")
 	)
 )
+
+p3 <- (cat_plots[[3]]
+	+ theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
+		, panel.spacing.x = unit(1, "lines")
+	)
+)
 ggarrange(p1 #+ rremove("ylab")
 	, p2 #+ rremove("ylab")
+	, p3
 	, nrow = 3
 	, ncol = 1
 )

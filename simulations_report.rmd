@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = FALSE
 	, message = FALSE
 	, fig.width = 10
 	, fig.height = 10
+	, fig.align = "center"
 	, results = "asis")
 options(width = 12)
 
@@ -25,8 +26,16 @@ theme_set(theme_bw() +
 	theme(panel.spacing=grid::unit(0,"lines")))
 
 library(ggpubr)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(DT)
+
+source("../funs/ggplot_theme.R")
 
 load("switchSummary.rda")
+load("switchPredEffects.rda")
+load("switchTidy.rda")
 ```
 
 ```{r functions, include=FALSE}
@@ -96,30 +105,30 @@ Let $\beta'_{1}$ and $\beta_{1}$ be the effect sizes of unmeasured and measured 
 \]
 
 
-The household services for the time period $t + 1$ are generated using _switch_ probabilities. Let $\beta_{lose}$ be the odd of losing service and $\beta_{gain}$ be the odd of gaining service, switch probabilities are either defined in a:
+The household services for the time period $t + 1$ are generated using _switch_ probabilities. Let $\beta_{lose}$ be the log odd of losing service and $\beta_{have}$ be the log odd of having service, switch probabilities are either defined in a:
 
 - **mechanistic way**
-	- If the household, $h$, has service, $s$,  at the current time, $t$ i.e., $y_{hts} = 1$, then the odd of losing service in $t+1$ is $\mu_{hts} = \beta_{lose} - \eta_{hts}$. The switch probability is given by
+	- If the household, $h$, has service, $s$,  at the current time, $t$ i.e., $y_{hts} = 1$, then the log odd of losing service in $t+1$ is $\mu_{hts} = \beta_{lose} - \eta_{hts}$. The switch probability is given by
 \[
 \pi_{ht} = \frac{1}{1 + \exp{(-\mu_{hts})}}
 \]
-	- Otherwise, if $y_{hts} = 0$, the odd of gaining service in the next year is $\mu'_{hts} = \beta_{gain} + \eta_{hts}$ with a switch probability of
+	- Otherwise, if $y_{hts} = 0$, the log odd of having service in the next year is $\mu'_{hts} = \beta_{have} + \eta_{hts}$ with a switch probability of
 \[
 \pi_{ht} = \frac{1}{1 + \exp{(-\mu'_{hts})}}
 \]
 
 - **simplified (or statistical) way**
 
-	- The odd of household $h$ at time $t$ gaining service $s$ is defined as
+	- The log odd of household $h$ at time $t+1$ having service $s$ is defined as
 \[
-\mu_{hts} = \eta_{hts} + \beta_{gain} + \beta_{add}\mu_{ht-1,s}\\
-\beta_{add} = -(\beta_{gain} + \beta_{lose}).
+\mu_{ht+1, s} = \eta_{ht+1, s} + \beta_{have} + \beta_{add}\mathbf{I}(y_{ht,s} = 1)\\
+\beta_{add} = -(\beta_{have} + \beta_{lose}).
 \]
 	Thus, switch probability is defined as
 \[
 \pi_{hts} = \frac{1}{1 + \exp{(-\mu_{hts})}}
 \]
-	- $\mu_{hts}$, $t = 0$ can be chosen at random
+	- $\mathbf{I}(y_{hts})$, $t = 0$ is based on random choice of $\mu_{hts}$ at $t=0$
 
 For this task, we use the simplified approach since we established that the two approaches give the same results.
 
@@ -128,7 +137,7 @@ Thus for households $s$ at time $t$, the observed value for service $s$ is drawn
 y_{hts} \sim \mathit{Bin}(1, \pi_{hts}).
 \]
 
-We simulated observed values for two services $(s = \{1,2\})$ for $5000$ households running for $100$ years and excluded the first $20$ years from the analysis (to take care of stationarity of the AR(1) process).
+We simulated observed values for two services $(s = \{1,2\})$ for $1000$ households running for $50$ years and excluded the first $20$ years from the analysis (to take care of stationarity of the AR(1) process).
 
 ### Fitting method
 
@@ -149,53 +158,116 @@ logit(p(y_{hts} = 1)) = \beta_{0,hts} + \beta_{1,s} y_{ht-1,s} + \beta_{2,s} x\\
 
 Where:
 
-- $\beta_{0, hts}$ is the baseline odds of households gaining service 
-- $\beta_{1,s}$ is the overall effect size of improved service in the previous year on status of service in the current year (odds of gaining service in the current year)
+- $\beta_{0, hts}$ is the baseline log odds of households having service 
+- $\beta_{1,s}$ is the overall effect size of improved service in the previous year on status of service in the current year (log odds of having service in the current year)
 - $\beta_{2,s}$ is the overall effect size of household income (measure covariate, x) on the status of service 
-- $\alpha_{0,hts}$ captures the offset of household odds of gaining service from the overall baseline (mean)
+- $\alpha_{0,hts}$ captures the offset of household log odds of having service from the overall baseline (mean)
 
 ### Results
+
+
 
 The parameters were estimated from a multivariate model.
 
 #### Fixed effects
 
-Figures below compares true parameter values against the estimates (lines) for $5000$ simulations. 
+Figures below compares true parameter values (red dots) against the estimates for $1$ simulation. 
 
-Figure 1 shows results for service 1 while Figure 2 shows results for service 2.
+<!-- Figure 1 shows results for service 1 while Figure 2 shows results for service 2. -->
+<!--  -->
+<!-- ```{R fig.cap=fig$cap("", "Service 1"), fig.align="center"} -->
+<!-- #print(y1Beta_plot) -->
+<!-- ``` -->
+<!--  -->
+<!-- ```{R fig.cap=fig$cap("", "Service 2"), fig.align="center"} -->
+<!-- print(y2Beta_plot) -->
+<!-- ``` -->
 
-```{R fig.cap=fig$cap("", "Service 1"), fig.align="center"}
-print(y1Beta_plot)
-```
+```{R fig.height = 12}
+### Reformat betas_df
+betas_df2 <- (betas_df
+	%>% mutate(parameter = ifelse(grepl("\\_M", coefs2), "xm"
+		, ifelse(grepl("gain", coefs2), "Add", "statusP1"))
+		, term = gsub("\\_.*", "", coefs2)
+	)
+)
 
-```{R fig.cap=fig$cap("", "Service 2"), fig.align="center"}
-print(y2Beta_plot)
-```
 
-#### Checkplots
+estimates_df <- (extract_coefs_df
+	%>% filter(effect == "fixed")
+)
+parameters <- pull(estimates_df, parameter) %>% unique()
+estimates_df <- (estimates_df
+	%>% mutate(parameter = factor(parameter, levels = parameters, labels = parameters))
+)
 
-Steve: JD any reference or more description?
+pos <- ggstance::position_dodgev(height=0.5)
 
-Basically used to check how good our estimates are. We expect uniformly distributed `p-values` (piano plot?)
-
-```{R fig.cap=fig$cap("", "Service 1 piano plots"), fig.align="center"}
-ggarrange(checkPlot_list[[1]] + labs(x = " ")
-   , checkPlot_list[[3]] + rremove("ylab") + labs(x = "p-value")
-   , checkPlot_list[[5]] + rremove("ylab") + labs(x = " ")
-   , common.legend = TRUE
-   , legend = "none"
-   , ncol = 3
+print(ggplot(estimates_df, aes(x = estimate, y = term))
+	+ geom_point(position = pos)
+	+ ggstance::geom_linerangeh(aes(xmin = conf.low, xmax = conf.high), position = pos)
+	+ geom_point(data = betas_df2, aes(x=betas, y = term), colour = "red")
+	+ labs(x = "Estimate"
+		, y = ""
+	)
+	+ facet_wrap(~parameter, scale = "free", ncol = 1)
+	+ facet_theme
+	+ theme(legend.position = "bottom")
 )
 ```
 
-```{R fig.cap=fig$cap("", "Service 2 piano plots"), fig.align="center"}
-ggarrange(checkPlot_list[[2]] + labs(x = " ")
-   , checkPlot_list[[4]] + rremove("ylab") + labs(x = "p-value")
-   , checkPlot_list[[6]] + rremove("ylab") + labs(x = " ")
-   , common.legend = TRUE
-   , legend = "none"
-   , ncol = 3
+
+### Effect plots
+
+**True values table**
+
+```{R}
+dd <- (betas_df
+	%>% mutate(var = ifelse(grepl("\\_M", coefs2), "xm"
+		, ifelse(grepl("gain", coefs2), "Add", "statusP"))
+		, term = gsub("\\_.*", "", coefs2)
+		, probs = round(probs, 3)
+	)
+	%>% select(term, var, betas, probs)
 )
+datatable(dd, rownames = FALSE)
 ```
 
-## Matrix based approach
+
+```{R fig.height = 5, fig.width = 5}
+print(service_plot)
+```
+
+```{R fig.height = 6, fig.width = 8}
+print(num_plots[[2]])
+```
+
+```{R fig.height = 5, fig.width = 5}
+print(num_plots[[1]])
+```
+<!-- #### Checkplots -->
+<!--  -->
+<!-- Steve: JD any reference or more description? -->
+<!--  -->
+<!-- Basically used to check how good our estimates are. We expect uniformly distributed `p-values` (piano plot?) -->
+<!--  -->
+<!-- ```{R fig.cap=fig$cap("", "Service 1 piano plots"), fig.align="center"} -->
+<!-- ggarrange(checkPlot_list[[1]] + labs(x = " ") -->
+<!--    , checkPlot_list[[3]] + rremove("ylab") + labs(x = "p-value") -->
+<!--    , checkPlot_list[[5]] + rremove("ylab") + labs(x = " ") -->
+<!--    , common.legend = TRUE -->
+<!--    , legend = "none" -->
+<!--    , ncol = 3 -->
+<!-- ) -->
+<!-- ``` -->
+<!--  -->
+<!-- ```{R fig.cap=fig$cap("", "Service 2 piano plots"), fig.align="center"} -->
+<!-- ggarrange(checkPlot_list[[2]] + labs(x = " ") -->
+<!--    , checkPlot_list[[4]] + rremove("ylab") + labs(x = "p-value") -->
+<!--    , checkPlot_list[[6]] + rremove("ylab") + labs(x = " ") -->
+<!--    , common.legend = TRUE -->
+<!--    , legend = "none" -->
+<!--    , ncol = 3 -->
+<!-- ) -->
+<!-- ``` -->
+

@@ -2,10 +2,8 @@ library(lme4)
 
 #load("switchModel.rda")
 
-load("simSwitch.rda")
+load("switchModel.rda")
 
-#print(summary(glmermodel_list[[2]]))
+print(summary(glmermodel_list[[1]]))
 
-sim_dflist[[1]]
 
-ls()

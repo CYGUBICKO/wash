@@ -15,7 +15,9 @@ load("longDFunc.rda")
 ### 1. wash_lagged_df - Ignore consecutive years. Lags services with years
 ### 2. wash_consec_df - Assumes all interviews were done consecitvely for all the years in all HH
 
-long_df <- longDFunc(wash_consec_df)
+long_df <- (longDFunc(wash_consec_df)
+	%>% mutate(statusP = as.factor(statusP))
+)
 modData <- model.frame(
 	status ~ services
 	+ age

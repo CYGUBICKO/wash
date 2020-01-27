@@ -20,6 +20,14 @@ load("switchSingleModel.rda")
 ## Plot funs
 #source("ggplot_theme.R")
 
+### log odds to probs
+logit2prob <- function(logit){
+	odds <- exp(logit)
+	prob <- odds/(1 + odds)
+	return(prob)
+}
+
+### Plot effects
 plotEffects <- function(df, var, xlabs){
 	pos <- position_dodge(0.2)
 	p1 <- (ggplot(df, aes_string(x = var, y = "fit", group = "services"))
@@ -48,11 +56,19 @@ plotEffects <- function(df, var, xlabs){
 	return(p2)
 }
 
+
+betas_df <- (betas_df
+	%>% mutate(probs = logit2prob(betas))
+)
+
+print(betas_df)
+
 ## Predict effect sizes
 
 mod <- glmer_model
 mod_effect_df <- predictorEffects(mod)
 mod_effect_df <- as.data.frame(mod_effect_df)
+summary(mod)
 
 ### Service level
 service_df <- (data.frame(mod_effect_df[["services"]])[, c("services", "fit", "lower", "upper")]
@@ -63,25 +79,29 @@ service_plot <- (ggplot(service_df, aes(x = services, y = fit))
 	+ geom_point(size = 0.6)
 	+ geom_errorbar(aes(ymin = lower, ymax = upper), width = 0)
 	+ scale_x_discrete(limits = c("y1", "y2"))
-	+ labs(x = "Services gain"
+	+ labs(x = "Add"
 		, y = "Probability of\nimproved service"
 	)
 )
 print(service_plot)
+#cat_vars <- c("slumarea")
+#cat_plots <- lapply(cat_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
+#p1 <- (cat_plots[[1]]
+#   + theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
+#      , panel.spacing.x = unit(1, "lines")
+#   )
+#)
+#print(p1)
 
-cat_vars <- c("slumarea")
-cat_plots <- lapply(cat_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
-p1 <- (cat_plots[[1]]
-   + theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
-      , panel.spacing.x = unit(1, "lines")
-   )
-)
-print(p1)
-
-num_vars <- c("years"
-	, "xm"
+num_vars <- c("xm"
 	, "statusP"
 )
 num_plots <- lapply(num_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
 print(num_plots)
+
+save(file = "switchPredEffects.rda"
+	, betas_df
+	, num_plots
+	, service_plot
+)
 

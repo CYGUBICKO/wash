@@ -11,9 +11,12 @@ library(ggplot2); theme_set(theme_bw() + theme(panel.spacing=grid::unit(0,"lines
 library(lme4)
 
 load("switchModel.rda")
+load("simSwitch.rda")
 source("../checkPlots/checkFuns.R")
 
 set.seed(7775)
+
+sim_df <- sim_dflist[[1]]
 
 ## check plots: Extract pvalue estimates to do checkplots
 ### parms = list(parm est. as per the glmer object = true value)
@@ -104,7 +107,6 @@ y2Beta_plot <- (ggplot(glmercoef_df %>% filter(variables=="y2"), aes(x = values)
 )
 print(y2Beta_plot)
 
-
 ### Separate models
 
 ### y1
@@ -137,4 +139,12 @@ save(file = "switchSummary.rda"
 	, checkPlot_list
 	, y1Beta_plot
 	, y2Beta_plot
+	, betas_df
+	, sim_df
+	, s1_M
+	, s2_M
+	, b_gain1
+	, b_add1
+	, b_gain2
+	, b_add2
 )
