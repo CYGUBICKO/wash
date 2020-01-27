@@ -105,37 +105,32 @@ Let $\beta'_{1}$ and $\beta_{1}$ be the effect sizes of unmeasured and measured 
 \]
 
 
-The household services for the time period $t + 1$ are generated using _switch_ probabilities. Let $\beta_{lose}$ be the log odd of losing service and $\beta_{have}$ be the log odd of having service, switch probabilities are either defined in a:
+The household services for the time period $t + 1$ are generated using probabilities calculated from odds based on $\eta$. We can do this either mechanistically, thinking explicitly about switching, or by a simpler, statistical method based on calculations from the mechanistic method.
 
 - **mechanistic way**
-	- If the household, $h$, has service, $s$,  at the current time, $t$ i.e., $y_{hts} = 1$, then the log odd of losing service in $t+1$ is $\mu_{hts} = \beta_{lose} - \eta_{hts}$. The switch probability is given by
-\[
-\pi_{ht} = \frac{1}{1 + \exp{(-\mu_{hts})}}
-\]
-	- Otherwise, if $y_{hts} = 0$, the log odd of having service in the next year is $\mu'_{hts} = \beta_{have} + \eta_{hts}$ with a switch probability of
-\[
-\pi_{ht} = \frac{1}{1 + \exp{(-\mu'_{hts})}}
-\]
+	- We assume that η is always positively correlated with having the service. Therefore the probability of gaining the service will be positively affected by η, and the probability of losing the service will be negatively affected by η.
+	- If a household has service (i.e., $y_{hts} = 1$), we thus say that the log odds of losing it in the next year are $\mu_{hts} = \beta_{lose} - \eta_{hts}$. 
+	- Conversely, if $y_{hts} = 0$, the log odds of gaining service is $\mu_{hts} = \beta_{\textrm{gain}} + \eta_{hts}$ 
+
+We use this mechanistic parameterization for choosing parameters.
 
 - **simplified (or statistical) way**
 
-	- The log odd of household $h$ at time $t+1$ having service $s$ is defined as
+	- Both of the above routes can be summarized in a more convenient form: The log odds of household $h$ at time $t+1$ having service $s$ is:
 \[
-\mu_{ht+1, s} = \eta_{ht+1, s} + \beta_{have} + \beta_{add}\mathbf{I}(y_{ht,s} = 1)\\
-\beta_{add} = -(\beta_{have} + \beta_{lose}).
+\mu_{ht+1, s} = \eta_{ht+1, s} + \beta_{gain} + \beta_{add}\mathbf{I}(y_{ht,s} = 1),\\
+\mbox{where }\beta_{add} = -(\beta_{gain} + \beta_{lose}).
 \]
-	Thus, switch probability is defined as
+
+We use this simpler parameterization for simulation and modeling. 
+
+Once μ is known, we calculate the probability of service as:
 \[
 \pi_{hts} = \frac{1}{1 + \exp{(-\mu_{hts})}}
 \]
 	- $\mathbf{I}(y_{hts})$, $t = 0$ is based on random choice of $\mu_{hts}$ at $t=0$
 
-For this task, we use the simplified approach since we established that the two approaches give the same results.
-
-Thus for households $s$ at time $t$, the observed value for service $s$ is drawn from a binomial distribution i.e.,
-\[
-y_{hts} \sim \mathit{Bin}(1, \pi_{hts}).
-\]
+We use this probability to pick values of $y_{hts}$
 
 We simulated observed values for two services $(s = \{1,2\})$ for $1000$ households running for $50$ years and excluded the first $20$ years from the analysis (to take care of stationarity of the AR(1) process).
 
