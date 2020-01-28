@@ -187,6 +187,10 @@ simSwitch.Rout: simSwitch.R
 switchModel.Rout: switchModel.R
 switchSummary.Rout: switchSummary.R
 
+### Comparing mech and stat switch simulation
+simSwitch_compare.Rout: simSwitch_compare.R
+switchCompare_summary.Rout: switchCompare_summary.R
+
 switchInspect.Rout: switchInspect.R
 
 ### Exploring effects plots by JD
