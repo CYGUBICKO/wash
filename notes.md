@@ -1,3 +1,10 @@
+2020 Jan 29 (Wed)
+=================
+
+- Relative odd - log relative odds of the two groups
+
+
+
 2019 Dec 03 (Tue)
 =================
 
