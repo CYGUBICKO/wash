@@ -182,7 +182,7 @@ Figures below compares true parameter values (red dots) against the estimates fo
 ### Reformat betas_df
 betas_df2 <- (betas_df
 	%>% mutate(parameter = ifelse(grepl("\\_M", coefs2), "xm"
-		, ifelse(grepl("gain", coefs2), "Add", "statusP1"))
+		, ifelse(grepl("gain", coefs2), "b_gain", "b_add"))
 		, term = gsub("\\_.*", "", coefs2)
 	)
 )
