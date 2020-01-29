@@ -71,6 +71,7 @@ switchCompare <- function(p_gain, p_lose, phi, sdeps, nyrs, nHH, s1_M, s1_U){
 	dat <- (dat
 		%>% mutate(osmech_prob = plogis(osmech)
 			, osstat_prob = plogis(osstat)
+			, add_prob = plogis(b_add)
 		)
 	)
 	return(dat)

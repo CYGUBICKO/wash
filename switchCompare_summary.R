@@ -65,7 +65,35 @@ sim_df <- switchCompare(p_gain = p_gain
 	, s1_M = s1_M
 	, s1_U = s1_U
 )
+
+sim_df <- (sim_df
+	%>% select(-xm)
+)
+
 print(head(sim_df, 50), width = Inf)
 
+bootFun(sim_df, stat_vars = "add_prob")
+
 ## Simulate for different p_gain and p_lose
+
+p_gains <- seq(0.1, 0.9, 0.1)
+p_loses <- seq(0.1, 0.9, 0.1)
+p_adds <- matrix(0, nrow = length(p_gains), ncol = length(p_loses))
+
+for (g in 1:length(p_gains)){
+	for (l in 1:length(p_loses)){
+		sim_df <- switchCompare(p_gain = p_gains[g]
+			, p_lose = p_loses[l]
+			, phi = phi
+			, sdeps = sdeps
+			, nyrs = nyrs
+			, nHH = nHH
+			, s1_M = s1_M
+			, s1_U = s1_U
+		)
+		p_adds[g, l] <- bootFun(sim_df, "add_prob")[2]
+	}
+}
+
+print(p_adds)
 
