@@ -72,6 +72,7 @@ sim_df <- (sim_df
 
 print(head(sim_df, 50), width = Inf)
 
+## Just in case I wanted to check for uncertainities
 bootFun(sim_df, stat_vars = "add_prob")
 
 ## Simulate for different p_gain and p_lose
