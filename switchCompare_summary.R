@@ -76,13 +76,13 @@ bootFun(sim_df, stat_vars = "add_prob")
 
 ## Simulate for different p_gain and p_lose
 
-p_gains <- seq(0.1, 0.9, 0.1)
-p_loses <- seq(0.1, 0.9, 0.1)
+p_gains <- seq(0.1, 0.9, 0.2)
+p_loses <- 1 - p_gains
 p_adds <- matrix(0, nrow = length(p_gains), ncol = length(p_loses))
 
 for (g in 1:length(p_gains)){
 	for (l in 1:length(p_loses)){
-		sim_df <- switchCompare(p_gain = p_gains[g]
+		dd <- switchCompare(p_gain = p_gains[g]
 			, p_lose = p_loses[l]
 			, phi = phi
 			, sdeps = sdeps
@@ -91,9 +91,23 @@ for (g in 1:length(p_gains)){
 			, s1_M = s1_M
 			, s1_U = s1_U
 		)
-		p_adds[g, l] <- bootFun(sim_df, "add_prob")[2]
+		p_adds[g, l] <- mean(dd[["add_prob"]])
 	}
 }
 
-print(p_adds)
+p_df <- as.data.frame(p_adds)
+colnames(p_df) <- paste0("g", p_gains)
+rownames(p_df) <- paste0("l", p_loses)
 
+p_df <- (p_df
+	%>% rownames_to_column("p_lose")
+	%>% gather(p_gain, p_add, -p_lose)
+	%>% mutate_at(c("p_lose", "p_gain"), function(x){as.numeric(gsub("l|g", "", x))})
+)
+
+print(p_df)
+
+print(ggplot(p_df, aes(x = p_gain, y = p_add, group = as.factor(p_lose), colour = as.factor(p_lose)))
+	+ geom_line(aes(lty = as.factor(p_lose)))
+	+ scale_colour_brewer(palette = "Dark2")
+)
