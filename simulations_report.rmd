@@ -178,6 +178,7 @@ Figures below compares true parameter values (red dots) against the estimates fo
 <!-- print(y2Beta_plot) -->
 <!-- ``` -->
 
+
 ```{R fig.height = 12}
 ### Reformat betas_df
 betas_df2 <- (betas_df
@@ -219,7 +220,7 @@ print(ggplot(estimates_df, aes(x = estimate, y = term))
 ```{R}
 dd <- (betas_df
 	%>% mutate(var = ifelse(grepl("\\_M", coefs2), "xm"
-		, ifelse(grepl("gain", coefs2), "Add", "statusP"))
+		, ifelse(grepl("gain", coefs2), "b_gain", ifelse(grepl("add", coefs2), "b_add", "b_lose")))
 		, term = gsub("\\_.*", "", coefs2)
 		, probs = round(probs, 3)
 	)

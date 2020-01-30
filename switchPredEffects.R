@@ -23,7 +23,7 @@ load("switchSingleModel.rda")
 ### log odds to probs
 logit2prob <- function(logit){
 	odds <- exp(logit)
-	prob <- odds/(1 + odds)
+	prob <- round(odds/(1 + odds), 1)
 	return(prob)
 }
 
@@ -79,7 +79,7 @@ service_plot <- (ggplot(service_df, aes(x = services, y = fit))
 	+ geom_point(size = 0.6)
 	+ geom_errorbar(aes(ymin = lower, ymax = upper), width = 0)
 	+ scale_x_discrete(limits = c("y1", "y2"))
-	+ labs(x = "Add"
+	+ labs(x = "???"
 		, y = "Probability of\nimproved service"
 	)
 )
@@ -96,7 +96,9 @@ print(service_plot)
 num_vars <- c("xm"
 	, "statusP"
 )
-num_plots <- lapply(num_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
+xlabs <- c("xm", "statusP (p_add)")
+num_plots <- lapply(num_vars, function(x){plotEffects(mod_effect_df[[x]], x, grep(x, xlabs, value = TRUE))})
+
 print(num_plots)
 
 save(file = "switchPredEffects.rda"

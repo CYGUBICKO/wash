@@ -27,8 +27,10 @@ set.seed(7775)
 betas_df <- (data.frame(y1_M = s1_M
 		, y2_M = s2_M
 		, y1_bgain = b_gain1
-		, y2_bgain = b_gain2
+		, y1_blose = b_lose1
 		, y1_add = b_add1
+		, y2_bgain = b_gain2
+		, y2_blose = b_lose2
 		, y2_add = b_add2
 	)
 	%>% t()
@@ -140,5 +142,7 @@ save(file = "switchModel.rda"
 	, b_add1
 	, b_gain2
 	, b_add2
+	, b_lose1
+	, b_lose2
 )
 

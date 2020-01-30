@@ -147,4 +147,6 @@ save(file = "switchSummary.rda"
 	, b_add1
 	, b_gain2
 	, b_add2
+	, b_lose1
+	, b_lose2
 )
