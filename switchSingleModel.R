@@ -73,25 +73,23 @@ long_df <- (long_df1
 
 #print(long_df, n = 200, width = Inf)
 
-# y1 model
-#dd <- (df
-#	%>% mutate(years = drop(scale(years)))
-#	%>% data.frame()
-#)
-#singMod_df <- model.frame(
-#	y1 ~ slumarea
-#	+ y1p
-#	+ xm
-#	+ years
-#	+ hhid
-#	, data = dd
-#	, na.action = na.exclude
-#	, drop.unused.levels = TRUE
-#)
-#y1_model <- glmer(y1 ~ slumarea + years + y1p + ns(xm, 3) + (1|hhid)
-#	, data = singMod_df
-#	, family = binomial
-#)
+## y1 model
+dd <- (df
+	%>% mutate(years = drop(scale(years)))
+	%>% data.frame()
+)
+singMod_df <- model.frame(
+	y1 ~ xm
+	+ y1p
+	+ hhid
+	, data = dd
+	, na.action = na.exclude
+	, drop.unused.levels = TRUE
+)
+y1_model <- glmer(y1 ~ xm + y1p + (1|hhid)
+	, data = singMod_df
+	, family = binomial
+)
 
 # Joint model
 jointMod_df <- model.frame(
@@ -114,9 +112,9 @@ glmer_model <- glmer(status ~ -1 + (services + statusP + xm):services + (service
 
 save(file = "switchSingleModel.rda"
 	, betas_df
-#	, singMod_df
+	, singMod_df
 	, jointMod_df
-#	, y1_model
+	, y1_model
 	, glmer_model
 )
 

@@ -179,13 +179,58 @@ Figures below compares true parameter values (red dots) against the estimates fo
 <!-- ``` -->
 
 
+#### Single model (y1)
+
+```{R}
+### Reformat betas_df
+dd <- (betas_df
+	%>% mutate(parameter = ifelse(grepl("\\_M", coefs2), "xm"
+		, ifelse(grepl("gain", coefs2), "b_gain", 
+			ifelse(grepl("add", coefs2), "b_add", "b_lose"))
+		)
+		, term = gsub("\\_.*", "", coefs2)
+	)
+	%>% filter(term=="y1" & !grepl("lose", parameter))
+)
+```
+
+```{R fig.height = 5, fig.width = 5}
+estimates_df <- (extract_coefs_y1
+	%>% filter(effect == "fixed")
+)
+parameters <- pull(estimates_df, parameter) %>% unique()
+estimates_df <- (estimates_df
+	%>% mutate(parameter = factor(parameter, levels = parameters, labels = parameters))
+)
+
+pos <- ggstance::position_dodgev(height=0.5)
+
+print(ggplot(estimates_df, aes(x = estimate, y = parameter))
+	+ geom_point(position = pos)
+	+ ggstance::geom_linerangeh(aes(xmin = conf.low, xmax = conf.high), position = pos)
+	+ geom_point(data = dd, aes(x=betas, y = parameter), colour = "red")
+	+ labs(x = "Estimate"
+		, y = ""
+	)
+#	+ facet_wrap(~parameter, scale = "free", ncol = 1)
+#	+ facet_theme
+	+ theme(legend.position = "bottom")
+)
+
+```
+
+#### Joint model
+
 ```{R fig.height = 12}
 ### Reformat betas_df
 betas_df2 <- (betas_df
 	%>% mutate(parameter = ifelse(grepl("\\_M", coefs2), "xm"
-		, ifelse(grepl("gain", coefs2), "b_gain", "b_add"))
+		, ifelse(grepl("gain", coefs2), "b_gain", 
+			ifelse(grepl("add", coefs2), "b_add", "b_lose"))
+		)
 		, term = gsub("\\_.*", "", coefs2)
 	)
+	%>% filter(!grepl("lose", parameter))
 )
 
 

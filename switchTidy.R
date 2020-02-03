@@ -16,8 +16,13 @@ library(ggplot2)
 
 load("switchSingleModel.rda")
 
-extract_coefs_df <- tidy(glmer_model, conf.int = TRUE)
-print(data.frame(extract_coefs_df))
+extract_coefs_y1 <- (tidy(y1_model, conf.int = TRUE)
+	%>% mutate(parameter = ifelse(grepl("^\\(Intercept", term), "b_gain", term)
+		, parameter = ifelse(grepl("y1p1", parameter), "b_add", parameter)
+	)
+)
+print(data.frame(extract_coefs_y1))
+
 
 
 extract_coefs_df <- (tidy(glmer_model, conf.int = TRUE)
@@ -39,4 +44,5 @@ print(extract_coefs_df, n = Inf, width = Inf)
 
 save(file = "switchTidy.rda"
 	, extract_coefs_df
+	, extract_coefs_y1
 )
