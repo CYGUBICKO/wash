@@ -103,7 +103,7 @@ jointMod_df <- model.frame(
 	, na.action = na.exclude
 	, drop.unused.levels = TRUE
 )
-glmer_model <- glmer(status ~ -1 + (services + statusP + xm):services + (services-1|hhid)
+glmer_model <- glmer(status ~ -1 + services + (statusP + xm):services + (services-1|hhid)
 	, data = jointMod_df
 	, family = binomial(link = "logit")
 	, control=glmerControl(optimizer="bobyqa")

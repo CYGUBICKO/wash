@@ -66,9 +66,9 @@ print(betas_df)
 ## Predict effect sizes
 
 mod <- glmer_model
-mod_effect_df <- predictorEffects(mod)
-mod_effect_df <- as.data.frame(mod_effect_df)
+mod_effect_df <- as.data.frame(predictorEffects(mod))
 summary(mod)
+print(mod_effect_df)
 
 ### Service level
 service_df <- (data.frame(mod_effect_df[["services"]])[, c("services", "fit", "lower", "upper")]
