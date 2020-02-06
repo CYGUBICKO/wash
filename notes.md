@@ -1,3 +1,13 @@
+
+2020 Feb 06 (Thu)
+=================
+
+Meeting with Dr. BB
+- Simply use Effect("services", mod)
+- Separate ep and x hat
+- a0,h: a0 for every hh
+- a1,ht: Latent variable effect
+
 2020 Jan 29 (Wed)
 =================
 
