@@ -71,16 +71,19 @@ summary(mod)
 print(mod_effect_df)
 
 ### Service level
-service_df <- (data.frame(mod_effect_df[["services"]])[, c("services", "fit", "lower", "upper")]
-	%>% group_by(services) 
-	%>% summarise_at(vars(fit:upper), mean, na.rm = TRUE)
+service_df <- (Effect("services", mod = mod)
+	%>% as.data.frame()
 )
+
+print(service_df)
+
 service_plot <- (ggplot(service_df, aes(x = services, y = fit))
 	+ geom_point(size = 0.6)
 	+ geom_errorbar(aes(ymin = lower, ymax = upper), width = 0)
 	+ scale_x_discrete(limits = c("y1", "y2"))
-	+ labs(x = "???"
-		, y = "Probability of\nimproved service"
+	+ scale_y_continuous(limits = c(0.3, 0.7), breaks = seq(0.3, 0.7, 0.1))
+	+ labs(x = "Service"
+		, y = "Probability of\ngaining service"
 	)
 )
 print(service_plot)

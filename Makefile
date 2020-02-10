@@ -207,6 +207,7 @@ switchEffect_plots.Rout: switchEffect_plots.R
 
 ### Effects plot effects package
 switchPredEffects.Rout: switchPredEffects.R
+switchPredInspect.Rout: switchPredInspect.R
 
 ## Complete simulation report
 simulations_report.html: simulations_report.rmd
