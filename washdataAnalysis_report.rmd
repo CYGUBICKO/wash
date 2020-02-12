@@ -47,47 +47,20 @@ load("hhsizeInspect.rda")
 ## Distribution of services
 
 ```{R distributions1, fig.width = 7, fig.height = 8}
-summaryFunc <- function(var){
-	summary_df <- (wash_df
-		%>% select(var, year)
-		%>% rename("temp_var" = var)
-		%>% group_by(year)
-		%>% summarise(prop = mean(temp_var))
-		%>% ungroup()
-		%>% mutate(services = var, overall = mean(prop))
-	)
-	return(summary_df)
-}
-
-service_props <- lapply(c("watersource", "garbagedposal", "toilettype"), summaryFunc)
-service_props_df <- do.call(rbind, service_props)
-
-prop_plot <- (ggplot(service_props_df, aes(x = factor(year, levels = 1:14, labels = 2002:2015), y = prop, group = services, colour = services))
-	+ geom_point()
-	+ geom_line()
-	+ geom_hline(aes(yintercept = overall, group = services, colour = services), linetype = "dashed")
-	+ geom_text(aes(x = max(year)-1, y = overall, group = services, label = paste0("Overall = ", scales::percent(overall)))
-		, vjust = -1.5
-		, show.legend = FALSE
-	)
-	+ labs(x = "Years"
-		, y = "Proportions of\nimproved services"
-		, colour = "Services"
-	)
-	+ scale_y_continuous(labels = percent, limits = c(0,1))
-	+ scale_colour_discrete(breaks = c("watersource"
-			, "garbagedposal"
-			, "toilettype"
-		)
-	)
-#	+ scale_colour_brewer(palette="Dark2")
-	+ theme(legend.position = "bottom"
-		, plot.title = element_text(hjust = 0.5)
-	)
-)
-
 print(prop_plot)
+```
 
+### No. of interviews completed by HH
+
+
+```{R fig.width = 7, fig.height = 5}
+print(n_interviews)
+```
+
+### No. of interviews per year
+
+
+```{R fig.width = 7, fig.height = 5}
 ```
 
 ### Household size
@@ -96,40 +69,6 @@ print(prop_plot)
 print(hhsize_plot)
 ```
 
-### No. of interviews completed by HH
-
-
-```{R fig.width = 7, fig.height = 5}
-n_intv_hh <- (wash_df
-	%>% group_by(hhid)
-	%>% summarise(n = n())
-)
-print(ggplot(n_intv_hh, aes(x = n))
-	+ geom_histogram(binwidth = 1)
-	+ stat_bin(binwidth = 1, geom="text", color='white'
-		, aes(label = paste0(percent(..count../sum(..count..))))
-		, position=position_stack(vjust = 0.5)	
-	)
-)
-```
-
-### No. of interviews per year
-
-
-```{R fig.width = 7, fig.height = 5}
-n_intv_year <- (wash_df
-	%>% group_by(year)
-	%>% summarise(n = n())
-)
-print(ggplot(n_intv_year, aes(x = year, y = n))
-	+ geom_bar(stat='identity')
-	+ geom_text(aes(label=paste0(percent(n/sum(n))))
-		, stat='identity'
-		, position=position_dodge(0.9)
-		, vjust=-0.2
-	)
-)
-```
 
 
 ## Variables

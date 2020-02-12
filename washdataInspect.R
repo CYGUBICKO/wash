@@ -32,6 +32,7 @@ wash_df <- (working_df
 	%>% setnames("numpeople_total", "hhsize")
 	%>% mutate(year = as.numeric(as.factor(year))
 		, year_scaled = drop(scale(year))
+		, hhsize_unscaled = hhsize
 	)
 	%>% mutate_at(c("age", "wealthindex", "hhsize"), function(x){x = drop(scale(x))})
 )

@@ -226,6 +226,7 @@ corr_effs.html: corr_effs.rmd
 
 ## WASH Analysis of real data
 washdataInspect.Rout: washdataInspect.R
+washdataInspect_plots.Rout: washdataInspect_plots.R
 
 ## Restructured data for hhid-year-services
 longDFunc.Rout: longDFunc.R
