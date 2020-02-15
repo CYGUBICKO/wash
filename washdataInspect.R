@@ -65,32 +65,10 @@ wash_consec_df <- (wash_df
 	)
 	%>% ungroup()
 )
-#print(wash_consec_df, n = 100, width = Inf)
-
-# HH which had missing interviews in consecutive years
-prevcases_df <- (wash_consec_df
-	%>% group_by(hhid)
-	%>% mutate(watersourceP2 = ifelse(year==min(year), rbinom(1,1,0.5), watersourceP)
-		, nprev_miss2 = sum(is.na(watersourceP2))
-	)
-	%>% ungroup()
-	%>% mutate_at("hhid", as.numeric)
-	%>% select(hhid, n, nprev_miss1, nprev_miss2)
-	%>% distinct()
-)
-
-#print(prevcases_df, n = 50, width = Inf)
-
-## Drop interviews which didn't have succesive interviews after the first interview
-#wash_consec_df <- (wash_consec_df
-#	%>% filter(!is.na(watersourceP))
-#)
-
-#print(wash_consec_df, n = 50, width = Inf)
+print(wash_consec_df, n = 50, width = Inf)
 
 save(file = "washdataInspect.rda"
 	, wash_consec_df
 	, miss_cases_df
-	, prevcases_df
 	, wash_df
 )

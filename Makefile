@@ -271,6 +271,9 @@ washModelfit_brmsS.Rout: washModelfit_brmsS.R
 ## Tidy model estimates
 washTidyestimates.Rout: washTidyestimates.R
 
+## Effect size plots
+washEffectsize_plots.Rout: washEffectsize_plots.R
+
 ### Wash predictor effects
 washPredEffects.Rout: washPredEffects.R
 
