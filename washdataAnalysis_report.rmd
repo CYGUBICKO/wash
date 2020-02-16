@@ -46,12 +46,16 @@ load("washEffectsize_plots.rda")
 
 ## Distribution of services
 
+- The Figure below shows the proportion of households with improved services over years. The dotted lines represent the household average for each service over the entire study period.
+
+
 ```{R distributions1, fig.width = 7, fig.height = 8}
 print(prop_plot)
 ```
 
 ### No. of interviews completed by HH
 
+- If every household was interviewed per year, we would expect $14$ interviews per household. On the contrary, over $40\%$ of the households only had $1$ interview over the entire study period.
 
 ```{R fig.width = 7, fig.height = 5}
 print(n_interviews_plot)
@@ -59,12 +63,21 @@ print(n_interviews_plot)
 
 ### No. of interviews per year
 
+- The Figure below shows the percentage of interviews per year.
+	- We may need to seek for clarification on low percentage in $2003$ 
 
 ```{R fig.width = 7, fig.height = 5}
 print(year_plot)
 ```
 
 ### Status based on the previous year (JD: Status Quo?)
+
+- We track service transitions from the previous year to the current year (within households):
+	- **All -**: Service not improved both in the previous and in the current year
+	- **All +**: Improved service both in the previous and current year
+	- **No prev.**: Had no service in the previous year (missing interview in the previous year)
+	- **Gain**: Unimproved service in the previous year but improved service in the current year
+	- **Loss**: Improved service in the previous year but unimproved service in the current year
 
 ```{R}
 print(status_quo_plot)

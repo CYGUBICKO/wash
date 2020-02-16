@@ -270,13 +270,17 @@ consec_temp_df <- (consec_temp_df
 )
 print(consec_temp_df)
 
-status_quo_plot <- (ggplot(consec_temp_df, aes(x = fct_reorder(SQ, prop), y = prop, group = services))
-	+ geom_bar(stat = "identity")
+status_quo_plot <- (ggplot(consec_temp_df, aes(x = reorder(SQ, -prop), y = prop, group = services, colour = services))
+	+ geom_line()
+	+ geom_point()
 	+ scale_y_continuous(labels = percent)
-	+ labs(x = "Status based on previous year", y = "Proportion")
-	+ facet_wrap(~services)
-	+ coord_flip()
-	+ facet_theme
+	+ labs(x = "Status based on previous year", y = "Proportion", colour = "Services")
+	+ scale_colour_discrete(breaks = c("water"
+			, "garbage"
+			, "toilet"
+		)
+	)
+	+ theme(legend.position = "bottom")
 )
 print(status_quo_plot)
 
