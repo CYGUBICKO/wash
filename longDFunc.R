@@ -14,7 +14,7 @@ longDFunc <- function(df){
 		%>% full_join(temp_df2, by = c("hhid", "year", c(services = "serviceP")))	
 		%>% data.frame()
 	)
-	return(long_df)
+	return(list(year1_df = temp_df1, prev_df = long_df))
 }
 
 save.image("longDFunc.rda")

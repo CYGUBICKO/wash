@@ -11,22 +11,23 @@ library(purrr)
 library(broom.mixed)
 
 library(data.table)
-library(glmmTMB)
 library(lme4)
 
-load("washModelfit_glmerS.rda")
-load("washModelfit_glmerU.rda")
-load("washModelfit_tmbS.rda")
-load("washModelfit_tmbU.rda")
+#load("washModelfit_pglmerS.rda")
+#load("washModelfit_pglmerU.rda")
+load("washModelfit_y1glmS.rda")
+load("washModelfit_y1glmU.rda")
 
-glmerScaled <- glmer_scaled
-glmerUnscaled <- glmer_unscaled
-tmbScaled <- tmb_scaled
-tmbUnscaled <- tmb_unscaled
-extract_coefs_df <- (map(list(glmerScaled = glmerScaled
-		, glmerUnscaled = glmerUnscaled
-		, tmbScaled = tmbScaled
-		, tmbUnscaled = tmbUnscaled
+#glmerScaled <- pglmer_scaled
+#glmerUnscaled <- pglmer_unscaled
+
+glmScaled <- y1glm_scaled
+glmUnscaled <- y1glm_unscaled
+
+extract_coefs_df <- (map(list(#glmerScaled = glmerScaled
+#		, glmerUnscaled = glmerUnscaled
+		 glmScaled = glmScaled
+		, glmUnscaled = glmUnscaled
 	)
 		, tidy
 		, conf.int = TRUE
@@ -42,15 +43,16 @@ extract_coefs_df <- (map(list(glmerScaled = glmerScaled
 		, term = gsub("\\:.*|\\.hhid|\\.year|.*\\_", "", term)
 	)
 #	%>% filter(term != "(Intercept)")
-	%>% mutate(term = reorder(term, estimate))
+	%>% mutate(term = reorder(term, estimate)
+		, parameter = ifelse(grepl("glmSc|glmUn", model)
+			, gsub("gain", "level", parameter)
+			, parameter
+		) 
+	)
 )
 
 print(extract_coefs_df, n = Inf, width = Inf)
 
 save(file = "washTidyestimates.rda"
 	, extract_coefs_df
-#	, glmerScaled
-#	, glmerUnscaled
-#	, tmbScaled
-#	, tmbUnscaled
 )

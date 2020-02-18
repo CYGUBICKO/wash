@@ -11,9 +11,9 @@ library(tibble)
 library(splines)
 library(lme4)
 
-load("washModelfit_glmerS.rda")
+load("washModelfit_pglmerS.rda")
 
-mod <- glmer_scaled
+mod <- pglmer_scaled
 glmer_allfit <- allFit(mod, parallel = "multicore", ncpus = parallel::detectCores())
 summary(glmer_allfit)
 

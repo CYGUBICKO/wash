@@ -8,14 +8,26 @@ library(effects)
 library(lme4)
 library(splines)
 
-load("washModelfit_glmerS.rda")
+# load("washModelfit_pglmerS.rda")
+load("washModelfit_y1glmS.rda")
 
-mod <- glmer_scaled
-mod_effect_df <- predictorEffects(mod)
-mod_effect_df <- as.data.frame(mod_effect_df)
+## Year 1 (first year) model
+
+y1mod <- y1glm_scaled
+
+### Service level predictions
+y1service_effect_df <- Effect("services", mod = y1mod)
+y1service_effect_df <- as.data.frame(y1service_effect_df)
+
+### Conditionaled on all other predictors
+y1mod_effect_df <- predictorEffects(y1mod)
+y1mod_effect_df <- as.data.frame(y1mod_effect_df)
+# d1 <- as.data.frame(allEffects(y1mod)) # The same (predictorEffects gives smooth curves)
+
+## Previous year model
+# mod <- pglmer_scaled
 
 save(file = "washPredEffects.rda"
-	, mod_effect_df
-	, modData_scaled
-	, model_form
+	, y1service_effect_df
+	, y1mod_effect_df
 )

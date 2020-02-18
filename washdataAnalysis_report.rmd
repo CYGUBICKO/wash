@@ -39,7 +39,7 @@ library(splines)
 source("../funs/ggplot_theme.R")
 source("../funs/effectsPlot.R")
 
-load("washPredEffects.rda")
+load("washPredEffects_plots.rda")
 load("washdataInspect_plots.rda")
 load("washEffectsize_plots.rda")
 ```
@@ -70,7 +70,7 @@ print(n_interviews_plot)
 print(year_plot)
 ```
 
-### Status based on the previous year (JD: Status Quo?)
+### Current vs previous year service status (JD: Status Quo?)
 
 - We track service transitions from the previous year to the current year (within households):
 	- **All -**: Service not improved both in the previous and in the current year
@@ -83,7 +83,11 @@ print(year_plot)
 print(status_quo_plot)
 ```
 
-### Household size
+### Household size scaling
+
+- I wasn't sure why I still hard large value after scaling. 
+- Do we need to scale household size?
+- Should we think of back transforming the predictor effects from effect plots? Is this something sensible?
 
 ```{R}
 print(hhsize_plot)
@@ -95,9 +99,10 @@ print(hhsize_plot)
 
 Distribution of missing cases per variable is shown in the table below
 
+- A total of `r nint_all` were done between $2002 - 2015$.
 - There are `r nhhid` households, each interviewed once for every interview year
-- Study was conducted between $2002 - 2015$. Not all households had interviews conducted in all the years
-- Although `hungerscale` and `belowpovertyline` have more proportion of missing cases, `wealthindex` is used as a proxy for the two.
+- Not all households had interviews conducted every year
+- Although `hungerscale` and `belowpovertyline` have more proportion of missing cases, `wealthindex` is considered a good proxy for the two.
 
 ```{R missingness}
 datatable(miss_cases_df, rownames = FALSE)
@@ -114,8 +119,8 @@ datatable(miss_cases_df, rownames = FALSE)
 	- `StatusP` - Availability of service in the previous year (0/1)
 
 - **Random effect variables**
-	- `(services-1|hhid)` - time-independent variation among households
-	- \*`(services-1|years)` - household-independent variation across years (not implemented)
+	- `(services-1|hhid)`
+	- \*`(services-1|hhid/years)` - We can talk about this and how much complexity we need (not implemented)
 
 - **Response variables**
 
@@ -194,102 +199,117 @@ datatable(miss_cases_df, rownames = FALSE)
 
 ## Data format choices
 
-There two choices to be made:
-
-- **Consecutive year interviews per household**: We assume that households conducted interviews every year. Consequently, a case missing an interview in the previous (immediate) year is dropped (`r percent_miss_consec`). See the Figure below. Fitted model is based on this.
+- **Consecutive year interviews per household**: We assume that interviews should have been conducted in every household every year. Consequently, a case missing an interview in the preceding year is dropped. This accounts for `r percent_miss_consec` cases. See the Figure below.
 
 
 ```{R fig.width = 5, fig.height = 5}
 print(consec_all_plot)
 ```
 
-- The `r percent_miss_consec` includes first year (specific to household) cases which do not have the previous years. These are dropped by model matrix. Thus the proportion of interviews we are actually dropping due to missing previous (immediate) interviews is `r percent_miss_consec_noyr0`.
+- The `r percent_miss_consec` includes first year (specific to household) cases which do not have the previous years. First year interviews are excluded and modeled separately (`r percent_year0`). Thus the proportion of interviews we are actually dropping due to missing preceding interview is `r percent_miss_consec_noyr0` of $69\%$ (of all interviews).
 
 ```{R, fig.width = 5, fig.height = 5}
 print(consec_noyr0_plot)
 ```
 
-- **Lagged interviews**: Any household interview (most recent) preceding the current household interview is considered consecutive interview. In this case, only interviews in the first year (household specific) will have missing previous year. Consequently, only first year interviews will be dropped (`r percent_miss_lagged`). Not fitted.
+<!-- - **Lagged interviews**: Any household interview (most recent) preceding the current household interview is considered consecutive interview. In this case, only interviews in the first year (household specific) will have missing previous year. Consequently, only first year interviews will be dropped (`r percent_miss_lagged`). Not fitted. -->
 
-- **Thoughts**
-	- Fit the first case model and have a separate household specific first year model
+## Models
 
+- Fit two separate models
+	- First (household specific) year model
+	- Previous year model without first year data
 
-## Estimates
+**Year 1 model**
 
-- Compared estimates when year is unscaled (mean centered) vs unscaled (but 1 being the ), both for `glmer` and `glmmTMB`.
-	- In subsequent analysis, we present `glmer` scaled year estimates
+- We only have a single observation per HH. I feel we don't need a hh level random effect
 
-```{R fig.width = 12, fig.height = 16}
-print(effectsize_plot)
-```
+	```
+	model <- glmer(status ~ -1 
+		+ services
+		+ (ns(age, 3) 
+			+ gender 
+			+ slumarea 
+			+ hhsize 
+			+ year 
+			+ ns(wealthindex, 3)
+		):services 
+		+ (services - 1 | hhid)
+		, ...
+	)
+	```
 
+**Previous year model**
 
+	model <- glmer(status ~ -1 
+		+ services
+		+ (ns(age, 3) 
+			+ gender 
+			+ slumarea 
+			+ hhsize 
+			+ year 
+			+ ns(wealthindex, 3) 
+			+ statusP
+		):services 
+		+ (services - 1 | hhid)
+		, ...
+	)
 
-## Predictor effect plots
+**Interaction model**
 
-- These are based on `effects package` - I think based on averaging and conditioning. Couldn't modify JD's effects plots to work for joint models!
+- `wealthindex` interact with all the predictors except `hhsize`
+	- The same will apply to year 1 interaction model
+
+	```
+	model <- glmer(status ~ -1 
+		+ services
+		+ (
+			(ns(age, 3) 
+				+ gender 
+				+ slumarea 
+				+ year 
+				+ statusP
+			) * ns(wealthindex, 3) 
+			+ hhsize 
+		):services 
+		+ (services - 1 | hhid)
+		, ...
+	)
+	```
+
+## Results
+
+### Year 1 model
+
+#### Estimated effect sizes (Steve -> JD: Best description?)
+
+- This refers to household specific first observational year
 
 ```{R}
-service_df <- (data.frame(mod_effect_df[["services"]])[, c("services", "fit", "lower", "upper")]
-	%>% group_by(services)
-	%>% summarise_at(vars(fit:upper), mean, na.rm = TRUE)
-)
-service_plot <- (ggplot(service_df, aes(x = services, y = fit))
-	+ geom_point(size = 0.6)
-	+ geom_errorbar(aes(ymin = lower, ymax = upper), width = 0)
-	+ scale_x_discrete(limits = c("watersource", "garbagedposal", "toilettype"))
-	+ labs(x = "Service gain"
-		, y = "Probability of\nimproved service"
-	)
-)
+print(y1effectsize_plot)
 ```
 
+#### Predicted effects (Steve -> JD: Best description?)
 
-```{R fig.height=10}
-num_vars <- c("age"
-	, "hhsize"
-	, "year"
-	, "wealthindex"
-)
-num_plots <- lapply(num_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
-ggarrange(service_plot
-	, num_plots[[1]] + rremove("ylab")
-	, num_plots[[2]] + rremove("ylab")
-	, num_plots[[3]] #+ rremove("ylab")
-	, num_plots[[4]] + rremove("ylab")
-#	, num_plots[[5]] + rremove("ylab")
+```{R}
+ggarrange(y1service_plot
+	, y1pred_effect_plots[[1]] + rremove("ylab") #+ rremove("y.text") + rremove("y.ticks")
+	, y1pred_effect_plots[[4]] + rremove("ylab") #+ rremove("y.text") + rremove("y.ticks")
+	, y1pred_effect_plots[[5]]
+	, y1pred_effect_plots[[6]] + rremove("ylab") #+ rremove("y.text") + rremove("y.ticks")
 	, common.legend = TRUE
 	, legend = "bottom"
-	, nrow = 3
-	, ncol = 2
+	, nrow = 2
+	, ncol = 3
 )
 ```
 
-```{R fig.height = 8}
-cat_vars <- c("statusP", "slumarea", "gender")
-cat_plots <- lapply(cat_vars, function(x){plotEffects(mod_effect_df[[x]], x, x)})
-p1 <- (cat_plots[[1]]
-   + theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
-      , panel.spacing.x = unit(1, "lines")
-   )
-)
-p2 <- (cat_plots[[2]]
-	+ theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
-		, panel.spacing.x = unit(1, "lines")
-	)
-)
-
-p3 <- (cat_plots[[3]]
-	+ theme(plot.margin = margin(0, 1, 0.1, 1, "cm")
-		, panel.spacing.x = unit(1, "lines")
-	)
-)
-ggarrange(p1 #+ rremove("ylab")
-	, p2 #+ rremove("ylab")
-	, p3
-	, nrow = 3
+```{R}
+ggarrange(y1pred_effect_plots[[2]]
+	, y1pred_effect_plots[[3]]
+	, common.legend = TRUE
+	, legend = "bottom"
+	, nrow = 2
 	, ncol = 1
 )
 ```
-

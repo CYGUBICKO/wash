@@ -4,6 +4,7 @@
 #### ---- By: Steve and Jonathan ----
 #### ---- Date: 2019 Dec 24 (Tue) ----
 
+library(data.table)
 library(dplyr)
 library(tidyr)
 library(tibble)
@@ -219,6 +220,7 @@ print(year_plot)
 
 hhsize_df <- (wash_df
 	%>% select(hhsize, hhsize_unscaled)
+	%>% setnames(c("hhsize", "hhsize_unscaled"), c("scaled", "unscaled")) 
 	%>% gather(type, value)
 )
 
@@ -246,7 +248,7 @@ print(consec_all_plot)
 
 consec_noyr0_plot <- (ggplot(summary_consec_noyr0_df, aes(x = as.factor(nprev_miss2), y = nn))
 	+ geom_bar(stat='identity')
-	+ geom_text(aes(label=paste0(percent(nn/nint_consec)))
+	+ geom_text(aes(label=paste0(percent(nn/nint_noyr0)))
 		, stat='identity'
 		, position=position_dodge(0.9)
 		, vjust=-0.2
@@ -274,7 +276,7 @@ status_quo_plot <- (ggplot(consec_temp_df, aes(x = reorder(SQ, -prop), y = prop,
 	+ geom_line()
 	+ geom_point()
 	+ scale_y_continuous(labels = percent)
-	+ labs(x = "Status based on previous year", y = "Proportion", colour = "Services")
+	+ labs(x = "Current-previous year status", y = "Proportion", colour = "Services")
 	+ scale_colour_discrete(breaks = c("water"
 			, "garbage"
 			, "toilet"
@@ -289,6 +291,7 @@ save(file = "washdataInspect_plots.rda"
 	, nint_all
 	, miss_cases_df
 	, nint_consec
+	, nint_noyr0
 	, percent_miss_consec
 	, percent_year0
 	, percent_miss_consec_noyr0
