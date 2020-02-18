@@ -12,8 +12,6 @@ source("../funs/effectsPlot.R")
 
 load("washTidyestimates.rda")
 
-extract_coefs_df
-
 ### Function to plot for different model classes i.e., glm and glmer
 effectsizeFunc <- function(df){
 	estimates_df <- df
@@ -50,6 +48,14 @@ y1effectsize_plot <- (extract_coefs_df
 
 print(y1effectsize_plot)
 
+## Year 1 model
+pyreffectsize_plot <- (extract_coefs_df
+	%>% filter(grepl("glmerSc|glmerUn", model))
+	%>% effectsizeFunc(.)
+)
+print(pyreffectsize_plot)
+
 save(file = "washEffectsize_plots.rda"
 	, y1effectsize_plot
+	, pyreffectsize_plot
 )

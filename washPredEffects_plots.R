@@ -48,6 +48,7 @@ plotEffects <- function(df, var, xlabs){
 }
 
 
+## Year 1 model
 ### Service level
 
 y1service_plot <- (ggplot(y1service_effect_df, aes(x = services, y = fit))
@@ -70,8 +71,33 @@ y1pred_effect_plots <- lapply(pred_vars, function(x){
 
 print(y1pred_effect_plots)
 
+## Previous year model
+### Service level
+
+pyrservice_plot <- (ggplot(pyrservice_effect_df, aes(x = services, y = fit))
+	+ geom_errorbar(aes(ymin = lower, ymax = upper), width = 0, colour = "steelblue3")
+	+ geom_point(colour = "blue")
+	+ scale_x_discrete(limits = c("toilettype", "garbagedposal", "watersource"))
+	+ scale_y_continuous(limits = c(0.1, 1), breaks = seq(0.1, 1, 0.1))
+	+ labs(x = "Service"
+		, y = "Probability of\nimproved service"
+	)
+)
+print(pyrservice_plot)
+
+### Other remaining predictors
+pred_vars <- names(pyrmod_effect_df)[!names(pyrmod_effect_df) %in% "services"]
+
+pyrpred_effect_plots <- lapply(pred_vars, function(x){
+	plotEffects(pyrmod_effect_df[[x]], x, grep(x, pred_vars, value = TRUE))
+})
+
+print(pyrpred_effect_plots)
+
 save(file = "washPredEffects_plots.rda"
 	, y1service_plot
 	, y1pred_effect_plots
+	, pyrservice_plot
+	, pyrpred_effect_plots
 )
 
