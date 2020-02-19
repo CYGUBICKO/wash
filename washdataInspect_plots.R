@@ -23,8 +23,8 @@ source("../funs/effectsPlot.R")
 load("washdataInspect.rda")
 
 ## Input files:
-### 1. wash_lagged_df - Ignore consecutive years. Lags services with years
-### 2. wash_consec_df - Assumes all interviews were done consecitvely for all the years in all HH
+### 1. wash_lagged_df - Ignore consecutive years. Lags services with years. DOES NOT EXIST
+### 2. wash_consec_df – Merged in services from previous year, when available (also has missingness at a higher level ungroup-ed in)
 
 summaryFunc <- function(var){
 	summary_df <- (wash_df

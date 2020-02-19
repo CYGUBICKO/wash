@@ -16,11 +16,13 @@ load("analysisdata.rda")
 
 ## Input files: cleaned working_df
 
+## Key variables put in categories
 response_vars <- c("cat_hhwatersource", "cat_hhtoilettype", "cat_hhgarbagedisposal")
 demo_vars <- c("ageyears", "gender", "ethnicity", "slumarea", "numpeople_total")
 socio_vars <- c("isbelowpovertyline", "hhdhungerscale", "wealthindex")
 other_vars <- c("intvwyear", "hhid_anon")
 
+base_year = 2001
 wash_df <- (working_df
 	%>% ungroup()
 	%>% select(response_vars
@@ -30,7 +32,7 @@ wash_df <- (working_df
 	)
 	%>% setnames(names(.), gsub(".*_hh|.*hhd|_anon|is|intvw|years", "", names(.)))
 	%>% setnames("numpeople_total", "hhsize")
-	%>% mutate(year = as.numeric(as.factor(year))
+	%>% mutate(year = year-base_year
 		, year_scaled = drop(scale(year))
 		, hhsize_unscaled = hhsize
 	)

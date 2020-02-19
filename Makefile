@@ -226,37 +226,41 @@ corr_effs.html: corr_effs.rmd
 
 ## WASH Analysis of real data
 washdataInspect.Rout: washdataInspect.R
-washdataInspect_plots.Rout: washdataInspect_plots.R
 
 ## Restructured data for hhid-year-services
 longDFunc.Rout: longDFunc.R
 washModeldata.Rout: washModeldata.R
 
+### Temp to avoid remaking the pipe
+hhsizeInspect.Rout: hhsizeInspect.R
+
 ## Fitting models
-
-## glme
-
-### Year 1 model
-#### Scaled variable (hhsize and year)
-washModelfit_y1glmS.Rout: washModelfit_y1glmS.R
-
-#### Unscaled
-washModelfit_y1glmU.Rout: washModelfit_y1glmU.R
 
 ## glmer
 
-### Previous year model
-#### Scaled variable (hhsize and year)
-washModelfit_pglmerS.Rout: washModelfit_pglmerS.R
+### Scaled year variable
+washModelfit_glmerS.Rout: washModelfit_glmerS.R
 
-#### Unscaled year variable
-washModelfit_pglmerU.Rout: washModelfit_pglmerU.R
+### Scaled but linear age and wealth index
+washModelfit_glmerL.Rout: washModelfit_glmerL.R
+
+### Unscaled year variable
+washModelfit_glmerU.Rout: washModelfit_glmerU.R
 
 ### All fit: to troubleshoot optimizer in lme4
 washModel_allFit.Rout: washModel_allFit.R
 
+## glmmTMB
+
+### Scaled
+washModelfit_tmbS.Rout: washModelfit_tmbS.R
+
+### Unscaled
+washModelfit_tmbU.Rout: washModelfit_tmbU.R
+
 ### Interaction model
-washModelfit_inter_pglmerS.Rout: washModelfit_inter_pglmerS.R
+washModelfit_inter_glmerS.Rout: washModelfit_inter_glmerS.R
+
 
 ## BRMS model
 
@@ -266,12 +270,8 @@ washModelfit_brmsS.Rout: washModelfit_brmsS.R
 ## Tidy model estimates
 washTidyestimates.Rout: washTidyestimates.R
 
-## Effect size plots
-washEffectsize_plots.Rout: washEffectsize_plots.R
-
 ### Wash predictor effects
 washPredEffects.Rout: washPredEffects.R
-washPredEffects_plots.Rout: washPredEffects_plots.R
 
 ### Analysis report
 washdataAnalysis_report.html: washdataAnalysis_report.rmd
@@ -280,6 +280,8 @@ washdataAnalysis_report.html: washdataAnalysis_report.rmd
 washModelPvalues.Rout: washModelPvalues.R
 
 washModel_isoplots.Rout: washModel_isoplots.R
+
+
 
 ######################################################################
 
