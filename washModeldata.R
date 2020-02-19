@@ -69,6 +69,7 @@ prev_df <- (long_df[["prev_df"]]
 	%>% group_by(hhid)
 	%>% filter(year != min(year))
 	%>% ungroup()
+	%>% mutate_at("statusP", as.factor)
 )
 
 prevyearmodData <- model.frame(
