@@ -228,6 +228,9 @@ corr_effs.html: corr_effs.rmd
 washdataInspect.Rout: washdataInspect.R
 washdataInspect_plots.Rout: washdataInspect_plots.R
 
+householdSurveys.Rout: householdSurveys.R
+householdSurveys_plots.Rout: householdSurveys_plots.R
+
 ## Restructured data for hhid-year-services
 longDFunc.Rout: longDFunc.R
 washModeldata.Rout: washModeldata.R
