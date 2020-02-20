@@ -72,7 +72,7 @@ missing_by_household <- (service_step
 		, no_prev = sum(is.na(watersourceP))
 	)
 )
-
+print(missing_by_household)
 print(missing_by_household
 	%>% summarize(
 		interviews=mean(interviews)

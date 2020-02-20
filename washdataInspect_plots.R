@@ -52,16 +52,27 @@ miss_cases_df <- miss_cases_df
 nint_consec <- nrow(wash_consec_df)
 
 ## HH which had missing interviews in consecutive years
+
 prevcases_df <- (wash_consec_df
 	%>% group_by(hhid)
-	%>% filter(year != min(year))
-	%>% mutate(nprev_miss2 = sum(is.na(watersourceP)))
+#	%>% filter(year != min(year))
+	%>% mutate(nprev_miss2 = sum(is.na(watersourceP) & year != min(year)))
 	%>% ungroup()
 	%>% mutate_at("hhid", as.numeric)
-	%>% select(hhid, n, nprev_miss1, nprev_miss2)
-	%>% distinct()
+	%>% select(hhid, year, watersource, watersourceP, n, nprev_miss1, nprev_miss2)
 )
 
+### Save a summary for explannation on the rmd
+prevcases_df_summary <- (prevcases_df
+	%>% filter(hhid %in% c(1,3))
+)
+print(prevcases_df_summary)
+
+prevcases_df <- (prevcases_df
+	%>% filter(year != min(year))
+	%>% select(-c("year", "watersource", "watersourceP"))
+	%>% distinct()
+)
 print(prevcases_df, n = 50, width = Inf)
 
 ### Excluding first year interviews because no previous year anyway
@@ -71,6 +82,7 @@ summary_consec_noyr0_df <- (prevcases_df
 	%>% group_by(nprev_miss2)
 	%>% summarise(nn = sum(nprev_miss2))
 )
+summary_consec_noyr0_df
 
 nint_noyr0 <- (wash_consec_df
 	%>% group_by(hhid)
@@ -79,6 +91,11 @@ nint_noyr0 <- (wash_consec_df
 )
 
 percent_miss_consec_noyr0 <- percent(sum(summary_consec_noyr0_df$nn/nint_noyr0))
+percent_miss_consec_noyr0
+
+### Missing previous year percentage with all cases as the denominator
+percent_miss_consec_noyr0_all <- percent(sum(summary_consec_noyr0_df$nn/nrow(wash_consec_df)))
+percent_miss_consec_noyr0_all
 
 ## Percentage of year 1 interviews
 nint_yr0 <- (wash_consec_df
@@ -98,10 +115,10 @@ summary_consec_df <- (wash_consec_df
 	%>% summarise(nn = sum(nprev_miss1))
 	%>% ungroup()
 )
+print(summary_consec_df)
 
 percent_miss_consec <- percent(sum(summary_consec_df$nn/nint_consec))
 percent_miss_consec
-
 
 ## Transition status (JD's Status Quo)
 
@@ -205,7 +222,8 @@ print(n_interviews_plot)
 n_intv_year_df <- (wash_df
 	%>% group_by(year)
 	%>% summarise(n = n())
-	%>% mutate(prop = n/sum(n))
+	%>% mutate(prop = n/nhhid) #sum(n))
+	%>% ungroup()
 )
 year_plot <- (ggplot(n_intv_year_df, aes(x = factor(year, levels = 1:14, labels = 2002:2015), group = 1, y = prop))
 	+ geom_point()
@@ -290,11 +308,13 @@ save(file = "washdataInspect_plots.rda"
 	, nhhid
 	, nint_all
 	, miss_cases_df
+	, prevcases_df_summary
 	, nint_consec
 	, nint_noyr0
 	, percent_miss_consec
 	, percent_year0
 	, percent_miss_consec_noyr0
+	, percent_miss_consec_noyr0_all
 	, percent_miss_lagged
 	, prop_plot
 	, status_quo_plot
