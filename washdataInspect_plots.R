@@ -61,6 +61,7 @@ prevcases_df <- (wash_consec_df
 	%>% mutate_at("hhid", as.numeric)
 	%>% select(hhid, year, watersource, watersourceP, n, nprev_miss1, nprev_miss2)
 )
+print(prevcases_df %>% arrange(desc(nprev_miss1)), n = 50, width = Inf)
 
 ### Save a summary for explannation on the rmd
 prevcases_df_summary <- (prevcases_df
@@ -94,7 +95,7 @@ percent_miss_consec_noyr0 <- percent(sum(summary_consec_noyr0_df$nn/nint_noyr0))
 percent_miss_consec_noyr0
 
 ### Missing previous year percentage with all cases as the denominator
-percent_miss_consec_noyr0_all <- percent(sum(summary_consec_noyr0_df$nn/nrow(wash_consec_df)))
+percent_miss_consec_noyr0_all <- percent(sum(summary_consec_noyr0_df$nn)/nrow(wash_consec_df))
 percent_miss_consec_noyr0_all
 
 ## Percentage of year 1 interviews
@@ -103,6 +104,8 @@ nint_yr0 <- (wash_consec_df
 	%>% filter(year == min(year))
 	%>% nrow()
 )
+nint_yr0
+
 percent_year0 <- percent(sum(nint_yr0/nrow(wash_consec_df)))
 percent_year0
 
@@ -111,13 +114,17 @@ summary_consec_df <- (wash_consec_df
 	%>% ungroup()
 	%>% select(hhid, n, nprev_miss1)
 	%>% distinct()
+)
+
+table(summary_consec_df$nprev_miss1) # Just for check
+
+summary_consec_df <- (summary_consec_df
 	%>% group_by(nprev_miss1)
 	%>% summarise(nn = sum(nprev_miss1))
-	%>% ungroup()
 )
-print(summary_consec_df)
+print(summary_consec_df) # Compare with the above check
 
-percent_miss_consec <- percent(sum(summary_consec_df$nn/nint_consec))
+percent_miss_consec <- percent(sum(summary_consec_df$nn/nint_all))
 percent_miss_consec
 
 ## Transition status (JD's Status Quo)
@@ -203,15 +210,10 @@ print(prop_plot)
 n_intv_hh_df <- (wash_df
 	%>% group_by(hhid)
 	%>% summarise(n = n())
-	%>% ungroup()
-	%>% group_by(n)
-	%>% summarise(total = n())
-	%>% mutate(prop = total/sum(total))
 )
-print(n_intv_hh_df)
 
-n_interviews_plot <- (ggplot(n_intv_hh_df, aes(x = as.factor(n), y = prop))
-	+ geom_bar(stat = "identity")
+n_interviews_plot <- (ggplot(n_intv_hh_df, aes(x = as.factor(n)))
+	+ geom_bar(aes(y = ..prop.., group = 1), stat = "count")
 	+ scale_y_continuous(labels = percent)
 	+ labs(x = "No. of interviews", y = "Proportion")
 )
@@ -244,6 +246,7 @@ hhsize_df <- (wash_df
 
 hhsize_plot <- (ggplot(hhsize_df, aes(x = value))
 	+ geom_histogram()
+	+ labs(x = "HH size", y = "Count")
 	+ facet_wrap(~type, scales = "free_x")
 )
 print(hhsize_plot)
@@ -256,8 +259,8 @@ consec_all_plot <- (ggplot(summary_consec_df, aes(x = as.factor(nprev_miss1), y 
 		, position=position_dodge(0.9)
 		, vjust=-0.2
 	)
-	+ labs(x = "Missing consecutive interviews"
-		, y = "No. of interviews"
+	+ labs(x = "Missing previous interviews"
+		, y = "Total no. of interviews"
 	)
 )
 print(consec_all_plot)
@@ -271,8 +274,8 @@ consec_noyr0_plot <- (ggplot(summary_consec_noyr0_df, aes(x = as.factor(nprev_mi
 		, position=position_dodge(0.9)
 		, vjust=-0.2
 	)
-	+ labs(x = "Missing consecutive interviews"
-		, y = "No. of interviews"
+	+ labs(x = "Missing previous interviews"
+		, y = "Total no. of interviews"
 	)
 )
 print(consec_noyr0_plot)

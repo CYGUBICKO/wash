@@ -68,7 +68,7 @@ service_step <- (wash_later
 missing_by_household <- (service_step
 	%>% group_by(hhid)
 	%>% summarize(
-		interviews = n()
+		interviews = n() # Should this be based on all hh interviews?
 		, no_prev = sum(is.na(watersourceP))
 	)
 )

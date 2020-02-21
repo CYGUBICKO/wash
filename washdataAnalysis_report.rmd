@@ -44,6 +44,32 @@ load("washdataInspect_plots.rda")
 load("washEffectsize_plots.rda")
 ```
 
+## Service in the previous year computation
+
+- Grouped within the households
+- Service status for the immediate preceding year is considered i.e., for every household, we count the number of interviews (services) missed in the immediate preceding year based on the current interview year.
+	- This is not based on supposed study period total number of interviews per household ($14$) but rather the total number of interviews conducted in that specific household during the study period.
+		- For example, in the Table below, household 1 had 3 interviews with 1 missing previous interview (`nprev_miss1`). `nprev_miss1` counts all missing previous year interviews including the first year while `nprev_miss2` exludes the first year. On the other hand, household 3 had a total of 11 interviews, 2 missing previous interviews i.e.,  one being the first year interview while the other being the year preceding (year 3) year 4 interview. Note: year 2 is also missing but we ignore that because year 4 is the current observational year.
+
+
+```{R}
+datatable(prevcases_df_summary, rownames = FALSE, options = list(pageLength = 8))
+```
+
+- We sum up the number of previous year missing interviews for each missing category. For example, in HH 1 there is 1 interview missing in the previous year, we sum up all interviews missing 1 interview in the previous and do the same for the rest of the categories ($2,3,4,...$), etc. The distribution of **total** number of interviews with missing immediate previous year are shown in the Figure below.
+- Including the first year, `r percent_miss_consec` have missing previous interviews. 
+- The denominator for the percentages is the total number of all interviews, including year 1 (reason to aggregate by total number of interviews per category as opposed to frequency)
+
+```{R fig.width = 5, fig.height = 5}
+print(consec_all_plot)
+```
+
+- Ignoring the first year interviews (`r percent_year0` which are modeled separately), the proportion of interviews we are actually dropping due to missing preceding year interviews are `r percent_miss_consec_noyr0 `(about `r percent_miss_consec_noyr0_all` of all the interviews).
+
+```{R, fig.width = 5, fig.height = 5}
+print(consec_noyr0_plot)
+```
+
 ## Distribution of services
 
 - The Figure below shows the proportion of households with improved services over years. The dotted lines represent the household average for each service over the entire study period.
@@ -56,6 +82,7 @@ print(prop_plot)
 ### No. of interviews completed by HH
 
 - If every household was interviewed per year, we would expect $14$ interviews per household. On the contrary, over $40\%$ of the households only had $1$ interview over the entire study period.
+- Denominator is number of HH (expected number of interviews per year)
 
 ```{R fig.width = 7, fig.height = 5}
 print(n_interviews_plot)
@@ -197,20 +224,6 @@ datatable(miss_cases_df, rownames = FALSE)
 |                       |                       | -   Other             |
 +-----------------------+-----------------------+-----------------------+
 
-## Data format choices
-
-- **Consecutive year interviews per household**: We assume that interviews should have been conducted in every household every year. Consequently, a case missing an interview in the preceding year is dropped. This accounts for `r percent_miss_consec` cases. See the Figure below.
-
-
-```{R fig.width = 5, fig.height = 5}
-print(consec_all_plot)
-```
-
-- The `r percent_miss_consec` includes first year (specific to household) cases which do not have the previous years. First year interviews are excluded and modeled separately (`r percent_year0`). Thus the proportion of interviews we are actually dropping due to missing preceding interview is `r percent_miss_consec_noyr0` of $69\%$ (of all interviews).
-
-```{R, fig.width = 5, fig.height = 5}
-print(consec_noyr0_plot)
-```
 
 <!-- - **Lagged interviews**: Any household interview (most recent) preceding the current household interview is considered consecutive interview. In this case, only interviews in the first year (household specific) will have missing previous year. Consequently, only first year interviews will be dropped (`r percent_miss_lagged`). Not fitted. -->
 
