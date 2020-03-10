@@ -50,7 +50,7 @@ load("washEffectsize_plots.rda")
 - The first observation for any household is used in the baseline model (and never has a previous year), so we don't count these as missing.
 - For example, in the Table below, household 1 had 3 consecutive interviews, so nprev_miss is 0.  Household 3 had 11 interviews, but there is a gap after the first one, so nprev_miss is 1. 
 
-Comments: It was a good idea to calculate nprev_miss1 and nprev_miss2 -- just to make sure that they _always_ differ by 1. Assuming you confirmed that. Once you've done that, it's easier, clearer and better practice to just have one value
+<!-- Comments: It was a good idea to calculate nprev_miss1 and nprev_miss2 -- just to make sure that they _always_ differ by 1. Assuming you confirmed that. Once you've done that, it's easier, clearer and better practice to just have one value -->
 
 ```{R}
 datatable(prevcases_df_summary, rownames = FALSE, options = list(pageLength = 8))
@@ -237,6 +237,7 @@ datatable(miss_cases_df, rownames = FALSE)
 
 - We only have a single observation per HH. I feel we don't need a hh level random effect
 
+<!--
 	```
 	model <- glmer(status ~ -1 
 		+ services
@@ -289,12 +290,13 @@ datatable(miss_cases_df, rownames = FALSE)
 		, ...
 	)
 	```
+-->
 
 ## Results
 
 ### Year 1 model
 
-#### Estimated effect sizes (Steve -> JD: Best description?)
+#### Estimated effect sizes <!-- (Steve -> JD: Best description?) -->
 
 - This refers to household specific first observational year
 
@@ -302,7 +304,7 @@ datatable(miss_cases_df, rownames = FALSE)
 print(y1effectsize_plot)
 ```
 
-#### Predicted effects (Steve -> JD: Best description?)
+#### Predicted effects <!-- (Steve -> JD: Best description?) -->
 
 ```{R}
 ggarrange(y1service_plot
@@ -337,7 +339,7 @@ ggarrange(y1pred_effect_plots[[2]]
 print(pyreffectsize_plot)
 ```
 
-#### Predicted effects (Steve -> JD: Best description?)
+#### Predicted effects <!-- (Steve -> JD: Best description?) -->
 
 ```{R}
 ggarrange(pyrservice_plot
