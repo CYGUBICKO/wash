@@ -228,6 +228,9 @@ corr_effs.html: corr_effs.rmd
 washdataInspect.Rout: washdataInspect.R
 washdataInspect_plots.Rout: washdataInspect_plots.R
 
+### Recategorise previous status variables (*P$)
+washdataStatusPcats.Rout: washdataStatusPcats.R
+
 householdSurveys.Rout: householdSurveys.R
 householdSurveys_plots.Rout: householdSurveys_plots.R
 
