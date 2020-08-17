@@ -1,8 +1,11 @@
 ---
-title: 'Simulated data documentation'
+title: "Simulated data documentation"
 author: "Steve and Jonathan"
-date: " `r as.Date(Sys.time())` "
+date: ' `r as.Date(Sys.time())` '
 output:
+  word_document:
+    toc: yes
+    toc_depth: '4'
   html_document:
     fig_caption: yes
     toc: yes
@@ -151,164 +154,164 @@ logit(p(y_{hts} = 1)) = \beta_{0,hts} + \beta_{1,s} y_{ht-1,s} + \beta_{2,s} x\\
 \alpha_{0,hts} \sim \mathit{N}(0, \sigma^2_s).
 \]
 
-Where:
+<!-- Where: -->
 
-- $\beta_{0, hts}$ is the baseline log odds of households having service 
-- $\beta_{1,s}$ is the overall effect size of improved service in the previous year on status of service in the current year (log odds of having service in the current year)
-- $\beta_{2,s}$ is the overall effect size of household income (measure covariate, x) on the status of service 
-- $\alpha_{0,hts}$ captures the offset of household log odds of having service from the overall baseline (mean)
+<!-- - $\beta_{0, hts}$ is the baseline log odds of households having service  -->
+<!-- - $\beta_{1,s}$ is the overall effect size of improved service in the previous year on status of service in the current year (log odds of having service in the current year) -->
+<!-- - $\beta_{2,s}$ is the overall effect size of household income (measure covariate, x) on the status of service  -->
+<!-- - $\alpha_{0,hts}$ captures the offset of household log odds of having service from the overall baseline (mean) -->
 
-### Results
-
-
-
-The parameters were estimated from a multivariate model.
-
-#### Fixed effects
-
-Figures below compares true parameter values (red dots) against the estimates for $1$ simulation. 
-
-<!-- Figure 1 shows results for service 1 while Figure 2 shows results for service 2. -->
-<!--  -->
-<!-- ```{R fig.cap=fig$cap("", "Service 1"), fig.align="center"} -->
-<!-- #print(y1Beta_plot) -->
-<!-- ``` -->
-<!--  -->
-<!-- ```{R fig.cap=fig$cap("", "Service 2"), fig.align="center"} -->
-<!-- print(y2Beta_plot) -->
-<!-- ``` -->
+<!-- ### Results -->
 
 
-#### Single model (y1)
 
-```{R}
-### Reformat betas_df
-dd <- (betas_df
-	%>% mutate(parameter = ifelse(grepl("\\_M", coefs2), "xm"
-		, ifelse(grepl("gain", coefs2), "b_gain", 
-			ifelse(grepl("add", coefs2), "b_add", "b_lose"))
-		)
-		, term = gsub("\\_.*", "", coefs2)
-	)
-	%>% filter(term=="y1" & !grepl("lose", parameter))
-)
-```
+<!-- The parameters were estimated from a multivariate model. -->
 
-```{R fig.height = 5, fig.width = 5}
-estimates_df <- (extract_coefs_y1
-	%>% filter(effect == "fixed")
-)
-parameters <- pull(estimates_df, parameter) %>% unique()
-estimates_df <- (estimates_df
-	%>% mutate(parameter = factor(parameter, levels = parameters, labels = parameters))
-)
+<!-- #### Fixed effects -->
 
-pos <- ggstance::position_dodgev(height=0.5)
+<!-- Figures below compares true parameter values (red dots) against the estimates for $1$ simulation.  -->
 
-print(ggplot(estimates_df, aes(x = estimate, y = parameter))
-	+ geom_point(position = pos)
-	+ ggstance::geom_linerangeh(aes(xmin = conf.low, xmax = conf.high), position = pos)
-	+ geom_point(data = dd, aes(x=betas, y = parameter), colour = "red")
-	+ labs(x = "Estimate"
-		, y = ""
-	)
-#	+ facet_wrap(~parameter, scale = "free", ncol = 1)
-#	+ facet_theme
-	+ theme(legend.position = "bottom")
-)
-
-```
-
-#### Joint model
-
-```{R fig.height = 12}
-### Reformat betas_df
-betas_df2 <- (betas_df
-	%>% mutate(parameter = ifelse(grepl("\\_M", coefs2), "xm"
-		, ifelse(grepl("gain", coefs2), "b_gain", 
-			ifelse(grepl("add", coefs2), "b_add", "b_lose"))
-		)
-		, term = gsub("\\_.*", "", coefs2)
-	)
-	%>% filter(!grepl("lose", parameter))
-)
+<!-- <!-- Figure 1 shows results for service 1 while Figure 2 shows results for service 2. --> -->
+<!-- <!--  --> -->
+<!-- <!-- ```{R fig.cap=fig$cap("", "Service 1"), fig.align="center"} --> -->
+<!-- <!-- #print(y1Beta_plot) --> -->
+<!-- <!-- ``` --> -->
+<!-- <!--  --> -->
+<!-- <!-- ```{R fig.cap=fig$cap("", "Service 2"), fig.align="center"} --> -->
+<!-- <!-- print(y2Beta_plot) --> -->
+<!-- <!-- ``` --> -->
 
 
-estimates_df <- (extract_coefs_df
-	%>% filter(effect == "fixed")
-)
-parameters <- pull(estimates_df, parameter) %>% unique()
-estimates_df <- (estimates_df
-	%>% mutate(parameter = factor(parameter, levels = parameters, labels = parameters))
-)
+<!-- #### Single model (y1) -->
 
-pos <- ggstance::position_dodgev(height=0.5)
-
-print(ggplot(estimates_df, aes(x = estimate, y = term))
-	+ geom_point(position = pos)
-	+ ggstance::geom_linerangeh(aes(xmin = conf.low, xmax = conf.high), position = pos)
-	+ geom_point(data = betas_df2, aes(x=betas, y = term), colour = "red")
-	+ labs(x = "Estimate"
-		, y = ""
-	)
-	+ facet_wrap(~parameter, scale = "free", ncol = 1)
-	+ facet_theme
-	+ theme(legend.position = "bottom")
-)
-```
-
-
-### Effect plots
-
-**True values table**
-
-```{R}
-dd <- (betas_df
-	%>% mutate(var = ifelse(grepl("\\_M", coefs2), "xm"
-		, ifelse(grepl("gain", coefs2), "b_gain", ifelse(grepl("add", coefs2), "b_add", "b_lose")))
-		, term = gsub("\\_.*", "", coefs2)
-		, probs = round(probs, 3)
-	)
-	%>% select(term, var, betas, probs)
-)
-datatable(dd, rownames = FALSE)
-```
-
-
-```{R fig.height = 5, fig.width = 5}
-print(service_plot)
-```
-
-```{R fig.height = 6, fig.width = 8}
-print(num_plots[[2]])
-```
-
-```{R fig.height = 5, fig.width = 5}
-print(num_plots[[1]])
-```
-<!-- #### Checkplots -->
-<!--  -->
-<!-- Steve: JD any reference or more description? -->
-<!--  -->
-<!-- Basically used to check how good our estimates are. We expect uniformly distributed `p-values` (piano plot?) -->
-<!--  -->
-<!-- ```{R fig.cap=fig$cap("", "Service 1 piano plots"), fig.align="center"} -->
-<!-- ggarrange(checkPlot_list[[1]] + labs(x = " ") -->
-<!--    , checkPlot_list[[3]] + rremove("ylab") + labs(x = "p-value") -->
-<!--    , checkPlot_list[[5]] + rremove("ylab") + labs(x = " ") -->
-<!--    , common.legend = TRUE -->
-<!--    , legend = "none" -->
-<!--    , ncol = 3 -->
+<!-- ```{R} -->
+<!-- ### Reformat betas_df -->
+<!-- dd <- (betas_df -->
+<!-- 	%>% mutate(parameter = ifelse(grepl("\\_M", coefs2), "xm" -->
+<!-- 		, ifelse(grepl("gain", coefs2), "b_gain",  -->
+<!-- 			ifelse(grepl("add", coefs2), "b_add", "b_lose")) -->
+<!-- 		) -->
+<!-- 		, term = gsub("\\_.*", "", coefs2) -->
+<!-- 	) -->
+<!-- 	%>% filter(term=="y1" & !grepl("lose", parameter)) -->
 <!-- ) -->
 <!-- ``` -->
-<!--  -->
-<!-- ```{R fig.cap=fig$cap("", "Service 2 piano plots"), fig.align="center"} -->
-<!-- ggarrange(checkPlot_list[[2]] + labs(x = " ") -->
-<!--    , checkPlot_list[[4]] + rremove("ylab") + labs(x = "p-value") -->
-<!--    , checkPlot_list[[6]] + rremove("ylab") + labs(x = " ") -->
-<!--    , common.legend = TRUE -->
-<!--    , legend = "none" -->
-<!--    , ncol = 3 -->
+
+<!-- ```{R fig.height = 5, fig.width = 5} -->
+<!-- estimates_df <- (extract_coefs_y1 -->
+<!-- 	%>% filter(effect == "fixed") -->
+<!-- ) -->
+<!-- parameters <- pull(estimates_df, parameter) %>% unique() -->
+<!-- estimates_df <- (estimates_df -->
+<!-- 	%>% mutate(parameter = factor(parameter, levels = parameters, labels = parameters)) -->
+<!-- ) -->
+
+<!-- pos <- ggstance::position_dodgev(height=0.5) -->
+
+<!-- print(ggplot(estimates_df, aes(x = estimate, y = parameter)) -->
+<!-- 	+ geom_point(position = pos) -->
+<!-- 	+ ggstance::geom_linerangeh(aes(xmin = conf.low, xmax = conf.high), position = pos) -->
+<!-- 	+ geom_point(data = dd, aes(x=betas, y = parameter), colour = "red") -->
+<!-- 	+ labs(x = "Estimate" -->
+<!-- 		, y = "" -->
+<!-- 	) -->
+<!-- #	+ facet_wrap(~parameter, scale = "free", ncol = 1) -->
+<!-- #	+ facet_theme -->
+<!-- 	+ theme(legend.position = "bottom") -->
+<!-- ) -->
+
+<!-- ``` -->
+
+<!-- #### Joint model -->
+
+<!-- ```{R fig.height = 12} -->
+<!-- ### Reformat betas_df -->
+<!-- betas_df2 <- (betas_df -->
+<!-- 	%>% mutate(parameter = ifelse(grepl("\\_M", coefs2), "xm" -->
+<!-- 		, ifelse(grepl("gain", coefs2), "b_gain",  -->
+<!-- 			ifelse(grepl("add", coefs2), "b_add", "b_lose")) -->
+<!-- 		) -->
+<!-- 		, term = gsub("\\_.*", "", coefs2) -->
+<!-- 	) -->
+<!-- 	%>% filter(!grepl("lose", parameter)) -->
+<!-- ) -->
+
+
+<!-- estimates_df <- (extract_coefs_df -->
+<!-- 	%>% filter(effect == "fixed") -->
+<!-- ) -->
+<!-- parameters <- pull(estimates_df, parameter) %>% unique() -->
+<!-- estimates_df <- (estimates_df -->
+<!-- 	%>% mutate(parameter = factor(parameter, levels = parameters, labels = parameters)) -->
+<!-- ) -->
+
+<!-- pos <- ggstance::position_dodgev(height=0.5) -->
+
+<!-- print(ggplot(estimates_df, aes(x = estimate, y = term)) -->
+<!-- 	+ geom_point(position = pos) -->
+<!-- 	+ ggstance::geom_linerangeh(aes(xmin = conf.low, xmax = conf.high), position = pos) -->
+<!-- 	+ geom_point(data = betas_df2, aes(x=betas, y = term), colour = "red") -->
+<!-- 	+ labs(x = "Estimate" -->
+<!-- 		, y = "" -->
+<!-- 	) -->
+<!-- 	+ facet_wrap(~parameter, scale = "free", ncol = 1) -->
+<!-- 	+ facet_theme -->
+<!-- 	+ theme(legend.position = "bottom") -->
 <!-- ) -->
 <!-- ``` -->
+
+
+<!-- ### Effect plots -->
+
+<!-- **True values table** -->
+
+<!-- ```{R} -->
+<!-- dd <- (betas_df -->
+<!-- 	%>% mutate(var = ifelse(grepl("\\_M", coefs2), "xm" -->
+<!-- 		, ifelse(grepl("gain", coefs2), "b_gain", ifelse(grepl("add", coefs2), "b_add", "b_lose"))) -->
+<!-- 		, term = gsub("\\_.*", "", coefs2) -->
+<!-- 		, probs = round(probs, 3) -->
+<!-- 	) -->
+<!-- 	%>% select(term, var, betas, probs) -->
+<!-- ) -->
+<!-- datatable(dd, rownames = FALSE) -->
+<!-- ``` -->
+
+
+<!-- ```{R fig.height = 5, fig.width = 5} -->
+<!-- print(service_plot) -->
+<!-- ``` -->
+
+<!-- ```{R fig.height = 6, fig.width = 8} -->
+<!-- print(num_plots[[2]]) -->
+<!-- ``` -->
+
+<!-- ```{R fig.height = 5, fig.width = 5} -->
+<!-- print(num_plots[[1]]) -->
+<!-- ``` -->
+<!-- <!-- #### Checkplots --> -->
+<!-- <!--  --> -->
+<!-- <!-- Steve: JD any reference or more description? --> -->
+<!-- <!--  --> -->
+<!-- <!-- Basically used to check how good our estimates are. We expect uniformly distributed `p-values` (piano plot?) --> -->
+<!-- <!--  --> -->
+<!-- <!-- ```{R fig.cap=fig$cap("", "Service 1 piano plots"), fig.align="center"} --> -->
+<!-- <!-- ggarrange(checkPlot_list[[1]] + labs(x = " ") --> -->
+<!-- <!--    , checkPlot_list[[3]] + rremove("ylab") + labs(x = "p-value") --> -->
+<!-- <!--    , checkPlot_list[[5]] + rremove("ylab") + labs(x = " ") --> -->
+<!-- <!--    , common.legend = TRUE --> -->
+<!-- <!--    , legend = "none" --> -->
+<!-- <!--    , ncol = 3 --> -->
+<!-- <!-- ) --> -->
+<!-- <!-- ``` --> -->
+<!-- <!--  --> -->
+<!-- <!-- ```{R fig.cap=fig$cap("", "Service 2 piano plots"), fig.align="center"} --> -->
+<!-- <!-- ggarrange(checkPlot_list[[2]] + labs(x = " ") --> -->
+<!-- <!--    , checkPlot_list[[4]] + rremove("ylab") + labs(x = "p-value") --> -->
+<!-- <!--    , checkPlot_list[[6]] + rremove("ylab") + labs(x = " ") --> -->
+<!-- <!--    , common.legend = TRUE --> -->
+<!-- <!--    , legend = "none" --> -->
+<!-- <!--    , ncol = 3 --> -->
+<!-- <!-- ) --> -->
+<!-- <!-- ``` --> -->
 
