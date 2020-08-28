@@ -210,6 +210,9 @@ switchPredEffects.Rout: switchPredEffects.R
 switchPredInspect.Rout: switchPredInspect.R
 
 ## Complete simulation report
+switch_effect_plots.Rout: switch_effect_plots.R
+# cp $@ ../comp_exam/
+
 simulations_report.html: simulations_report.rmd
 
 ## Bottomline test with multivariate normal response
